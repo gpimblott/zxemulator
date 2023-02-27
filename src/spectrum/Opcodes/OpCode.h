@@ -8,9 +8,10 @@
 #include <string>
 #include "../../utils/BaseTypes.h"
 #include "../ProcessorTypes.h"
+#include "../ProcessorState.h"
 
 // Define the type of the execution function
-typedef int (*executeFunc_t)(ProcessorState&);
+typedef int (*executeFunc_t)(ProcessorState &);
 
 /**
  * Representation of a single instruction opcode recognised by the processor
@@ -20,18 +21,18 @@ class OpCode {
 private:
     emulator_types::byte code;
     std::string name;
-    ProcessorState &state;
     executeFunc_t executeFunc;
 
 public:
     // Constructor
-    OpCode(ProcessorState &state, emulator_types::byte opcode, std::string name, executeFunc_t func);
+    OpCode(emulator_types::byte opcode, std::string name, executeFunc_t func);
 
     // Method that implements the specific code for an instruction
-    int execute();
+    int execute(ProcessorState &state);
 
     // Methods
     emulator_types::byte getOpCode();
+
     std::string getName();
 };
 

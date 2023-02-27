@@ -9,7 +9,7 @@
 using namespace emulator_types;
 
 /**
- * LoadFactory the specified file into a byte videoBuffer
+ * LoadOpcodes the specified file into a byte videoBuffer
  * @param filename Name of the file to load
  */
 BinaryFileLoader::BinaryFileLoader(const char *filename) : filename(filename) {
@@ -21,7 +21,7 @@ BinaryFileLoader::BinaryFileLoader(const char *filename) : filename(filename) {
 }
 
 /**
- * LoadFactory the file into a predefined videoBuffer
+ * LoadOpcodes the file into a predefined videoBuffer
  * @param filename Name of the file to load
  * @param buffer Buffer tp load the file into
  */

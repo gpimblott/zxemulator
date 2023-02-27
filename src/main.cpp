@@ -13,36 +13,36 @@ using namespace utils;
 
 int main() {
     try {
-        const char *romFile = "./roms/48k.bin";
+        const char *romFileLocation = "./roms/48k.bin";
         Logger::write("Starting ZX Spectrum Emulator v0.1");
 
 
         // Create the main memory map
-        Memory *memoryMap = new Memory();
-        VideoBuffer *videoBuffer = (*memoryMap).getVideoBuffer();
+        Memory *memoryPtr = new Memory();
+        VideoBuffer *videoBuffer = (*memoryPtr).getVideoBuffer();
 
         // Create the screen
         Screen *screen = Screen::Factory();
         screen->init(videoBuffer);
-        screen->show();
+//        screen->show();
+//
+//        /**
+//         * Put a test pattern into the video buffer
+//         */
+//        emulator_types::byte value = 170;
+//        VideoBuffer *buffer = memoryPtr->getVideoBuffer();
+//        for (int y = 0; y < SPECTRUM_SCREEN_HEIGHT; y++) {
+//            value = y%2? 170:85;
+//            for (int x = 0; x < SPECTRUM_SCREEN_WIDTH_BYTES; x++) {
+//                (*buffer).setByte(x, y, value);
+//            }
+//        }
 
-        /**
-         * Put a test pattern into the video buffer
-         */
-        emulator_types::byte value = 170;
-        VideoBuffer *buffer = memoryMap->getVideoBuffer();
-        for (int y = 0; y < SPECTRUM_SCREEN_HEIGHT; y++) {
-            value = y%2? 170:85;
-            for (int x = 0; x < SPECTRUM_SCREEN_WIDTH_BYTES; x++) {
-                (*buffer).setByte(x, y, value);
-            }
-        }
-
-        screen->update();
+//        screen->update();
 
         // Create a processor and load the basic ROM
         Processor processor;
-        processor.init(romFile);
+        processor.init(romFileLocation);
 
         processor.run();
 

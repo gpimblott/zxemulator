@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(MY_DEPENDANCIES_PATHS /SFML/SFML-2.5.1/bin)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../cmake_modules" ${CMAKE_MODULE_PATH})
 
-add_executable(${EXECUTABLE_NAME} main.cpp utils/Logger.cpp utils/Logger.h utils/BinaryFileLoader.cpp utils/BinaryFileLoader.h utils/BaseTypes.h utils/RegisterUtils.cpp utils/RegisterUtils.h spectrum/Rom.cpp spectrum/Rom.h spectrum/Memory.cpp spectrum/Memory.h spectrum/instructions/OpCode.cpp spectrum/instructions/OpCode.h exceptions/MemoryException.h spectrum/Processor.cpp spectrum/Processor.h spectrum/instructions/OpCodeCatalogue.cpp spectrum/instructions/OpCodeCatalogue.h spectrum/instructions/InterruptsFactory.cpp spectrum/instructions/InterruptsFactory.h spectrum/instructions/LoadFactory.cpp spectrum/instructions/LoadFactory.h spectrum/instructions/LogicFactory.cpp spectrum/instructions/LogicFactory.h spectrum/ProcessorTypes.h spectrum/instructions/OpCodeFactory.cpp spectrum/instructions/OpCodeFactory.h spectrum/video/Screen.cpp spectrum/video/Screen.h spectrum/video/windows/WindowsScreen.cpp spectrum/video/windows/WindowsScreen.h spectrum/video/VideoBuffer.cpp spectrum/video/VideoBuffer.h utils/PeriodTimer.cpp utils/PeriodTimer.h)
+add_executable(${EXECUTABLE_NAME} main.cpp utils/Logger.cpp utils/Logger.h utils/BinaryFileLoader.cpp utils/BinaryFileLoader.h utils/BaseTypes.h utils/RegisterUtils.cpp utils/RegisterUtils.h spectrum/Rom.cpp spectrum/Rom.h spectrum/Memory.cpp spectrum/Memory.h spectrum/Opcodes/OpCode.cpp spectrum/Opcodes/OpCode.h exceptions/MemoryException.h spectrum/Processor.cpp spectrum/Processor.h spectrum/Opcodes/OpCodeCatalogue.cpp spectrum/Opcodes/OpCodeCatalogue.h spectrum/Opcodes/instructions/InterruptOpcodes.cpp spectrum/Opcodes/instructions/InterruptOpcodes.h spectrum/Opcodes/instructions/LoadOpcodes.cpp spectrum/Opcodes/instructions/LoadOpcodes.h spectrum/Opcodes/instructions/LogicOpcodes.cpp spectrum/Opcodes/instructions/LogicOpcodes.h spectrum/ProcessorTypes.h spectrum/Opcodes/OpCodeProvider.cpp spectrum/Opcodes/OpCodeProvider.h spectrum/video/Screen.cpp spectrum/video/Screen.h spectrum/video/windows/WindowsScreen.cpp spectrum/video/windows/WindowsScreen.h spectrum/video/VideoBuffer.cpp spectrum/video/VideoBuffer.h utils/PeriodTimer.cpp utils/PeriodTimer.h utils/debug.h spectrum/Opcodes/instructions/JumpOpcodes.cpp spectrum/Opcodes/instructions/JumpOpcodes.h spectrum/ProcessorMacros.h spectrum/ProcessorState.cpp spectrum/ProcessorState.h spectrum/Opcodes/instructions/OutOpcodes.cpp spectrum/Opcodes/instructions/OutOpcodes.h)
 
 # Detect and add SFML
 find_package(SFML 2 REQUIRED system window graphics network audio)
@@ -19,3 +19,8 @@ if(SFML_FOUND)
 else()
     target_link_libraries(${CMAKE_PROJECT_NAME})
 endif()
+
+add_subdirectory(tests)
+
+
+

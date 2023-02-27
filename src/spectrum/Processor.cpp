@@ -4,19 +4,24 @@
 //
 
 #include "Processor.h"
+#include "../utils/debug.h"
+
+Processor::Processor() : state() {
+    // Set up the default state of the registers
+    state.registers.PC = 0x0;     // Set the initial execution position to 0
+    state.registers.AF = 0xFFFF;
+    state.registers.SP = 0xFFFF;
+}
 
 /**
- * Set the initial state of the processor ready to start executing
+ * initialise the processor with a ROM file
  */
 void Processor::init(const char *romFile) {
-    // Setup the default state of the registers
-    state.registers.pc = 0x0;     // Set the initial execution position to 0
-
-    // LoadFactory the ROM into memory
+    // Load the ROM into memory
     Rom theROM = Rom(romFile);
     state.memory.loadIntoMemory(theROM);
 
-    state.memory.dump(0, 16);
+    state.memory.dump(0, 32);
 
     // Ready to GO :)
 }
@@ -27,12 +32,17 @@ void Processor::run() {
     while (running) {
         // need some clock cycle stuff here
         count++;
-        if (count >= 2) running = false;
 
         OpCode *opCode = getNextInstruction();
         if (opCode != nullptr) {
-            printf("Found : %s\n", opCode->getName().c_str());
-            opCode->execute();
+            // increment past the opcode
+            this->state.registers.PC++;
+
+            // execute the opcode
+            opCode->execute(this->state);
+        } else {
+            debug( "Unknown opcode at address %d", this->state.registers.PC);
+            running = false;
         }
     }
 }
@@ -46,6 +56,10 @@ void Processor::shutdown() {
  * @return
  */
 OpCode *Processor::getNextInstruction() {
-    byte opcode = state.memory[state.registers.pc++];
-    return catalogue.lookup(opcode);
+#ifdef DEBUG
+    state.memory.dump(state.registers.PC, 8);
+#endif
+
+    byte opcode = state.memory[state.registers.PC];
+    return catalogue.lookupOpcode(opcode);
 }

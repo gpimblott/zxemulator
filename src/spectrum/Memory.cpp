@@ -25,7 +25,7 @@ Memory::~Memory() {
 }
 
 /**
- * LoadFactory some data into memory
+ * LoadOpcodes some data into memory
  * @param start Start location
  * @param length The length of data to load
  * @param data  The data to load
@@ -35,7 +35,7 @@ void Memory::loadIntoMemory(long start, long length, byte *data) {
 }
 
 /**
- * LoadFactory a preloaded ROM into memory
+ * LoadOpcodes a preloaded ROM into memory
  * @param start start address to load the ROM
  * @param rom The ROM to load
  */
@@ -70,11 +70,21 @@ void Memory::dump(long start, long size) {
 }
 
 /**
+ * Get a word from the specified address
+ * @param address
+ * @return The word at the specified address
+ */
+word Memory::getWord(long address) {
+    word *ptr = reinterpret_cast<word *>(m_memory + address);
+    return *(ptr);
+}
+
+/**
  *
  * @return
  */
 VideoBuffer *Memory::getVideoBuffer() {
-    VideoBuffer *buffer = new VideoBuffer( this->m_memory );
+    VideoBuffer *buffer = new VideoBuffer(this->m_memory);
     return buffer;
 }
 

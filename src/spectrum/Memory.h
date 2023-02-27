@@ -42,6 +42,9 @@ public:
 
     void loadIntoMemory(Rom &rom);
 
+    // Get a word from the specified address
+    word getWord(long address);
+
     // Get an instance of the video videoBuffer configured to point at the correct
     // location in this memory map
     VideoBuffer *getVideoBuffer();
@@ -50,6 +53,8 @@ public:
     emulator_types::byte operator[](long i);
 
     void dump( long start, long size);
+
+
 };
 
 

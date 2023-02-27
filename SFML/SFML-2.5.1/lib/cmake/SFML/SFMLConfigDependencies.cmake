@@ -30,7 +30,7 @@ if(SFML_STATIC_LIBRARIES)
             message(FATAL_ERROR "Unknown arguments when calling sfml_bind_dependency: ${THIS_UNPARSED_ARGUMENTS}")
         endif()
 
-        # No lookup in environment variables (PATH on Windows), as they may contain wrong library versions
+        # No lookupOpcode in environment variables (PATH on Windows), as they may contain wrong library versions
         find_library(${THIS_FRIENDLY_NAME}_LIB NAMES ${THIS_SEARCH_NAMES}
                      PATHS ${FIND_SFML_PATHS} PATH_SUFFIXES lib NO_SYSTEM_ENVIRONMENT_PATH)
         mark_as_advanced(${THIS_FRIENDLY_NAME}_LIB)

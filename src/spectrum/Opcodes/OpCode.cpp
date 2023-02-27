@@ -5,13 +5,12 @@
 
 /**
  * Constructor to create a specific opcode
- * @param state Reference to the processor state variables
  * @param opcode instruction code
  * @param name text name of the instruction
  * @param func pointer to a function to execute to handle this opcode
  */
-OpCode::OpCode(ProcessorState &state,emulator_types::byte opcode, std::string name, executeFunc_t func)
-        : state(state),code(opcode), name(name), executeFunc(func) {
+OpCode::OpCode( emulator_types::byte opcode, std::string name, executeFunc_t func)
+        : code(opcode), name(name), executeFunc(func) {
 }
 
 /**
@@ -34,8 +33,8 @@ emulator_types::byte OpCode::getOpCode() {
  * Execute the code associated with this opcode
  * @return status code
  */
-int OpCode::execute() {
-    return this->executeFunc( this->state );
+int OpCode::execute(ProcessorState &state) {
+    return this->executeFunc( state );
 }
 
 

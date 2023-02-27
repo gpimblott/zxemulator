@@ -6,7 +6,7 @@
 #ifndef ZXEMULATOR_PROCESSOR_H
 #define ZXEMULATOR_PROCESSOR_H
 
-#include "instructions/OpCodeCatalogue.h"
+#include "Opcodes/OpCodeCatalogue.h"
 #include "ProcessorTypes.h"
 
 class Processor {
@@ -14,7 +14,7 @@ class Processor {
 private:
     // State variables
     ProcessorState state;
-    OpCodeCatalogue catalogue = OpCodeCatalogue(state);
+    OpCodeCatalogue catalogue = OpCodeCatalogue();
 
     bool running = false;
 
@@ -22,6 +22,8 @@ private:
     OpCode *getNextInstruction();
 
 public:
+    explicit Processor();
+
     void init(const char *romFile);
 
     void run();

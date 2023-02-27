@@ -56,29 +56,29 @@ void WindowsScreen::update() {
     byte *screenBufferPtr = this->videoBuffer->getBuffer();
     byte *currentLinePtr = this->videoBuffer->getBuffer();
 
-    for (int row = 0; row < numberOfRows; row++) {
-
-        // Move to the next row
-        currentLinePtr += bytesPerRow;
-    }
+//    for (int row = 0; row < numberOfRows; row++) {
+//
+//        // Move to the next row
+//        currentLinePtr += bytesPerRow;
+//    }
 
 
     // Redraw the double buffer
-//    sf::Uint8 *currentPixelPtr = pixelBuffer;N
-//    int bufferRow = 0;
-//
-//    // Loop through drawing all the rows of the screen
-//    for (int y = 0; y < FULL_HEIGHT; y++) {
-//        if ((y < BORDER_WIDTH) || (y >= (FULL_HEIGHT - BORDER_WIDTH))) {
-//            // Draw the top and bottom borders
-//            drawBorderRow(&currentPixelPtr);
-//        } else {
-//            // Draw a row from the video buffer
-//            drawRow(&currentPixelPtr, bufferRow++);
-//        }
-//
-//         screenBufferPtr += BYTES_PER_ROW;
-//    }
+    sf::Uint8 *currentPixelPtr = pixelBuffer;
+    int bufferRow = 0;
+
+    // Loop through drawing all the rows of the screen
+    for (int y = 0; y < FULL_HEIGHT; y++) {
+        if ((y < BORDER_WIDTH) || (y >= (FULL_HEIGHT - BORDER_WIDTH))) {
+            // Draw the top and bottom borders
+            drawBorderRow(&currentPixelPtr);
+        } else {
+            // Draw a row from the video buffer
+            drawRow(&currentPixelPtr, bufferRow++);
+        }
+
+         screenBufferPtr += BYTES_PER_ROW;
+    }
 
     texture.update(pixelBuffer);
 
