@@ -13,7 +13,7 @@ using namespace std::chrono;
 
 class PeriodTimer {
 private:
-    time_point<system_clock,nanoseconds> m_startTime;
+    high_resolution_clock::time_point m_startTime;
     long m_duration;
 
 public:
