@@ -14,7 +14,27 @@ using namespace std::chrono;
 static const int numberOfRows = 192;
 static const int bytesPerRow = 32;
 
-WindowsScreen::WindowsScreen() : sprite(texture) {}
+WindowsScreen::WindowsScreen() : sprite(texture) {
+  // Base colors (Bright 0)
+  colors[0] = sf::Color(0, 0, 0);       // Black
+  colors[1] = sf::Color(0, 0, 205);     // Blue
+  colors[2] = sf::Color(205, 0, 0);     // Red
+  colors[3] = sf::Color(205, 0, 205);   // Magenta
+  colors[4] = sf::Color(0, 205, 0);     // Green
+  colors[5] = sf::Color(0, 205, 205);   // Cyan
+  colors[6] = sf::Color(205, 205, 0);   // Yellow
+  colors[7] = sf::Color(205, 205, 205); // White
+
+  // Bright colors (Bright 1)
+  colors[8] = sf::Color(0, 0, 0);        // Black
+  colors[9] = sf::Color(0, 0, 255);      // Bright Blue
+  colors[10] = sf::Color(255, 0, 0);     // Bright Red
+  colors[11] = sf::Color(255, 0, 255);   // Bright Magenta
+  colors[12] = sf::Color(0, 255, 0);     // Bright Green
+  colors[13] = sf::Color(0, 255, 255);   // Bright Cyan
+  colors[14] = sf::Color(255, 255, 0);   // Bright Yellow
+  colors[15] = sf::Color(255, 255, 255); // Bright White
+}
 
 void WindowsScreen::init(VideoBuffer *buffer) {
   printf("Init window()\n");
@@ -56,7 +76,7 @@ void WindowsScreen::hide() { printf("Hide window()\n"); }
  * copied to the window The window copy is scaled to increase its size
  */
 void WindowsScreen::update() {
-  printf("Starting frame update\n");
+  // printf("Starting frame update\n");
 
   // Start a timer
   PeriodTimer timer;
@@ -83,7 +103,9 @@ void WindowsScreen::update() {
       drawBorderRow(&currentPixelPtr);
     } else {
       // Draw a row from the video buffer
-      drawRow(&currentPixelPtr, bufferRow++);
+      // y is absolute screen y. Need relative y for video buffer (0-191)
+      int videoY = y - BORDER_WIDTH;
+      drawRow(&currentPixelPtr, videoY);
     }
 
     screenBufferPtr += BYTES_PER_ROW;
@@ -95,9 +117,18 @@ void WindowsScreen::update() {
   theWindow.display();
 
   // Get starting timepoint
-  printf("Finished frame update - execution %ld microseconds\n", timer.stop());
+  // printf("Finished frame update - execution %ld microseconds\n",
+  // timer.stop());
+}
 
-  waitForEvent();
+bool WindowsScreen::processEvents() {
+  while (const auto event = theWindow.pollEvent()) {
+    if (event->is<sf::Event::Closed>()) {
+      theWindow.close();
+      return false;
+    }
+  }
+  return theWindow.isOpen();
 }
 
 /**
@@ -107,7 +138,8 @@ void WindowsScreen::update() {
  * @return
  */
 void WindowsScreen::drawBorderRow(std::uint8_t **pixels) const {
-  sf::Color borderColour = sf::Color::Cyan;
+  // sf::Color borderColour = sf::Color::Cyan; // Incorrect hardcoded color
+  sf::Color borderColour = colors[7]; // White border default
 
   for (int x = 0; x < FULL_WIDTH; x++) {
     setPixel(pixels, borderColour);
@@ -121,20 +153,35 @@ void WindowsScreen::drawBorderRow(std::uint8_t **pixels) const {
  * @return
  */
 void WindowsScreen::drawRow(std::uint8_t **pixels, int y) const {
-  sf::Color borderColour = sf::Color::Cyan;
-
-  drawBorder(pixels, borderColour);
+  // Draw the left border
+  for (int i = 0; i < BORDER_WIDTH; i++) {
+    setPixel(pixels, colors[7]); // White border default
+  }
 
   for (int x = 0; x < VIEWPORT_WIDTH / 8; x++) {
     byte data = (*videoBuffer).getByte(x, y);
+    byte attr = (*videoBuffer).getAttribute(x, y);
+
+    // Decode Attribute: F B PPP III
+    int brightIdx = (attr & 0x40) ? 8 : 0;
+    int paperIdx = ((attr >> 3) & 0x07) + brightIdx;
+    int inkIdx = (attr & 0x07) + brightIdx;
+
+    sf::Color paperColor = colors[paperIdx];
+    sf::Color inkColor = colors[inkIdx];
+
     for (int bits = 0; bits < 8; bits++) {
-      sf::Color colour =
-          (data & (0b00000001 << bits)) ? sf::Color::Black : sf::Color::White;
+      // MSB is left pixel
+      bool pixelSet = (data & (0x80 >> bits)) != 0;
+      sf::Color colour = pixelSet ? inkColor : paperColor;
       setPixel(pixels, colour);
     }
   }
 
-  drawBorder(pixels, borderColour);
+  // Draw the right border
+  for (int i = 0; i < BORDER_WIDTH; i++) {
+    setPixel(pixels, colors[7]);
+  }
 }
 
 /**
@@ -162,14 +209,6 @@ void WindowsScreen::setPixel(std::uint8_t **pixel, sf::Color colour) const {
   *(ptr++) = colour.a;
 }
 
-void WindowsScreen::waitForEvent() { // run the program as long as the window is
-                                     // open
-  while (theWindow.isOpen()) {
-    // check all the window's events that were triggered since the last
-    // iteration of the loop
-    while (const auto event = theWindow.pollEvent()) {
-      if (event->is<sf::Event::Closed>())
-        theWindow.close();
-    }
-  }
+void WindowsScreen::waitForEvent() {
+  // Deprecated
 }

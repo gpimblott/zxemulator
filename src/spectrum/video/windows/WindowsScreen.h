@@ -33,6 +33,8 @@ private:
       new std::uint8_t[FULL_WIDTH * FULL_HEIGHT *
                        4]; // * 4 because pixelBuffer have 4 components (RGBA)
 
+  sf::Color colors[16];
+
   void drawRow(unsigned char **pixels, int y) const;
 
   void setPixel(unsigned char **pixel, sf::Color colour) const;
@@ -51,6 +53,7 @@ public:
 
   void hide() override;
 
+  bool processEvents() override;
   void waitForEvent();
 };
 

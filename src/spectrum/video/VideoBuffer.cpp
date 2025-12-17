@@ -3,20 +3,22 @@
 // Copyright (c) 2023 G.Pimblott All rights reserved.
 //
 
-#include <cstring>
 #include "VideoBuffer.h"
+#include <cstring>
 
 /**
  * Overlay the Video videoBuffer onto the main memory map
  * @param memoryMap A pointer to the memory map being used
  */
 VideoBuffer::VideoBuffer(emulator_types::byte *memoryMap) {
-    this->videoBuffer = memoryMap + VIDEO_PIXEL_START;
-    this->colourAttributes = memoryMap + VIDEO_ATTR_START;
+  this->videoBuffer = memoryMap + VIDEO_PIXEL_START;
+  this->colourAttributes = memoryMap + VIDEO_ATTR_START;
 
-    // Blank memory out
-    memset( videoBuffer , 0 , VIDEO_BITMAP_DATA);
-    memset(colourAttributes, 0, VIDEO_ATTR_DATA);
+  // Blank memory out
+  memset(videoBuffer, 0, VIDEO_BITMAP_DATA);
+  // Set attributes to White Paper (7), Black Ink (0), Bright 0, Flash 0 -> 00
+  // 111 000 -> 0x38
+  memset(colourAttributes, 0x38, VIDEO_ATTR_DATA);
 }
 
 /**
@@ -34,10 +36,10 @@ VideoBuffer::VideoBuffer(emulator_types::byte *memoryMap) {
  */
 emulator_types::byte VideoBuffer::getByte(int x, int y) const {
 
-    emulator_types::word address = encodeAddress(x, y);
-    emulator_types::byte result = *(videoBuffer + address);
+  emulator_types::word address = encodeAddress(x, y);
+  emulator_types::byte result = *(videoBuffer + address);
 
-    return result;
+  return result;
 }
 
 /**
@@ -48,8 +50,8 @@ emulator_types::byte VideoBuffer::getByte(int x, int y) const {
  */
 void VideoBuffer::setByte(int x, int y, emulator_types::byte data) {
 
-    emulator_types::word address = encodeAddress(x, y);
-    *(videoBuffer + address) = data;
+  emulator_types::word address = encodeAddress(x, y);
+  *(videoBuffer + address) = data;
 }
 
 /**
@@ -59,12 +61,21 @@ void VideoBuffer::setByte(int x, int y, emulator_types::byte data) {
  * @return The colour attribute byte for the specified position
  */
 emulator_types::byte VideoBuffer::getAttribute(int x, int y) const {
-    long addressOffset = ((y*VIDEO_WIDTH_CHARS)+x);
+  // x is in character columns (0-31)
+  // y is in pixel rows (0-191)
 
-    // NOT IMPLEMENTED
+  // Address logic:
+  // Attribute area starts at 0x1800 (offset from video start)
+  // It is a linear buffer of 32x24 bytes.
+  // Each byte controls an 8x8 pixel block.
 
-    // return the byte at this 'addressOffset in the attribute button
-    return 0;
+  // Convert pixel y to character row
+  int charRow = y >> 3; // y / 8
+
+  // Offset = Row * 32 + Column
+  int offset = (charRow << 5) + x; // charRow * 32 + x
+
+  return colourAttributes[offset];
 }
 
 /**
@@ -72,12 +83,12 @@ emulator_types::byte VideoBuffer::getAttribute(int x, int y) const {
  * @param index
  * @return
  */
-emulator_types::byte& VideoBuffer::operator[] (int index) {
-    if( index > VIDEO_BITMAP_DATA) {
-        printf("Video videoBuffer index out of range\n");
-        exit(0);
-    }
-    return videoBuffer[index];
+emulator_types::byte &VideoBuffer::operator[](int index) {
+  if (index > VIDEO_BITMAP_DATA) {
+    printf("Video videoBuffer index out of range\n");
+    exit(0);
+  }
+  return videoBuffer[index];
 }
 
 /**
@@ -88,20 +99,20 @@ emulator_types::byte& VideoBuffer::operator[] (int index) {
  * @return The address offset of the given x,y coordinates
  */
 emulator_types::word VideoBuffer::encodeAddress(int x, int y) const {
-    emulator_types::word address = 0x00;
-    // copy X bits X0-X4 to 0-4 in the address
-    address |= (x & 0b11111);
+  emulator_types::word address = 0x00;
+  // copy X bits X0-X4 to 0-4 in the address
+  address |= (x & 0b11111);
 
-    // Copy Y bits Y3-Y5 to 5-7 in the address
-    address |= ((y & 0b00111000) << 2);
+  // Copy Y bits Y3-Y5 to 5-7 in the address
+  address |= ((y & 0b00111000) << 2);
 
-    // Copy Y bits Y0-Y2 to 8-10 in the address
-    address |= ((y & 0b00000111) << 8);
+  // Copy Y bits Y0-Y2 to 8-10 in the address
+  address |= ((y & 0b00000111) << 8);
 
-    // Copy Y bits Y6-Y7 to 11-12 in the address
-    address |= ((y & 0b11000000) << 5);
+  // Copy Y bits Y6-Y7 to 11-12 in the address
+  address |= ((y & 0b11000000) << 5);
 
-    return address;
+  return address;
 }
 
 /**
@@ -110,24 +121,19 @@ emulator_types::word VideoBuffer::encodeAddress(int x, int y) const {
  * @param size The number of bytes to display
  * @param ptr Pointer to the data to output
  */
-void VideoBuffer::printBits(std::string msg, size_t const size, void const *const ptr) const {
-    unsigned char *b = (unsigned char *) ptr;
-    unsigned char byte;
-    int i, j;
+void VideoBuffer::printBits(std::string msg, size_t const size,
+                            void const *const ptr) const {
+  unsigned char *b = (unsigned char *)ptr;
+  unsigned char byte;
+  int i, j;
 
-    printf("%s : ", msg.c_str());
-    for (i = size - 1; i >= 0; i--) {
-        printf( " ");
-        for (j = 7; j >= 0; j--) {
-            byte = (b[i] >> j) & 1;
-            printf("%u", byte);
-        }
+  printf("%s : ", msg.c_str());
+  for (i = size - 1; i >= 0; i--) {
+    printf(" ");
+    for (j = 7; j >= 0; j--) {
+      byte = (b[i] >> j) & 1;
+      printf("%u", byte);
     }
-    printf("\n");
+  }
+  printf("\n");
 }
-
-
-
-
-
-

@@ -6,28 +6,31 @@
 #ifndef ZXEMULATOR_PROCESSORSTATE_H
 #define ZXEMULATOR_PROCESSORSTATE_H
 
-
-#include "ProcessorTypes.h"
 #include "Memory.h"
+#include "ProcessorTypes.h"
 
 class ProcessorState {
 private:
-    bool interruptsEnabled = true;
+  bool interruptsEnabled = true;
+  bool halted = false;
+
 public:
-    Z80Registers registers;
-    Memory memory;
+  Z80Registers registers;
+  Memory memory;
 
-    // Supporting routines
-    void setInterrupts(bool value);
-    word getNextWordFromPC();
-    byte getNextByteFromPC();
+  // Supporting routines
+  void setInterrupts(bool value);
+  bool areInterruptsEnabled() const { return interruptsEnabled; }
+  void setHalted(bool value) { halted = value; }
+  bool isHalted() const { return halted; }
+  word getNextWordFromPC();
+  byte getNextByteFromPC();
 
-    // Program counter util functions
-    long incPC();
-    long incPC(int value);
-    long setPC(long address);
-
+  // Program counter util functions
+  long incPC();
+  long incPC(int value);
+  long decPC(int value);
+  long setPC(long address);
 };
 
-
-#endif //ZXEMULATOR_PROCESSORSTATE_H
+#endif // ZXEMULATOR_PROCESSORSTATE_H

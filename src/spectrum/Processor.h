@@ -12,24 +12,26 @@
 class Processor {
 
 private:
-    // State variables
-    ProcessorState state;
-    OpCodeCatalogue catalogue = OpCodeCatalogue();
+  // State variables
+  ProcessorState state;
+  OpCodeCatalogue catalogue = OpCodeCatalogue();
 
-    bool running = false;
+  bool running = false;
 
-    // Internal methods
-    OpCode *getNextInstruction();
+  // Internal methods
+  OpCode *getNextInstruction();
 
 public:
-    explicit Processor();
+  explicit Processor();
 
-    void init(const char *romFile);
+  void init(const char *romFile);
 
-    void run();
+  void run();
+  void executeFrame();
 
-    void shutdown();
+  VideoBuffer *getVideoBuffer();
+
+  void shutdown();
 };
 
-
-#endif //ZXEMULATOR_PROCESSOR_H
+#endif // ZXEMULATOR_PROCESSOR_H

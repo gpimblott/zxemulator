@@ -12,13 +12,14 @@
 
 class InterruptOpcodes : public OpCodeProvider {
 private:
-    static constexpr emulator_types::byte DI = 0xf3;
+  static constexpr emulator_types::byte DI = 0xf3;
+  static constexpr emulator_types::byte EI = 0xfb;
 
-    static int processDI(ProcessorState &state);
+  static int processDI(ProcessorState &state);
+  static int processEI(ProcessorState &state);
 
 public:
-    InterruptOpcodes();
+  InterruptOpcodes();
 };
 
-
-#endif //ZXEMULATOR_INTERRUPTOPCODES_H
+#endif // ZXEMULATOR_INTERRUPTOPCODES_H

@@ -9,20 +9,21 @@
 #include "../Memory.h"
 
 #define SPECTRUM_SCREEN_WIDTH 256
-#define SPECTRUM_SCREEN_WIDTH_BYTES (SPECTRUM_SCREEN_WIDTH/8)
+#define SPECTRUM_SCREEN_WIDTH_BYTES (SPECTRUM_SCREEN_WIDTH / 8)
 #define SPECTRUM_SCREEN_HEIGHT 192
 
 class Screen {
 protected:
-    VideoBuffer *videoBuffer;
-public:
-    virtual void init(VideoBuffer* buffer)=0;
-    virtual void show()=0;
-    virtual void hide()=0;
-    virtual void update()=0;
+  VideoBuffer *videoBuffer;
 
-    static Screen* Factory();
+public:
+  virtual void init(VideoBuffer *buffer) = 0;
+  virtual void show() = 0;
+  virtual void hide() = 0;
+  virtual void update() = 0;
+  virtual bool processEvents() { return true; };
+
+  static Screen *Factory();
 };
 
-
-#endif //ZXEMULATOR_SCREEN_H
+#endif // ZXEMULATOR_SCREEN_H

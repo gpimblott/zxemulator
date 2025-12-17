@@ -6,7 +6,7 @@
 #include "ProcessorState.h"
 
 void ProcessorState::setInterrupts(bool value) {
-    this->interruptsEnabled = value;
+  this->interruptsEnabled = value;
 }
 
 /**
@@ -14,7 +14,7 @@ void ProcessorState::setInterrupts(bool value) {
  * @return
  */
 word ProcessorState::getNextWordFromPC() {
-    return this->memory.getWord(this->registers.PC);
+  return this->memory.getWord(this->registers.PC);
 }
 
 /**
@@ -22,17 +22,21 @@ word ProcessorState::getNextWordFromPC() {
  * @return
  */
 byte ProcessorState::getNextByteFromPC() {
-    return this->memory[this->registers.PC];
+  return this->memory[this->registers.PC];
 }
 
 long ProcessorState::incPC(int value) {
-    return (this->registers.PC+=value);
+  this->registers.PC += value;
+  return this->registers.PC;
 }
 
-long ProcessorState::incPC() {
-    return incPC(1);
+long ProcessorState::decPC(int value) {
+  this->registers.PC -= value;
+  return this->registers.PC;
 }
+
+long ProcessorState::incPC() { return incPC(1); }
 
 long ProcessorState::setPC(long address) {
-    return (this->registers.PC = address);
+  return (this->registers.PC = address);
 }

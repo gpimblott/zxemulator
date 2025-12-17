@@ -31,31 +31,29 @@ using namespace emulator_types;
  */
 class Memory {
 private:
-    const long m_totalMemory = RAM_SIZE + ROM_SIZE;
-    byte *m_memory;
+  const long m_totalMemory = RAM_SIZE + ROM_SIZE;
+  byte *m_memory;
+
 public:
-    Memory();
+  Memory();
 
-    ~Memory();
+  ~Memory();
 
-    void loadIntoMemory(long start, long length, byte *data);
+  void loadIntoMemory(long start, long length, byte *data);
 
-    void loadIntoMemory(Rom &rom);
+  void loadIntoMemory(Rom &rom);
 
-    // Get a word from the specified address
-    word getWord(long address);
+  // Get a word from the specified address
+  word getWord(long address);
 
-    // Get an instance of the video videoBuffer configured to point at the correct
-    // location in this memory map
-    VideoBuffer *getVideoBuffer();
+  // Get an instance of the video videoBuffer configured to point at the correct
+  // location in this memory map
+  VideoBuffer *getVideoBuffer();
 
-    // Override operators
-    emulator_types::byte operator[](long i);
+  // Override operators
+  emulator_types::byte &operator[](long i);
 
-    void dump( long start, long size);
-
-
+  void dump(long start, long size);
 };
 
-
-#endif //ZXEMULATOR_MEMORY_H
+#endif // ZXEMULATOR_MEMORY_H

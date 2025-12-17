@@ -2,26 +2,28 @@
 // Created by G.Pimblott on 17/01/2023.
 //
 
-#include <cstdlib>
 #include "Memory.h"
 #include "../exceptions/MemoryException.h"
+#include <cstdlib>
 
 /**
  * Constructor
  * Allocate the memory
  */
-Memory::Memory() {
-    m_memory = (byte *) malloc(m_totalMemory);
-}
+/**
+ * Constructor
+ * Allocate the memory
+ */
+Memory::Memory() { m_memory = (byte *)calloc(1, m_totalMemory); }
 
 /**
  * Destructor
  */
 Memory::~Memory() {
-    if (m_memory != NULL) {
-        free(m_memory);
-        m_memory = NULL;
-    }
+  if (m_memory != NULL) {
+    free(m_memory);
+    m_memory = NULL;
+  }
 }
 
 /**
@@ -31,7 +33,7 @@ Memory::~Memory() {
  * @param data  The data to load
  */
 void Memory::loadIntoMemory(long start, long length, byte *data) {
-    memcpy(m_memory + start, data, length);
+  memcpy(m_memory + start, data, length);
 }
 
 /**
@@ -40,7 +42,10 @@ void Memory::loadIntoMemory(long start, long length, byte *data) {
  * @param rom The ROM to load
  */
 void Memory::loadIntoMemory(Rom &rom) {
-    loadIntoMemory(ROM_LOCATION, rom.getSize(), rom.getData());
+  loadIntoMemory(ROM_LOCATION, rom.getSize(), rom.getData());
+
+  // Clear Video RAM explicitly to ensure clean start
+  memset(m_memory + 0x4000, 0, 0x1B00);
 }
 
 /**
@@ -48,11 +53,11 @@ void Memory::loadIntoMemory(Rom &rom) {
  * @param i index of the byte to read
  * @return The byte value or throw a <code>MemoryExceptom</code>
  */
-emulator_types::byte Memory::operator[](long i) {
-    if (i > m_totalMemory)
-        throw MemoryException(i);
+emulator_types::byte &Memory::operator[](long i) {
+  if (i > m_totalMemory)
+    throw MemoryException(i);
 
-    return *(this->m_memory + i);
+  return *(this->m_memory + i);
 }
 
 /**
@@ -61,12 +66,13 @@ emulator_types::byte Memory::operator[](long i) {
  * @param size number of bytes to dump
  */
 void Memory::dump(long start, long size) {
-    for (long i = 0; i < size; i++) {
-        long address = start + i;
-        if (i % 8 == 0) printf("\n%04d ", address);
-        printf("%hhx ", this->m_memory[address]);
-    }
-    printf("\n");
+  for (long i = 0; i < size; i++) {
+    long address = start + i;
+    if (i % 8 == 0)
+      printf("\n%04d ", address);
+    printf("%hhx ", this->m_memory[address]);
+  }
+  printf("\n");
 }
 
 /**
@@ -75,8 +81,8 @@ void Memory::dump(long start, long size) {
  * @return The word at the specified address
  */
 word Memory::getWord(long address) {
-    word *ptr = reinterpret_cast<word *>(m_memory + address);
-    return *(ptr);
+  word *ptr = reinterpret_cast<word *>(m_memory + address);
+  return *(ptr);
 }
 
 /**
@@ -84,7 +90,6 @@ word Memory::getWord(long address) {
  * @return
  */
 VideoBuffer *Memory::getVideoBuffer() {
-    VideoBuffer *buffer = new VideoBuffer(this->m_memory);
-    return buffer;
+  VideoBuffer *buffer = new VideoBuffer(this->m_memory);
+  return buffer;
 }
-
