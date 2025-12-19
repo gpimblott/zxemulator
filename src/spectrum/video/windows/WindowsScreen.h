@@ -7,8 +7,11 @@
 #define ZXEMULATOR_WINDOWSSCREEN_H
 
 #include "../Screen.h"
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window.hpp>
 #include <cstdint>
@@ -20,6 +23,8 @@
 #define VIEWPORT_HEIGHT (SPECTRUM_SCREEN_HEIGHT)
 #define FULL_WIDTH (VIEWPORT_WIDTH + (BORDER_WIDTH * 2))
 #define FULL_HEIGHT (VIEWPORT_HEIGHT + (BORDER_WIDTH * 2))
+
+class Processor;
 
 /**
  *
@@ -44,6 +49,15 @@ private:
   void drawBorder(unsigned char **pixel, sf::Color colour) const;
 
 public:
+  sf::RenderWindow debugWindow;
+  sf::Font debugFont;
+  bool showDebug = false;
+  Processor *processor = nullptr;
+
+  void drawDebugWindow();
+  void initDebug();
+
+public:
   WindowsScreen();
   void init(VideoBuffer *buffer) override;
 
@@ -55,6 +69,8 @@ public:
 
   bool processEvents() override;
   void waitForEvent();
+
+  void setProcessor(Processor *p) override { processor = p; };
 };
 
 #endif // ZXEMULATOR_WINDOWSSCREEN_H

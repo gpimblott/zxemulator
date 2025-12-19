@@ -15,7 +15,16 @@ int IOOpcodes::processOUT(ProcessorState &state) {
   byte port = state.getNextByteFromPC();
   state.incPC();
   debug("OUT (%02X), A", port);
-  // TODO: Implement actual IO
+
+  // Port FE (or any even port on 48K) controls border color and speaker
+  // Bit 0-2: Border color (0-7)
+  // Bit 3: MIC output
+  // Bit 4: Speaker (beeper)
+  if ((port & 0x01) == 0) {
+    byte borderColor = state.registers.A & 0x07;
+    state.memory.getVideoBuffer()->setBorderColor(borderColor);
+  }
+
   return 11;
 }
 

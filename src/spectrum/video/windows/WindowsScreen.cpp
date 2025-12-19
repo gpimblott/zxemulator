@@ -7,6 +7,7 @@
 #include <cstdio>
 
 #include "../../../utils/PeriodTimer.h"
+#include "../../Processor.h"
 #include "WindowsScreen.h"
 
 using namespace std::chrono;
@@ -114,6 +115,20 @@ void WindowsScreen::update() {
   texture.update(pixelBuffer);
 
   theWindow.draw(sprite);
+
+  // Draw Debug Button
+  sf::RectangleShape btnRect({60, 20});
+  btnRect.setPosition({10, 10});
+  btnRect.setFillColor(sf::Color(100, 100, 100, 200));
+  theWindow.draw(btnRect);
+
+  sf::Text btnText(debugFont);
+  btnText.setString("DEBUG");
+  btnText.setCharacterSize(12);
+  btnText.setFillColor(sf::Color::White);
+  btnText.setPosition({15, 12});
+  theWindow.draw(btnText);
+
   theWindow.display();
 
   // Get starting timepoint
@@ -121,15 +136,8 @@ void WindowsScreen::update() {
   // timer.stop());
 }
 
-bool WindowsScreen::processEvents() {
-  while (const auto event = theWindow.pollEvent()) {
-    if (event->is<sf::Event::Closed>()) {
-      theWindow.close();
-      return false;
-    }
-  }
-  return theWindow.isOpen();
-}
+// processEvents moved to bottom
+// bool WindowsScreen::processEvents() { ... }
 
 /**
  * Draw a full border row for use at the top and bottom on the screen
@@ -138,8 +146,8 @@ bool WindowsScreen::processEvents() {
  * @return
  */
 void WindowsScreen::drawBorderRow(std::uint8_t **pixels) const {
-  // sf::Color borderColour = sf::Color::Cyan; // Incorrect hardcoded color
-  sf::Color borderColour = colors[7]; // White border default
+  byte borderIdx = (*videoBuffer).getBorderColor();
+  sf::Color borderColour = colors[borderIdx];
 
   for (int x = 0; x < FULL_WIDTH; x++) {
     setPixel(pixels, borderColour);
@@ -153,9 +161,12 @@ void WindowsScreen::drawBorderRow(std::uint8_t **pixels) const {
  * @return
  */
 void WindowsScreen::drawRow(std::uint8_t **pixels, int y) const {
+  byte borderIdx = (*videoBuffer).getBorderColor();
+  sf::Color borderColour = colors[borderIdx];
+
   // Draw the left border
   for (int i = 0; i < BORDER_WIDTH; i++) {
-    setPixel(pixels, colors[7]); // White border default
+    setPixel(pixels, borderColour);
   }
 
   for (int x = 0; x < VIEWPORT_WIDTH / 8; x++) {
@@ -180,7 +191,7 @@ void WindowsScreen::drawRow(std::uint8_t **pixels, int y) const {
 
   // Draw the right border
   for (int i = 0; i < BORDER_WIDTH; i++) {
-    setPixel(pixels, colors[7]);
+    setPixel(pixels, borderColour);
   }
 }
 
@@ -211,4 +222,188 @@ void WindowsScreen::setPixel(std::uint8_t **pixel, sf::Color colour) const {
 
 void WindowsScreen::waitForEvent() {
   // Deprecated
+}
+
+void WindowsScreen::initDebug() {
+  if (!debugFont.openFromFile("/System/Library/Fonts/Monaco.ttf")) {
+    // Fallback if needed or log error
+    printf("Failed to load debug font\n");
+  } else {
+    printf("Loaded debug font\n");
+  }
+}
+
+void WindowsScreen::drawDebugWindow() {
+  if (!showDebug || !debugWindow.isOpen())
+    return;
+
+  debugWindow.clear(sf::Color(50, 50, 50));
+
+  if (!processor)
+    return;
+
+  ProcessorState &state = processor->getState();
+
+  char buffer[256];
+  sf::Text text(debugFont);
+  text.setCharacterSize(14);
+  text.setFillColor(sf::Color::White);
+  text.setPosition({10, 10});
+
+  // Registers
+  snprintf(buffer, sizeof(buffer),
+           "A: %02X  F: %02X\nBC: %04X\nDE: %04X\nHL: %04X\nSP: %04X\nPC: "
+           "%04X\n\nFlags: %c%c%c%c%c%c%c%c",
+           state.registers.A, state.registers.F, state.registers.BC,
+           state.registers.DE, state.registers.HL, state.registers.SP,
+           state.registers.PC, (state.registers.F & 0x80) ? 'S' : '-',
+           (state.registers.F & 0x40) ? 'Z' : '-',
+           (state.registers.F & 0x20) ? '5' : '-',
+           (state.registers.F & 0x10) ? 'H' : '-',
+           (state.registers.F & 0x08) ? '3' : '-',
+           (state.registers.F & 0x04) ? 'P' : '-',
+           (state.registers.F & 0x02) ? 'N' : '-',
+           (state.registers.F & 0x01) ? 'C' : '-');
+  text.setString(buffer);
+  debugWindow.draw(text);
+
+  // Disassembly output
+  int pc = state.registers.PC;
+  sf::Text asmText(debugFont);
+  asmText.setCharacterSize(12);
+  asmText.setFillColor(sf::Color::Yellow);
+  asmText.setPosition({200, 10});
+
+  std::string asmStr = "Disassembly:\n";
+  for (int i = 0; i < 10; i++) {
+    byte op = state.memory[pc + i];
+    char hex[16];
+    snprintf(hex, sizeof(hex), "%04X: %02X ", pc + i, op);
+    asmStr += hex;
+
+    OpCode *opcode = processor->getOpCode(op);
+    if (opcode) {
+      asmStr += opcode->getName();
+    } else {
+      asmStr += "???";
+    }
+    asmStr += "\n";
+  }
+  asmText.setString(asmStr);
+  debugWindow.draw(asmText);
+
+  // Buttons (Simple text buttons for now)
+  sf::Text btnText(debugFont);
+  btnText.setCharacterSize(16);
+  btnText.setPosition({10, 200});
+
+  if (processor->isPaused()) {
+    btnText.setString("[RESUME]   [STEP]");
+    btnText.setFillColor(sf::Color::Green);
+  } else {
+    btnText.setString("[PAUSE]");
+    btnText.setFillColor(sf::Color::Red);
+  }
+  debugWindow.draw(btnText);
+
+  debugWindow.display();
+}
+
+bool WindowsScreen::processEvents() {
+  // Main Window Events
+  while (const auto event = theWindow.pollEvent()) {
+    if (event->is<sf::Event::Closed>()) {
+      theWindow.close();
+      if (debugWindow.isOpen())
+        debugWindow.close();
+      return false;
+    } else if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+      if (keyPressed->scancode == sf::Keyboard::Scancode::D) {
+        // Toggle Debug Window
+        showDebug = !showDebug;
+        if (showDebug) {
+          if (!debugWindow.isOpen()) {
+            debugWindow.create(sf::VideoMode({400, 300}), "Debugger");
+            initDebug();
+          }
+          debugWindow.requestFocus();
+          if (processor)
+            processor->pause();
+        } else {
+          if (debugWindow.isOpen())
+            debugWindow.close();
+          if (processor)
+            processor->resume();
+        }
+      }
+    } else if (const auto *mouseButton =
+                   event->getIf<sf::Event::MouseButtonPressed>()) {
+      if (mouseButton->button == sf::Mouse::Button::Left) {
+        // Debug Button at 10,10 size 60x20
+        if (mouseButton->position.x >= 10 && mouseButton->position.x <= 70 &&
+            mouseButton->position.y >= 10 && mouseButton->position.y <= 30) {
+
+          showDebug = !showDebug;
+          if (showDebug) {
+            if (!debugWindow.isOpen()) {
+              debugWindow.create(sf::VideoMode({400, 300}), "Debugger");
+              initDebug();
+            }
+            debugWindow.requestFocus();
+            if (processor)
+              processor->pause();
+          } else {
+            if (debugWindow.isOpen())
+              debugWindow.close();
+            if (processor)
+              processor->resume();
+          }
+        }
+      }
+    }
+  }
+
+  // Debug Window Events
+  if (showDebug && debugWindow.isOpen()) {
+    while (const auto event = debugWindow.pollEvent()) {
+      if (event->is<sf::Event::Closed>()) {
+        showDebug = false;
+        debugWindow.close();
+        if (processor)
+          processor->resume();
+      }
+      // Simple click handling for buttons
+      else if (const auto *mouseButton =
+                   event->getIf<sf::Event::MouseButtonPressed>()) {
+        if (mouseButton->button == sf::Mouse::Button::Left) {
+          printf("Debug Win Click: %d, %d. Processor: %p\n",
+                 mouseButton->position.x, mouseButton->position.y,
+                 (void *)processor);
+          int y = mouseButton->position.y;
+          if (y > 190 && y < 230) { // Rough button area
+            if (processor) {
+              if (processor->isPaused()) {
+                // Resume or Step?
+                if (mouseButton->position.x < 100) {
+                  printf("Resume requested\n");
+                  processor->resume();
+                } else {
+                  printf("Step requested\n");
+                  processor->step();
+                }
+              } else {
+                printf("Pause requested\n");
+                processor->pause();
+              }
+            } else {
+              printf("Error: Processor is null\n");
+            }
+          }
+        }
+      }
+    }
+    drawDebugWindow();
+  }
+
+  return theWindow.isOpen();
 }

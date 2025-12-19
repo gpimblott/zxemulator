@@ -33,6 +33,7 @@ class Memory {
 private:
   const long m_totalMemory = RAM_SIZE + ROM_SIZE;
   byte *m_memory;
+  VideoBuffer *m_videoBuffer = nullptr;
 
 public:
   Memory();

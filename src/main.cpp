@@ -20,6 +20,7 @@ int main() {
     // Create the screen
     Screen *screen = Screen::Factory();
     screen->init(processor.getVideoBuffer());
+    screen->setProcessor(&processor);
 
     screen->show();
 

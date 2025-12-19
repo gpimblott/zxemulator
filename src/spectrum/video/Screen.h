@@ -12,6 +12,8 @@
 #define SPECTRUM_SCREEN_WIDTH_BYTES (SPECTRUM_SCREEN_WIDTH / 8)
 #define SPECTRUM_SCREEN_HEIGHT 192
 
+class Processor;
+
 class Screen {
 protected:
   VideoBuffer *videoBuffer;
@@ -22,6 +24,8 @@ public:
   virtual void hide() = 0;
   virtual void update() = 0;
   virtual bool processEvents() { return true; };
+
+  virtual void setProcessor(Processor *p) {}
 
   static Screen *Factory();
 };

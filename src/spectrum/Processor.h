@@ -17,6 +17,8 @@ private:
   OpCodeCatalogue catalogue = OpCodeCatalogue();
 
   bool running = false;
+  bool paused = false;
+  bool stepRequest = false;
 
   // Internal methods
   OpCode *getNextInstruction();
@@ -24,14 +26,26 @@ private:
 public:
   explicit Processor();
 
+  OpCode *getOpCode(byte b) { return catalogue.lookupOpcode(b); }
+
   void init(const char *romFile);
 
   void run();
   void executeFrame();
 
   VideoBuffer *getVideoBuffer();
+  ProcessorState &getState() { return state; } // Expose for debugger
 
   void shutdown();
+
+  // Debug control
+  void pause() { paused = true; }
+  void resume() { paused = false; }
+  void step() {
+    if (paused)
+      stepRequest = true;
+  }
+  bool isPaused() const { return paused; }
 };
 
 #endif // ZXEMULATOR_PROCESSOR_H

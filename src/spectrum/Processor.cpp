@@ -40,6 +40,14 @@ void Processor::executeFrame() {
   const int frameCycles = 69888;
 
   while (tStates < frameCycles && running) {
+    if (paused) {
+      if (stepRequest) {
+        stepRequest = false;
+      } else {
+        break;
+      }
+    }
+
     if (state.isHalted()) {
       // CPU executes NOPs (4 T-states) while halted
       tStates += 4;

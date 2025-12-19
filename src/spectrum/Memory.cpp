@@ -14,12 +14,19 @@
  * Constructor
  * Allocate the memory
  */
-Memory::Memory() { m_memory = (byte *)calloc(1, m_totalMemory); }
+Memory::Memory() {
+  m_memory = (byte *)calloc(1, m_totalMemory);
+  m_videoBuffer = new VideoBuffer(m_memory);
+}
 
 /**
  * Destructor
  */
 Memory::~Memory() {
+  if (m_videoBuffer != nullptr) {
+    delete m_videoBuffer;
+    m_videoBuffer = nullptr;
+  }
   if (m_memory != NULL) {
     free(m_memory);
     m_memory = NULL;
@@ -89,7 +96,4 @@ word Memory::getWord(long address) {
  *
  * @return
  */
-VideoBuffer *Memory::getVideoBuffer() {
-  VideoBuffer *buffer = new VideoBuffer(this->m_memory);
-  return buffer;
-}
+VideoBuffer *Memory::getVideoBuffer() { return m_videoBuffer; }
