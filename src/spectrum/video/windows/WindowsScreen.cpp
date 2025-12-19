@@ -64,7 +64,7 @@ void WindowsScreen::show() {
                                               FULL_HEIGHT * WINDOW_SCALE)),
                    "ZX Emulator");
 
-  theWindow.setFramerateLimit(30);
+  theWindow.setFramerateLimit(50);
   theWindow.clear(sf::Color::White);
 }
 
@@ -84,7 +84,7 @@ void WindowsScreen::update() {
   timer.start();
 
   // Get a pointer for the screen buffer
-  byte *screenBufferPtr = this->videoBuffer->getBuffer();
+  // byte *screenBufferPtr = this->videoBuffer->getBuffer();
   // byte *currentLinePtr = this->videoBuffer->getBuffer(); // unused
 
   //    for (int row = 0; row < numberOfRows; row++) {
@@ -109,11 +109,12 @@ void WindowsScreen::update() {
       drawRow(&currentPixelPtr, videoY);
     }
 
-    screenBufferPtr += BYTES_PER_ROW;
+    // screenBufferPtr += BYTES_PER_ROW;
   }
 
   texture.update(pixelBuffer);
 
+  theWindow.clear(sf::Color::Black);
   theWindow.draw(sprite);
 
   // Draw Debug Button

@@ -1,3 +1,5 @@
 /src/cmake-build-debug/
+/src/_deps/
+/src/CMakeFiles/
 /build/
 
