@@ -104,10 +104,41 @@ int ExtendedOpcodes::processExtended(ProcessorState &state) {
     return processIN_r_C(state, dummy);
   }
 
+  case 0x57: // LD A, I
+  {
+    state.registers.A = state.registers.I;
+    // S, Z, Y, H=0, N=0 from A. P/V = IFF2.
+    byte f = state.registers.F & 1;           // Keep C
+    f |= (state.registers.A & 0x80);          // S
+    f |= (state.registers.A == 0) ? 0x40 : 0; // Z
+    f |= (state.registers.A & 0x20);          // Y (bit 5)
+    f |= (state.registers.A & 0x08); // X (bit 3) - undocumented match A?
+    // P/V copies IFF2
+    if (state.registers.IFF2)
+      f |= 0x04;
+
+    state.registers.F = f;
+    return 9;
+  }
+  case 0x5F: // LD A, R
+  {
+    state.registers.A = state.registers.R;
+    // S, Z, Y, H=0, N=0 from A. P/V = IFF2.
+    byte f = state.registers.F & 1;           // Keep C
+    f |= (state.registers.A & 0x80);          // S
+    f |= (state.registers.A == 0) ? 0x40 : 0; // Z
+    f |= (state.registers.A & 0x20);          // Y
+    // P/V copies IFF2
+    if (state.registers.IFF2)
+      f |= 0x04;
+
+    state.registers.F = f;
+    return 9;
+  }
   case 0x4F: // LD R, A
     state.registers.R = state.registers.A;
     return 9;
-  case 0x46: // IM 0 (Undocumented extended? Standard is ED 46)
+  case 0x46: // IM 0
     state.setInterruptMode(0);
     return 8;
   case 0x56: // IM 1

@@ -28,7 +28,7 @@
             "program": "${workspaceFolder}/build/ZXEmulator",
             "args": [
                 "-r",
-                "${workspaceFolder}/roms/brendanalford.rom"
+                "${workspaceFolder}/roms/brendanalford.bin"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build"

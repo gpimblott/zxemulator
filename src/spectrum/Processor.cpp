@@ -38,6 +38,11 @@ Processor::Processor() : state() {
 void Processor::init(const char *romFile) {
   // Load the ROM into memory
   Rom theROM = Rom(romFile);
+  if (theROM.getSize() <= 0) {
+    utils::Logger::write(
+        ("Error: Failed to load ROM file: " + std::string(romFile)).c_str());
+    throw std::runtime_error("Failed to load ROM file");
+  }
   state.memory.loadIntoMemory(theROM);
 
   // set up the start point
@@ -230,10 +235,6 @@ void Processor::loadZ80Snapshot(const char *filename) {
       word blockLen = (loader[fileIndex + 1] << 8) | loader[fileIndex];
       byte pageId = loader[fileIndex + 2];
       fileIndex += 3;
-
-      std::string log = "Block: Page=" + std::to_string(pageId) +
-                        " Len=" + std::to_string(blockLen);
-      utils::Logger::write(log.c_str());
 
       if (blockLen == 0)
         break; // End marker? usually just EOF.
@@ -443,6 +444,8 @@ void Processor::reset() {
   state.setInterrupts(false);
   state.setInterruptMode(0); // Reset to IM 0
   lastError = "";
+  running = true;
+  paused = false;
 }
 
 /**

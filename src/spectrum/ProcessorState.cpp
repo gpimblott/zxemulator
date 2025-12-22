@@ -26,6 +26,8 @@
 
 void ProcessorState::setInterrupts(bool value) {
   this->interruptsEnabled = value;
+  this->registers.IFF1 = value ? 1 : 0;
+  this->registers.IFF2 = value ? 1 : 0;
 }
 
 /**
