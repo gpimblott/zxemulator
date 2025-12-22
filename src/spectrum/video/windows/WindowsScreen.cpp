@@ -474,27 +474,27 @@ void WindowsScreen::handleKey(sf::Keyboard::Key key, bool pressed) {
     processor->getState().keyboard.setKey(2, 4, pressed);
 
   // Line 3 (0xF7): 1 (0), 2 (1), 3 (2), 4 (3), 5 (4)
-  if (key == sf::Keyboard::Key::Num1)
+  if (key == sf::Keyboard::Key::Num1 || key == sf::Keyboard::Key::Numpad1)
     processor->getState().keyboard.setKey(3, 0, pressed);
-  if (key == sf::Keyboard::Key::Num2)
+  if (key == sf::Keyboard::Key::Num2 || key == sf::Keyboard::Key::Numpad2)
     processor->getState().keyboard.setKey(3, 1, pressed);
-  if (key == sf::Keyboard::Key::Num3)
+  if (key == sf::Keyboard::Key::Num3 || key == sf::Keyboard::Key::Numpad3)
     processor->getState().keyboard.setKey(3, 2, pressed);
-  if (key == sf::Keyboard::Key::Num4)
+  if (key == sf::Keyboard::Key::Num4 || key == sf::Keyboard::Key::Numpad4)
     processor->getState().keyboard.setKey(3, 3, pressed);
-  if (key == sf::Keyboard::Key::Num5)
+  if (key == sf::Keyboard::Key::Num5 || key == sf::Keyboard::Key::Numpad5)
     processor->getState().keyboard.setKey(3, 4, pressed);
 
   // Line 4 (0xEF): 0 (0), 9 (1), 8 (2), 7 (3), 6 (4)
-  if (key == sf::Keyboard::Key::Num0)
+  if (key == sf::Keyboard::Key::Num0 || key == sf::Keyboard::Key::Numpad0)
     processor->getState().keyboard.setKey(4, 0, pressed);
-  if (key == sf::Keyboard::Key::Num9)
+  if (key == sf::Keyboard::Key::Num9 || key == sf::Keyboard::Key::Numpad9)
     processor->getState().keyboard.setKey(4, 1, pressed);
-  if (key == sf::Keyboard::Key::Num8)
+  if (key == sf::Keyboard::Key::Num8 || key == sf::Keyboard::Key::Numpad8)
     processor->getState().keyboard.setKey(4, 2, pressed);
-  if (key == sf::Keyboard::Key::Num7)
+  if (key == sf::Keyboard::Key::Num7 || key == sf::Keyboard::Key::Numpad7)
     processor->getState().keyboard.setKey(4, 3, pressed);
-  if (key == sf::Keyboard::Key::Num6)
+  if (key == sf::Keyboard::Key::Num6 || key == sf::Keyboard::Key::Numpad6)
     processor->getState().keyboard.setKey(4, 4, pressed);
 
   // Line 5 (0xDF): P (0), O (1), I (2), U (3), Y (4)

@@ -29,6 +29,10 @@ BitOpcodes::BitOpcodes() : OpCodeProvider() {
 }
 
 int BitOpcodes::processCB(ProcessorState &state) {
+  // M1 Cycle for second byte
+  state.registers.R =
+      (state.registers.R & 0x80) | ((state.registers.R + 1) & 0x7F);
+
   byte opcode = state.getNextByteFromPC();
   state.incPC();
 

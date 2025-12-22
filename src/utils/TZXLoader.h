@@ -22,31 +22,34 @@
  * SOFTWARE.
  */
 
-#ifndef ZXEMULATOR_EXTENDEDOPCODES_H
-#define ZXEMULATOR_EXTENDEDOPCODES_H
+#ifndef ZXEMULATOR_TZXLOADER_H
+#define ZXEMULATOR_TZXLOADER_H
 
-#include "OpCodeProvider.h"
+#include "BinaryFileLoader.h"
+#include <string>
+#include <vector>
 
-class ExtendedOpcodes : public OpCodeProvider {
-public:
-  ExtendedOpcodes();
+namespace utils {
 
-  static int processExtended(ProcessorState &state);
-
-  emulator_types::byte LDIR = 0xB0;
-  emulator_types::byte CPIR = 0xB1;
-  emulator_types::byte LDDR = 0xB8;
-  emulator_types::byte OTDR = 0xBB;
-
-  static int sbc16(ProcessorState &state, emulator_types::word val);
-  static int adc16(ProcessorState &state, emulator_types::word val);
-  static int ld_nn_rr(ProcessorState &state, emulator_types::word val);
-  static int ld_rr_nn(ProcessorState &state, emulator_types::word &reg);
-
-  static int processLDIR(ProcessorState &state);
-  static int processCPIR(ProcessorState &state);
-  static int processLDDR(ProcessorState &state);
-  static int processIN_r_C(ProcessorState &state, emulator_types::byte &reg);
+struct TapeBlock {
+  int id;
+  std::vector<emulator_types::byte> data;
+  int pauseAfter; // block ID 0x10 usually has a pause
 };
 
-#endif // ZXEMULATOR_EXTENDEDOPCODES_H
+class TZXLoader : public BinaryFileLoader {
+private:
+  std::vector<TapeBlock> blocks;
+
+public:
+  TZXLoader(const char *filename);
+
+  bool isValid();
+  void parse();
+
+  const std::vector<TapeBlock> &getBlocks() const { return blocks; }
+};
+
+} // namespace utils
+
+#endif // ZXEMULATOR_TZXLOADER_H

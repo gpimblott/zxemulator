@@ -37,11 +37,26 @@ int main(int argc, char *argv[]) {
     const char *romFileLocation = "./roms/48k.bin";
     bool debugMode = false;
 
+    std::string tapeFile = "";
+    std::string snapshotFile = "";
+
     // Parse command line arguments
     for (int i = 1; i < argc; ++i) {
       std::string arg = argv[i];
       if (arg == "-d" || arg == "--debug") {
         debugMode = true;
+      } else if (arg == "-t" || arg == "--tape") {
+        if (i + 1 < argc) {
+          tapeFile = argv[++i];
+        }
+      } else if (arg == "-r" || arg == "--rom") {
+        if (i + 1 < argc) {
+          romFileLocation = argv[++i];
+        }
+      } else if (arg == "-s" || arg == "--snapshot") {
+        if (i + 1 < argc) {
+          snapshotFile = argv[++i];
+        }
       }
     }
 
@@ -50,6 +65,14 @@ int main(int argc, char *argv[]) {
     // Create a processor and load the basic ROM
     Processor processor;
     processor.init(romFileLocation);
+
+    if (!tapeFile.empty()) {
+      processor.loadTape(tapeFile.c_str());
+    }
+
+    if (!snapshotFile.empty()) {
+      processor.loadSnapshot(snapshotFile.c_str());
+    }
 
     // Debug: Check ROM integrity at 0x0672
     // byte b = processor.getState().memory.getByte(0x0672); // Need access?

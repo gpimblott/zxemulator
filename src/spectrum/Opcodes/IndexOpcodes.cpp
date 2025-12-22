@@ -42,6 +42,10 @@ int IndexOpcodes::processIY(ProcessorState &state) {
 
 int IndexOpcodes::processIndex(ProcessorState &state,
                                emulator_types::word &indexReg) {
+  // M1 Cycle for second byte
+  state.registers.R =
+      (state.registers.R & 0x80) | ((state.registers.R + 1) & 0x7F);
+
   byte opcode = state.getNextByteFromPC();
   state.incPC();
 
@@ -61,6 +65,39 @@ int IndexOpcodes::processIndex(ProcessorState &state,
     return ArithmeticOpcodes::add16(state, indexReg, state.registers.DE) + 4;
   case 0x23: // INC IX/IY
     return ArithmeticOpcodes::inc16(state, indexReg) + 4;
+
+  case 0x24: // INC IXH/IYH (Undocumented)
+  {
+    byte val = (indexReg >> 8) & 0xFF;
+    val++;
+    indexReg = (indexReg & 0x00FF) | (val << 8);
+
+    // Flags S, Z, H, P/V, N
+    if (val == 0)
+      SET_FLAG(Z_FLAG, state.registers);
+    else
+      CLEAR_FLAG(Z_FLAG, state.registers);
+    if (val & 0x80)
+      SET_FLAG(S_FLAG, state.registers);
+    else
+      CLEAR_FLAG(S_FLAG, state.registers);
+    if ((val & 0x0F) == 0x00)
+      SET_FLAG(H_FLAG, state.registers);
+    else
+      CLEAR_FLAG(H_FLAG, state.registers);
+    if (val == 0x80)
+      SET_FLAG(P_FLAG, state.registers);
+    else
+      CLEAR_FLAG(P_FLAG, state.registers); // Overflow V
+    CLEAR_FLAG(N_FLAG, state.registers);
+    return 8;
+  }
+  case 0x54: // LD D, IXH/IYH (Undocumented)
+    state.registers.D = (byte)((indexReg >> 8) & 0xFF);
+    return 8;
+  case 0x5D: // LD E, IXL/IYL (Undocumented)
+    state.registers.E = (byte)(indexReg & 0xFF);
+    return 8;
   case 0x29: // ADD IX/IY, IX/IY
     return ArithmeticOpcodes::add16(state, indexReg, indexReg) + 4;
   case 0x2B: // DEC IX/IY
@@ -189,6 +226,43 @@ int IndexOpcodes::processIndex(ProcessorState &state,
   case 0x77: // LD (IX/IY+d), A
     return ld_idx_r(state, indexReg, state.registers.A);
 
+  // Undocumented: LD A, IXH/IXL
+  case 0x7C: // LD A, IXH/IYH
+    state.registers.A = (byte)((indexReg >> 8) & 0xFF);
+    return 8; // 4 + 4
+  case 0x7D:  // LD A, IXL/IYL
+    state.registers.A = (byte)(indexReg & 0xFF);
+    return 8;
+
+  // Undocumented: LD IXL, C (0x69)
+  case 0x69:
+    indexReg = (indexReg & 0xFF00) | state.registers.C;
+    return 8;
+  // Undocumented: LD IXH, B (0x60)
+  case 0x60:
+    indexReg = (indexReg & 0x00FF) | (state.registers.B << 8);
+    return 8;
+  // Undocumented: LD C, IXH (0x4C)
+  case 0x4C:
+    state.registers.C = (byte)((indexReg >> 8) & 0xFF);
+    return 8;
+  // Undocumented: OR IXL (0xB5)
+  case 0xB5:
+    return LogicOpcodes::or8(state, (byte)(indexReg & 0xFF)) + 4;
+
+  // Undocumented: LD E, IXH (0x5C)
+  case 0x5C:
+    state.registers.E = (byte)((indexReg >> 8) & 0xFF);
+    return 8;
+  // Undocumented: LD IXL, A (0x6F)
+  case 0x6F:
+    indexReg = (indexReg & 0xFF00) | state.registers.A;
+    return 8;
+  // Undocumented: LD IXH, A (0x67)
+  case 0x67:
+    indexReg = (indexReg & 0x00FF) | (state.registers.A << 8);
+    return 8;
+
   // Indexed Arithmetic / Logic (op (IX+d))
   // ADD A, (IX+d) - 0x86
   case 0x86: {
@@ -251,6 +325,23 @@ int IndexOpcodes::processIndex(ProcessorState &state,
   case 0xE9: {
     state.setPC(indexReg);
     return 8;
+  }
+  case 0xE1: // POP IX/IY
+  {
+    byte low = state.memory[state.registers.SP];
+    state.registers.SP++;
+    byte high = state.memory[state.registers.SP];
+    state.registers.SP++;
+    indexReg = (high << 8) | low;
+    return 14;
+  }
+  case 0xE5: // PUSH IX/IY
+  {
+    state.registers.SP--;
+    state.memory[state.registers.SP] = (byte)((indexReg >> 8) & 0xFF);
+    state.registers.SP--;
+    state.memory[state.registers.SP] = (byte)(indexReg & 0xFF);
+    return 15;
   }
 
   default:

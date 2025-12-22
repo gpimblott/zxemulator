@@ -71,79 +71,50 @@ int ExtendedOpcodes::processLDDR(ProcessorState &state) {
 }
 
 int ExtendedOpcodes::processExtended(ProcessorState &state) {
+  // M1 Cycle for second byte
+  state.registers.R =
+      (state.registers.R & 0x80) | ((state.registers.R + 1) & 0x7F);
+
   byte extOpcode = state.getNextByteFromPC();
   state.incPC(); // Consume the extended opcode byte
 
   switch (extOpcode) {
   case 0x47: // LD I, A
     state.registers.I = state.registers.A;
-    // debug("LD I, A\n");
-    state.registers.I = state.registers.A;
-    // debug("LD I, A\n");
     return 9;
-  case 0x78: // IN A, (C)
+
+  // IN r, (C)
+  case 0x40:
+    return processIN_r_C(state, state.registers.B); // IN B, (C)
+  case 0x48:
+    return processIN_r_C(state, state.registers.C); // IN C, (C)
+  case 0x50:
+    return processIN_r_C(state, state.registers.D); // IN D, (C)
+  case 0x58:
+    return processIN_r_C(state, state.registers.E); // IN E, (C)
+  case 0x60:
+    return processIN_r_C(state, state.registers.H); // IN H, (C)
+  case 0x68:
+    return processIN_r_C(state, state.registers.L); // IN L, (C)
+  case 0x78:
+    return processIN_r_C(state, state.registers.A); // IN A, (C)
+  case 0x70:                                        // IN (C) / IN F, (C)
   {
-    // Input from port BC
-    // The port address is in BC.
-    // Spectrum ULA responds to all even ports (bit 0 = 0).
-    int port = state.registers.BC;
-    if ((port & 1) == 0) {
-      state.registers.A = state.keyboard.readPort((port >> 8) & 0xFF);
-    } else {
-      state.registers.A = 0xFF;
-    }
-
-    // Flags: S, Z, H, P/V, N affected. C preserved.
-    // Preserve Carry
-    bool carry = GET_FLAG(C_FLAG, state.registers);
-
-    // Clear all except C? No, standard behavior is specific updates.
-    // But usually we build F from scratch or modify.
-    // Let's reset F but keep C.
-    state.registers.F = 0;
-    if (carry)
-      SET_FLAG(C_FLAG, state.registers);
-
-    // Set result flags based on result
-    if (state.registers.A & 0x80)
-      SET_FLAG(S_FLAG, state.registers);
-    else
-      CLEAR_FLAG(S_FLAG, state.registers);
-
-    if (state.registers.A == 0)
-      SET_FLAG(Z_FLAG, state.registers);
-    else
-      CLEAR_FLAG(Z_FLAG, state.registers);
-
-    CLEAR_FLAG(H_FLAG, state.registers);
-
-    // Parity
-    int parity = 0;
-    for (int i = 0; i < 8; i++) {
-      if ((state.registers.A >> i) & 1)
-        parity++;
-    }
-    if (parity % 2 == 0)
-      SET_FLAG(P_FLAG, state.registers); // P/V Set if Parity Even
-    else
-      CLEAR_FLAG(P_FLAG, state.registers);
-
-    CLEAR_FLAG(N_FLAG, state.registers);
-
-    return 12;
+    emulator_types::byte dummy = 0;
+    return processIN_r_C(state, dummy);
   }
 
   case 0x4F: // LD R, A
     state.registers.R = state.registers.A;
-    // debug("LD R, A\n");
     return 9;
+  case 0x46: // IM 0 (Undocumented extended? Standard is ED 46)
+    state.setInterruptMode(0);
+    return 8;
   case 0x56: // IM 1
-    // TODO: Set Interrupt Mode 1
-    // debug("IM 1\n");
+    state.setInterruptMode(1);
     return 8;
   case 0x5E: // IM 2
-    // TODO: Set Interrupt Mode 2
-    // debug("IM 2\n");
+    state.setInterruptMode(2);
     return 8;
 
   // SBC HL, rr
@@ -304,4 +275,47 @@ int ExtendedOpcodes::ld_rr_nn(ProcessorState &state,
   reg = (valH << 8) | valL;
 
   return 20;
+}
+
+int ExtendedOpcodes::processIN_r_C(ProcessorState &state,
+                                   emulator_types::byte &reg) {
+  // Input from port BC
+  int port = state.registers.BC;
+  emulator_types::byte result = 0xFF; // Default floating bus
+
+  if ((port & 1) == 0) { // ULA port
+    result = state.keyboard.readPort((port >> 8) & 0xFF);
+    result |= (state.tape.getEarBit() ? 0x40 : 0x00);
+  } else if ((port & 0x1F) == 0x1F) {
+    // Kempston Joystick
+    result = 0x00;
+  }
+
+  reg = result;
+
+  // Flags: S, Z, H, P/V, N affected. C preserved.
+  bool carry = GET_FLAG(C_FLAG, state.registers);
+
+  // Reset F based on result (keeping C)
+  state.registers.F = 0;
+  if (carry)
+    SET_FLAG(C_FLAG, state.registers);
+
+  if (result & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  if (result == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+
+  // Parity P/V
+  int parity = 0;
+  for (int i = 0; i < 8; i++) {
+    if ((result >> i) & 1)
+      parity++;
+  }
+  if (parity % 2 == 0)
+    SET_FLAG(P_FLAG, state.registers);
+
+  return 12;
 }

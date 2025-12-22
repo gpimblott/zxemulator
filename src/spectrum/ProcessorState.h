@@ -28,20 +28,25 @@
 #include "Keyboard.h"
 #include "Memory.h"
 #include "ProcessorTypes.h"
+#include "Tape.h"
 
 class ProcessorState {
 private:
   bool interruptsEnabled = false;
+  int interruptMode = 0; // Default IM 0 on reset
   bool halted = false;
 
 public:
   Z80Registers registers;
   Memory memory;
   Keyboard keyboard;
+  Tape tape;
 
   // Supporting routines
   void setInterrupts(bool value);
   bool areInterruptsEnabled() const { return interruptsEnabled; }
+  void setInterruptMode(int mode) { interruptMode = mode; }
+  int getInterruptMode() const { return interruptMode; }
   void setHalted(bool value) { halted = value; }
   bool isHalted() const { return halted; }
   word getNextWordFromPC();

@@ -64,7 +64,12 @@ int IOOpcodes::processIN_A_N(ProcessorState &state) {
   // Technically we should check if the low byte (port) is FE (254).
   // But the Spectrum ULA responds to any even port number.
   if ((port & 0x01) == 0) {
-    state.registers.A = state.keyboard.readPort(highByte);
+    byte ear = state.tape.getEarBit() ? 0x40 : 0x00; // EAR is bit 6
+    state.registers.A = state.keyboard.readPort(highByte) | ear;
+  } else if ((port & 0x1F) == 0x1F) {
+    // Kempston Joystick (Port 31). Return 0 (no input) to avoid "stuck keys"
+    // detection
+    state.registers.A = 0x00;
   } else {
     // Floating bus or other devices?
     state.registers.A = 0xFF;

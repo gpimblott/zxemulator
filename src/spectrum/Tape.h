@@ -22,31 +22,32 @@
  * SOFTWARE.
  */
 
-#ifndef ZXEMULATOR_EXTENDEDOPCODES_H
-#define ZXEMULATOR_EXTENDEDOPCODES_H
+#ifndef ZXEMULATOR_TAPE_H
+#define ZXEMULATOR_TAPE_H
 
-#include "OpCodeProvider.h"
+#include "../utils/BaseTypes.h"
+#include <string>
+#include <vector>
 
-class ExtendedOpcodes : public OpCodeProvider {
+class Tape {
+private:
+  std::string filename;
+  bool playing = false;
+
 public:
-  ExtendedOpcodes();
+  Tape();
 
-  static int processExtended(ProcessorState &state);
+  bool load(const std::string &filename);
+  void play();
+  void stop();
 
-  emulator_types::byte LDIR = 0xB0;
-  emulator_types::byte CPIR = 0xB1;
-  emulator_types::byte LDDR = 0xB8;
-  emulator_types::byte OTDR = 0xBB;
+  // Returns true if the EAR bit should be high (1) or low (0)
+  // For now, this will be a stub to verify connection
+  bool getEarBit();
 
-  static int sbc16(ProcessorState &state, emulator_types::word val);
-  static int adc16(ProcessorState &state, emulator_types::word val);
-  static int ld_nn_rr(ProcessorState &state, emulator_types::word val);
-  static int ld_rr_nn(ProcessorState &state, emulator_types::word &reg);
+  void update(int tStates);
 
-  static int processLDIR(ProcessorState &state);
-  static int processCPIR(ProcessorState &state);
-  static int processLDDR(ProcessorState &state);
-  static int processIN_r_C(ProcessorState &state, emulator_types::byte &reg);
+  bool isPlaying() const { return playing; }
 };
 
-#endif // ZXEMULATOR_EXTENDEDOPCODES_H
+#endif // ZXEMULATOR_TAPE_H

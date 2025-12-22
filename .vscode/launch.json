@@ -20,6 +20,30 @@
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build"
+        },
+        {
+            "name": "ZXEmulator Test ROM",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/ZXEmulator",
+            "args": [
+                "-r",
+                "${workspaceFolder}/roms/brendanalford.rom"
+            ],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build"
+        },
+        {
+            "name": "ZXEmulator Snapshot",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/ZXEmulator",
+            "args": [
+                "-s",
+                "${workspaceFolder}/roms/pacman.z80"
+            ],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build"
         }
     ]
 }

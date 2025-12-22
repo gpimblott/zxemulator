@@ -69,5 +69,7 @@ emulator_types::byte Keyboard::readPort(emulator_types::byte highByte) {
   // on other things (ear/mic/floating bus) We'll return 1s for upper bits here
   // to be safe or just mask. Real hardware: D0-D4 are keys. D6 is EAR. For now
   // we just focus on the keys. Upper bits should probably be FF or result | E0
-  return result | 0xE0;
+  // FIX: Bit 6 is EAR. We should leave it 0 here so IOOpcodes can OR in the
+  // actual EAR value. Bits 5 and 7 are usually 1.
+  return result | 0xA0;
 }
