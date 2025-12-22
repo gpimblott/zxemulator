@@ -6,28 +6,28 @@
 #ifndef ZXEMULATOR_OPCODECATALOGUE_H
 #define ZXEMULATOR_OPCODECATALOGUE_H
 
-#include <list>
-#include "OpCode.h"
 #include "../../utils/BaseTypes.h"
 #include "../ProcessorState.h"
+#include "OpCode.h"
 #include "OpCodeProvider.h"
 #include "instructions/LoadOpcodes.h"
+#include <list>
 
 typedef std::list<OpCodeProvider *> providerList_t;
 
 class OpCodeCatalogue {
 private:
-    providerList_t providersList;
+  providerList_t providersList;
+  OpCode *m_opcodeLookup[256];
 
 public:
-    OpCodeCatalogue();
+  OpCodeCatalogue();
 
-    void add(OpCodeProvider *provider);
+  void add(OpCodeProvider *provider);
 
-    OpCode *lookupOpcode(byte opcode);
+  OpCode *lookupOpcode(byte opcode);
 
-    virtual ~OpCodeCatalogue();
+  virtual ~OpCodeCatalogue();
 };
 
-
-#endif //ZXEMULATOR_OPCODECATALOGUE_H
+#endif // ZXEMULATOR_OPCODECATALOGUE_H

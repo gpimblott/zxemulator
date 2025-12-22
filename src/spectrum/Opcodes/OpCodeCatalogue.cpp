@@ -31,6 +31,18 @@ OpCodeCatalogue::OpCodeCatalogue() {
   add(new BitOpcodes());
   add(new ArithmeticOpcodes());
   add(new RotateOpcodes());
+
+  // Build the O(1) lookup table
+  for (int i = 0; i < 256; i++) {
+    m_opcodeLookup[i] = nullptr;
+    for (OpCodeProvider *provider : providersList) {
+      OpCode *code = provider->lookupOpcode((byte)i);
+      if (code != nullptr) {
+        m_opcodeLookup[i] = code;
+        break;
+      }
+    }
+  }
 }
 
 OpCodeCatalogue::~OpCodeCatalogue() {
@@ -57,11 +69,5 @@ void OpCodeCatalogue::add(OpCodeProvider *provider) {
  * @return Either a pointer to the opcode class or null
  */
 OpCode *OpCodeCatalogue::lookupOpcode(byte opcode) {
-  for (OpCodeProvider *provider : providersList) {
-    OpCode *code = provider->lookupOpcode(opcode);
-    if (code != nullptr) {
-      return code;
-    }
-  }
-  return nullptr;
+  return m_opcodeLookup[opcode];
 }
