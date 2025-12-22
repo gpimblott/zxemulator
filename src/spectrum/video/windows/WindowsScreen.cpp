@@ -82,13 +82,6 @@ void WindowsScreen::update() {
   // byte *screenBufferPtr = this->videoBuffer->getBuffer();
   // byte *currentLinePtr = this->videoBuffer->getBuffer(); // unused
 
-  // Debug: Check content
-  static int debugCounter = 0;
-  if (debugCounter++ % 100 == 0) {
-    printf("VideoBuffer[0]: %02X, Attr[0]: %02X\n", videoBuffer->getByte(0, 0),
-           videoBuffer->getAttribute(0, 0));
-  }
-
   //    for (int row = 0; row < numberOfRows; row++) {
   //
   //        // Move to the next row
