@@ -8,9 +8,7 @@
 
 Processor::Processor() : state() {
   // Set up the default state of the registers
-  state.registers.PC = 0x0; // Set the initial execution position to 0
-  state.registers.AF = 0xFFFF;
-  state.registers.SP = 0xFFFF;
+  reset();
 }
 
 /**
@@ -39,6 +37,27 @@ void Processor::executeFrame() {
   int tStates = 0;
   const int frameCycles = 69888;
 
+  // Fire an interrupt
+  if (!paused && state.areInterruptsEnabled()) {
+    // If we were halted, we are no longer halted
+    if (state.isHalted()) {
+      state.setHalted(false);
+      // PC already points to next instruction (instruction following HALT)
+    }
+
+    // Push PC
+    state.registers.SP -= 2;
+    word pc = state.registers.PC;
+    state.memory[state.registers.SP] = (byte)(pc & 0xFF);
+    state.memory[state.registers.SP + 1] = (byte)((pc >> 8) & 0xFF);
+
+    // Jump to 0x0038 (IM1 default)
+    state.registers.PC = 0x0038;
+
+    // Disable interrupts (standard Z80 behavior on accept)
+    state.setInterrupts(false);
+  }
+
   while (tStates < frameCycles && running) {
     if (paused) {
       if (stepRequest) {
@@ -63,31 +82,15 @@ void Processor::executeFrame() {
       tStates += opCode->execute(this->state);
     } else {
       byte unknownOpcode = state.memory[state.registers.PC];
+      char errorMsg[100];
+      snprintf(errorMsg, sizeof(errorMsg), "Unknown opcode %02X at address %d",
+               unknownOpcode, this->state.registers.PC);
+      lastError = std::string(errorMsg);
+
       debug("Unknown opcode %02X at address %d\n", unknownOpcode,
             this->state.registers.PC);
       running = false;
     }
-  }
-
-  // Fire an interrupt
-  if (state.areInterruptsEnabled()) {
-    // If we were halted, we are no longer halted
-    if (state.isHalted()) {
-      state.setHalted(false);
-      // PC already points to next instruction (instruction following HALT)
-    }
-
-    // Push PC
-    state.registers.SP -= 2;
-    word pc = state.registers.PC;
-    state.memory[state.registers.SP] = (byte)(pc & 0xFF);
-    state.memory[state.registers.SP + 1] = (byte)((pc >> 8) & 0xFF);
-
-    // Jump to 0x0038 (IM1 default)
-    state.registers.PC = 0x0038;
-
-    // Disable interrupts (standard Z80 behavior on accept)
-    state.setInterrupts(false);
   }
 }
 
@@ -96,6 +99,20 @@ VideoBuffer *Processor::getVideoBuffer() {
 }
 
 void Processor::shutdown() {}
+
+void Processor::reset() {
+  state.registers.PC = 0x0;
+  state.registers.AF = 0xFFFF;
+  state.registers.SP = 0xFFFF;
+  state.registers.BC = 0;
+  state.registers.DE = 0;
+  state.registers.HL = 0;
+  state.registers.IX = 0;
+  state.registers.IY = 0;
+  state.setHalted(false);
+  state.setInterrupts(false);
+  lastError = "";
+}
 
 /**
  * Read the next instruction and process it

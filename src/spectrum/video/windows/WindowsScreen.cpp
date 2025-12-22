@@ -44,17 +44,12 @@ void WindowsScreen::init(VideoBuffer *buffer) {
   // Create the texture and assign it to a scaled sprite
   // Note: Sprite is already bound to texture in constructor
   if (!texture.resize(sf::Vector2u(FULL_WIDTH, FULL_HEIGHT))) {
-    // handle error if needed, though resize returns bool in SFML 3?
-    // Checking docs: Texture::resize is effectively create in SFML 2.
-    // SFML 3 Texture::resize(size) exists.
+    // handle error if needed
+    printf("Error: Failed to resize texture\n");
   }
-  // SFML 3: Texture::create is removed/renamed? explicit resize(size) is used.
-  // Actually SFML 3 uses resize(Vector2u).
-  // Let's assume resize(Vector2u) works or check if create exists.
-  // SFML 3 docs: Texture::resize(Vector2u size).
-  texture.resize(sf::Vector2u(FULL_WIDTH, FULL_HEIGHT));
 
-  // sprite.setTexture(texture); // Done in constructor
+  // Ensure sprite uses the full texture size now that it is resized
+  sprite.setTexture(texture, true);
   sprite.setScale(sf::Vector2f(WINDOW_SCALE, WINDOW_SCALE));
 }
 
@@ -87,6 +82,13 @@ void WindowsScreen::update() {
   // byte *screenBufferPtr = this->videoBuffer->getBuffer();
   // byte *currentLinePtr = this->videoBuffer->getBuffer(); // unused
 
+  // Debug: Check content
+  static int debugCounter = 0;
+  if (debugCounter++ % 100 == 0) {
+    printf("VideoBuffer[0]: %02X, Attr[0]: %02X\n", videoBuffer->getByte(0, 0),
+           videoBuffer->getAttribute(0, 0));
+  }
+
   //    for (int row = 0; row < numberOfRows; row++) {
   //
   //        // Move to the next row
@@ -113,22 +115,15 @@ void WindowsScreen::update() {
   }
 
   texture.update(pixelBuffer);
+  // Debug attribute at 0,0 (Top Left)
+  // printf("Attribute(0,0): %02X\n", videoBuffer->getAttribute(0, 0));
 
   theWindow.clear(sf::Color::Black);
   theWindow.draw(sprite);
 
-  // Draw Debug Button
-  sf::RectangleShape btnRect({60, 20});
-  btnRect.setPosition({10, 10});
-  btnRect.setFillColor(sf::Color(100, 100, 100, 200));
-  theWindow.draw(btnRect);
+  theWindow.draw(sprite);
 
-  sf::Text btnText(debugFont);
-  btnText.setString("DEBUG");
-  btnText.setCharacterSize(12);
-  btnText.setFillColor(sf::Color::White);
-  btnText.setPosition({15, 12});
-  theWindow.draw(btnText);
+  /* Debug button removed as per request */
 
   theWindow.display();
 
@@ -268,6 +263,33 @@ void WindowsScreen::drawDebugWindow() {
   text.setString(buffer);
   debugWindow.draw(text);
 
+  // Status
+  sf::Text statusText(debugFont);
+  statusText.setCharacterSize(14);
+  statusText.setPosition({200, 180});
+  if (processor->isRunning()) {
+    if (processor->isPaused()) {
+      statusText.setString("Status: PAUSED");
+      statusText.setFillColor(sf::Color::Yellow);
+    } else {
+      statusText.setString("Status: RUNNING");
+      statusText.setFillColor(sf::Color::Green);
+    }
+  } else {
+    statusText.setString("Status: STOPPED");
+    statusText.setFillColor(sf::Color::Red);
+  }
+  debugWindow.draw(statusText);
+
+  if (!processor->getLastError().empty()) {
+    sf::Text errorText(debugFont);
+    errorText.setCharacterSize(12);
+    errorText.setFillColor(sf::Color::Red);
+    errorText.setPosition({10, 250});
+    errorText.setString("Error: " + processor->getLastError());
+    debugWindow.draw(errorText);
+  }
+
   // Disassembly output
   int pc = state.registers.PC;
   sf::Text asmText(debugFont);
@@ -299,13 +321,28 @@ void WindowsScreen::drawDebugWindow() {
   btnText.setPosition({10, 200});
 
   if (processor->isPaused()) {
-    btnText.setString("[RESUME]   [STEP]");
+    btnText.setString("[RESUME]");
     btnText.setFillColor(sf::Color::Green);
+    btnText.setPosition({10, 200});
+    debugWindow.draw(btnText);
+
+    btnText.setString("[STEP]");
+    btnText.setFillColor(sf::Color::Green);
+    btnText.setPosition({130, 200});
+    debugWindow.draw(btnText);
+
+    btnText.setString("[RESET]");
+    btnText.setFillColor(sf::Color::Green);
+    btnText.setPosition({210, 200});
+    debugWindow.draw(btnText);
+
   } else {
     btnText.setString("[PAUSE]");
-    btnText.setFillColor(sf::Color::Red);
+    btnText.setFillColor(sf::Color::Red); // Changed from Red to be consistent?
+                                          // No, Red for Pause is fine.
+    btnText.setPosition({10, 200});
+    debugWindow.draw(btnText);
   }
-  debugWindow.draw(btnText);
 
   debugWindow.display();
 }
@@ -319,47 +356,11 @@ bool WindowsScreen::processEvents() {
         debugWindow.close();
       return false;
     } else if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-      if (keyPressed->scancode == sf::Keyboard::Scancode::D) {
-        // Toggle Debug Window
-        showDebug = !showDebug;
-        if (showDebug) {
-          if (!debugWindow.isOpen()) {
-            debugWindow.create(sf::VideoMode({400, 300}), "Debugger");
-            initDebug();
-          }
-          debugWindow.requestFocus();
-          if (processor)
-            processor->pause();
-        } else {
-          if (debugWindow.isOpen())
-            debugWindow.close();
-          if (processor)
-            processor->resume();
-        }
-      }
+      /* D key removed */
     } else if (const auto *mouseButton =
                    event->getIf<sf::Event::MouseButtonPressed>()) {
       if (mouseButton->button == sf::Mouse::Button::Left) {
-        // Debug Button at 10,10 size 60x20
-        if (mouseButton->position.x >= 10 && mouseButton->position.x <= 70 &&
-            mouseButton->position.y >= 10 && mouseButton->position.y <= 30) {
-
-          showDebug = !showDebug;
-          if (showDebug) {
-            if (!debugWindow.isOpen()) {
-              debugWindow.create(sf::VideoMode({400, 300}), "Debugger");
-              initDebug();
-            }
-            debugWindow.requestFocus();
-            if (processor)
-              processor->pause();
-          } else {
-            if (debugWindow.isOpen())
-              debugWindow.close();
-            if (processor)
-              processor->resume();
-          }
-        }
+        // Debug Button removed
       }
     }
   }
@@ -385,12 +386,18 @@ bool WindowsScreen::processEvents() {
             if (processor) {
               if (processor->isPaused()) {
                 // Resume or Step?
-                if (mouseButton->position.x < 100) {
+                // Resume or Step?
+                if (mouseButton->position.x < 120) {
                   printf("Resume requested\n");
                   processor->resume();
-                } else {
+                } else if (mouseButton->position.x >= 120 &&
+                           mouseButton->position.x < 200) {
                   printf("Step requested\n");
                   processor->step();
+                } else if (mouseButton->position.x >= 200) {
+                  printf("Reset requested\n");
+                  processor->reset();
+                  processor->pause();
                 }
               } else {
                 printf("Pause requested\n");
@@ -407,4 +414,18 @@ bool WindowsScreen::processEvents() {
   }
 
   return theWindow.isOpen();
+}
+
+void WindowsScreen::setDebugMode(bool debug) {
+  showDebug = debug;
+  if (showDebug) {
+    if (!debugWindow.isOpen()) {
+      debugWindow.create(sf::VideoMode({400, 300}), "Debugger");
+      initDebug();
+    }
+    debugWindow.requestFocus();
+  } else {
+    if (debugWindow.isOpen())
+      debugWindow.close();
+  }
 }

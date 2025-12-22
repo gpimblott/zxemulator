@@ -2,4 +2,6 @@
 /src/_deps/
 /src/CMakeFiles/
 /build/
+/build_test/
+/.cache/
 

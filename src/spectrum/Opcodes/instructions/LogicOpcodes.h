@@ -56,11 +56,13 @@ private:
   emulator_types::byte OR_A = 0xB7;
 
   // Helpers
+public:
   static int cp8(ProcessorState &state, emulator_types::byte value);
   static int and8(ProcessorState &state, emulator_types::byte value);
   static int xor8(ProcessorState &state, emulator_types::byte value);
   static int or8(ProcessorState &state, emulator_types::byte value);
 
+private:
   static int processXOR_A(ProcessorState &state);
   static int processCP_N(ProcessorState &state);
   static int processNOP(ProcessorState &state);

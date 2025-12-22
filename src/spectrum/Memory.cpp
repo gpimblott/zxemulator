@@ -52,7 +52,10 @@ void Memory::loadIntoMemory(Rom &rom) {
   loadIntoMemory(ROM_LOCATION, rom.getSize(), rom.getData());
 
   // Clear Video RAM explicitly to ensure clean start
-  memset(m_memory + 0x4000, 0, 0x1B00);
+  // Pixels: 0x4000, length 6144 (0x1800)
+  memset(m_memory + 0x4000, 0, 6144);
+  // Attributes: 0x5800, length 768 (0x300) -> 0x38 (White Paper, Black Ink)
+  memset(m_memory + 0x5800, 0x38, 768);
 }
 
 /**
@@ -63,6 +66,13 @@ void Memory::loadIntoMemory(Rom &rom) {
 emulator_types::byte &Memory::operator[](long i) {
   if (i > m_totalMemory)
     throw MemoryException(i);
+
+  // ROM Protection (0x0000 - 0x3FFF)
+  if (i < ROM_SIZE) {
+    m_romScratch = m_memory[i]; // Load current ROM value into scratch
+    return m_romScratch; // Return ref to scratch. Writes affect scratch, Reads
+                         // get real value.
+  }
 
   return *(this->m_memory + i);
 }
@@ -76,7 +86,7 @@ void Memory::dump(long start, long size) {
   for (long i = 0; i < size; i++) {
     long address = start + i;
     if (i % 8 == 0)
-      printf("\n%04d ", address);
+      printf("\n%04ld ", address);
     printf("%hhx ", this->m_memory[address]);
   }
   printf("\n");

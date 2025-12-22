@@ -71,6 +71,7 @@ public:
   void waitForEvent();
 
   void setProcessor(Processor *p) override { processor = p; };
+  void setDebugMode(bool debug) override;
 };
 
 #endif // ZXEMULATOR_WINDOWSSCREEN_H

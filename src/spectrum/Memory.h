@@ -34,6 +34,7 @@ private:
   const long m_totalMemory = RAM_SIZE + ROM_SIZE;
   byte *m_memory;
   VideoBuffer *m_videoBuffer = nullptr;
+  byte m_romScratch = 0; // Scratch byte for ROM write protection
 
 public:
   Memory();

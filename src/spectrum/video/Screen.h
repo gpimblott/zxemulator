@@ -26,6 +26,7 @@ public:
   virtual bool processEvents() { return true; };
 
   virtual void setProcessor(Processor *p) {}
+  virtual void setDebugMode(bool debug) {}
 
   static Screen *Factory();
 };

@@ -1,5 +1,7 @@
 #include "IndexOpcodes.h"
 #include "../../utils/debug.h"
+#include "instructions/ArithmeticOpcodes.h"
+#include "instructions/LogicOpcodes.h"
 
 IndexOpcodes::IndexOpcodes() : OpCodeProvider() {
   createOpCode(0xDD, "IX Prefix", processIX);
@@ -29,6 +31,19 @@ int IndexOpcodes::processIndex(ProcessorState &state,
     indexReg = (high << 8) | low;
     return 14;
   }
+  case 0x09: // ADD IX/IY, BC
+    return ArithmeticOpcodes::add16(state, indexReg, state.registers.BC) + 4;
+  case 0x19: // ADD IX/IY, DE
+    return ArithmeticOpcodes::add16(state, indexReg, state.registers.DE) + 4;
+  case 0x23: // INC IX/IY
+    return ArithmeticOpcodes::inc16(state, indexReg) + 4;
+  case 0x29: // ADD IX/IY, IX/IY
+    return ArithmeticOpcodes::add16(state, indexReg, indexReg) + 4;
+  case 0x2B: // DEC IX/IY
+    return ArithmeticOpcodes::dec16(state, indexReg) + 4;
+  case 0x39: // ADD IX/IY, SP
+    return ArithmeticOpcodes::add16(state, indexReg, state.registers.SP) + 4;
+
   case 0x34: // INC (IX/IY + d)
   {
     byte d = state.getNextByteFromPC();
@@ -149,6 +164,70 @@ int IndexOpcodes::processIndex(ProcessorState &state,
     return ld_idx_r(state, indexReg, state.registers.L);
   case 0x77: // LD (IX/IY+d), A
     return ld_idx_r(state, indexReg, state.registers.A);
+
+  // Indexed Arithmetic / Logic (op (IX+d))
+  // ADD A, (IX+d) - 0x86
+  case 0x86: {
+    byte d = state.getNextByteFromPC();
+    state.incPC();
+    word addr = indexReg + (int8_t)d;
+    return ArithmeticOpcodes::add8(state, state.memory[addr]) +
+           15; // 19T total (4 base + 15 add)
+  }
+  // ADC A, (IX+d) - 0x8E
+  case 0x8E: {
+    byte d = state.getNextByteFromPC();
+    state.incPC();
+    word addr = indexReg + (int8_t)d;
+    return ArithmeticOpcodes::adc8(state, state.memory[addr]) + 15;
+  }
+  // SUB (IX+d) - 0x96
+  case 0x96: {
+    byte d = state.getNextByteFromPC();
+    state.incPC();
+    word addr = indexReg + (int8_t)d;
+    return ArithmeticOpcodes::sub8(state, state.memory[addr]) + 15;
+  }
+  // SBC A, (IX+d) - 0x9E
+  case 0x9E: {
+    byte d = state.getNextByteFromPC();
+    state.incPC();
+    word addr = indexReg + (int8_t)d;
+    return ArithmeticOpcodes::sbc8(state, state.memory[addr]) + 15;
+  }
+  // AND (IX+d) - 0xA6
+  case 0xA6: {
+    byte d = state.getNextByteFromPC();
+    state.incPC();
+    word addr = indexReg + (int8_t)d;
+    return LogicOpcodes::and8(state, state.memory[addr]) + 15;
+  }
+  // XOR (IX+d) - 0xAE
+  case 0xAE: {
+    byte d = state.getNextByteFromPC();
+    state.incPC();
+    word addr = indexReg + (int8_t)d;
+    return LogicOpcodes::xor8(state, state.memory[addr]) + 15;
+  }
+  // OR (IX+d) - 0xB6
+  case 0xB6: {
+    byte d = state.getNextByteFromPC();
+    state.incPC();
+    word addr = indexReg + (int8_t)d;
+    return LogicOpcodes::or8(state, state.memory[addr]) + 15;
+  }
+  // CP (IX+d) - 0xBE
+  case 0xBE: {
+    byte d = state.getNextByteFromPC();
+    state.incPC();
+    word addr = indexReg + (int8_t)d;
+    return LogicOpcodes::cp8(state, state.memory[addr]) + 15;
+  }
+  // JP (IX) - 0xE9
+  case 0xE9: {
+    state.setPC(indexReg);
+    return 8;
+  }
 
   default:
     debug("Unknown Index Opcode %02X\n", opcode);

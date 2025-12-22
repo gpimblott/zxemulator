@@ -33,12 +33,17 @@ public:
   void run();
   void executeFrame();
 
+  std::string lastError = "";
+
   VideoBuffer *getVideoBuffer();
   ProcessorState &getState() { return state; } // Expose for debugger
+  bool isRunning() const { return running; }
+  const std::string &getLastError() const { return lastError; }
 
   void shutdown();
 
   // Debug control
+  void reset();
   void pause() { paused = true; }
   void resume() { paused = false; }
   void step() {

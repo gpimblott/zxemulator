@@ -17,32 +17,32 @@
 struct Z80Registers {
   union {
     struct {
-      emulator_types::byte A;
       emulator_types::byte F;
+      emulator_types::byte A;
     };
     emulator_types::word AF;
   };
 
   union {
     struct {
-      emulator_types::byte B;
       emulator_types::byte C;
+      emulator_types::byte B;
     };
     emulator_types::word BC;
   };
 
   union {
     struct {
-      emulator_types::byte D;
       emulator_types::byte E;
+      emulator_types::byte D;
     };
     emulator_types::word DE;
   };
 
   union {
     struct {
-      emulator_types::byte H;
       emulator_types::byte L;
+      emulator_types::byte H;
     };
     emulator_types::word HL;
   };

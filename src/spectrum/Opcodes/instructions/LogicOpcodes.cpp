@@ -63,7 +63,7 @@ int LogicOpcodes::processXOR_A(ProcessorState &state) {
   CLEAR_FLAG(N_FLAG, state.registers);
   state.registers.A ^= state.registers.A;
 
-  debug("XOR A result=%#02x\n", state.registers.A);
+  // debug("XOR A result=%#02x\n", state.registers.A);
   return 4;
 }
 

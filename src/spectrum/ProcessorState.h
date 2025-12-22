@@ -11,7 +11,7 @@
 
 class ProcessorState {
 private:
-  bool interruptsEnabled = true;
+  bool interruptsEnabled = false;
   bool halted = false;
 
 public:

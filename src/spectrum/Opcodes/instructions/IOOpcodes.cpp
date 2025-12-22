@@ -14,7 +14,7 @@ IOOpcodes::IOOpcodes() : OpCodeProvider() {
 int IOOpcodes::processOUT(ProcessorState &state) {
   byte port = state.getNextByteFromPC();
   state.incPC();
-  debug("OUT (%02X), A", port);
+  // debug("OUT (%02X), A", port);
 
   // Port FE (or any even port on 48K) controls border color and speaker
   // Bit 0-2: Border color (0-7)
@@ -31,7 +31,7 @@ int IOOpcodes::processOUT(ProcessorState &state) {
 int IOOpcodes::processIN_A_N(ProcessorState &state) {
   byte port = state.getNextByteFromPC();
   state.incPC();
-  debug("IN A, (%02X)", port);
+  // debug("IN A, (%02X)", port);
 
   // TODO: Actual Input from Keyboard/Port
   // For now return 0xFF (floating bus)

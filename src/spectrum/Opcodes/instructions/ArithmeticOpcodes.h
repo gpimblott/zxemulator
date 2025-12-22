@@ -49,22 +49,23 @@ private:
   static constexpr emulator_types::byte DEC_A = 0x3D;
 
   // Helpers
+public:
   static int inc8(ProcessorState &state, emulator_types::byte &reg);
   static int dec8(ProcessorState &state, emulator_types::byte &reg);
   static int add8(ProcessorState &state, emulator_types::byte val);
   static int adc8(ProcessorState &state, emulator_types::byte val);
   static int sub8(ProcessorState &state, emulator_types::byte val);
   static int sbc8(ProcessorState &state, emulator_types::byte val);
-  static int and8(ProcessorState &state, emulator_types::byte val);
-  static int xor8(ProcessorState &state, emulator_types::byte val);
-  static int or8(ProcessorState &state, emulator_types::byte val);
-  static int cp8(ProcessorState &state, emulator_types::byte val);
+  // Removed unused/duplicated Logic declarations (and8, xor8, etc)
 
+private:
+public:
   static int add16(ProcessorState &state, emulator_types::word &dest,
                    emulator_types::word src);
   static int inc16(ProcessorState &state, emulator_types::word &reg);
   static int dec16(ProcessorState &state, emulator_types::word &reg);
 
+private:
   // Handlers
   static int processADD_HL_BC(ProcessorState &state);
   static int processADD_HL_DE(ProcessorState &state);

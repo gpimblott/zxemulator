@@ -3,6 +3,7 @@
 
 #include "ArithmeticOpcodes.h"
 #include "../../../utils/debug.h"
+#include "LogicOpcodes.h"
 
 ArithmeticOpcodes::ArithmeticOpcodes() : OpCodeProvider() {
   createOpCode(ADD_HL_BC, "ADD_HL_BC", processADD_HL_BC);
@@ -115,22 +116,22 @@ ArithmeticOpcodes::ArithmeticOpcodes() : OpCodeProvider() {
   createOpCode(0xE6, "AND n", [](ProcessorState &s) {
     byte n = s.getNextByteFromPC();
     s.incPC();
-    return and8(s, n) + 3;
+    return LogicOpcodes::and8(s, n) + 3;
   });
   createOpCode(0xEE, "XOR n", [](ProcessorState &s) {
     byte n = s.getNextByteFromPC();
     s.incPC();
-    return xor8(s, n) + 3;
+    return LogicOpcodes::xor8(s, n) + 3;
   });
   createOpCode(0xF6, "OR n", [](ProcessorState &s) {
     byte n = s.getNextByteFromPC();
     s.incPC();
-    return or8(s, n) + 3;
+    return LogicOpcodes::or8(s, n) + 3;
   });
   createOpCode(0xFE, "CP n", [](ProcessorState &s) {
     byte n = s.getNextByteFromPC();
     s.incPC();
-    return cp8(s, n) + 3;
+    return LogicOpcodes::cp8(s, n) + 3;
   });
 
   // Flag/Misc Arithmetic
@@ -186,7 +187,17 @@ int ArithmeticOpcodes::inc8(ProcessorState &state, emulator_types::byte &reg) {
   else
     CLEAR_FLAG(S_FLAG, state.registers);
 
-  // TODO: H and P/V flags
+  // H (Half Carry) - Carry from bit 3
+  if ((reg & 0x0F) == 0x00)
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  // P/V (Overflow) - Detect 0x7F -> 0x80
+  if (reg == 0x80)
+    SET_FLAG(P_FLAG, state.registers);
+  else
+    CLEAR_FLAG(P_FLAG, state.registers);
 
   return 4;
 }
@@ -210,7 +221,17 @@ int ArithmeticOpcodes::dec8(ProcessorState &state, emulator_types::byte &reg) {
   else
     CLEAR_FLAG(S_FLAG, state.registers);
 
-  // TODO: H and P/V flags
+  // H (Half Carry) - Borrow from bit 4
+  if ((reg & 0x0F) == 0x0F)
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  // P/V (Overflow) - Detect 0x80 -> 0x7F
+  if (reg == 0x7F)
+    SET_FLAG(P_FLAG, state.registers);
+  else
+    CLEAR_FLAG(P_FLAG, state.registers);
 
   return 4;
 }
@@ -500,100 +521,6 @@ int ArithmeticOpcodes::sbc8(ProcessorState &state, emulator_types::byte val) {
   return 4;
 }
 
-int ArithmeticOpcodes::and8(ProcessorState &state, emulator_types::byte val) {
-  state.registers.A &= val;
-  // Flags: S, Z, H=1, P/V, N=0, C=0
-  byte res = state.registers.A;
-  if (res & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-  if (res == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  SET_FLAG(H_FLAG, state.registers);
-  // P/V is Parity
-  // TODO: Parity calc
-  CLEAR_FLAG(N_FLAG, state.registers);
-  CLEAR_FLAG(C_FLAG, state.registers);
-  return 4;
-}
-
-int ArithmeticOpcodes::xor8(ProcessorState &state, emulator_types::byte val) {
-  state.registers.A ^= val;
-  // Flags: S, Z, H=0, P/V (Parity), N=0, C=0
-  byte res = state.registers.A;
-  if (res & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-  if (res == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-  // TODO: Parity
-  CLEAR_FLAG(N_FLAG, state.registers);
-  CLEAR_FLAG(C_FLAG, state.registers);
-  return 4;
-}
-
-int ArithmeticOpcodes::or8(ProcessorState &state, emulator_types::byte val) {
-  state.registers.A |= val;
-  // Flags: S, Z, H=0, P/V (Parity), N=0, C=0
-  byte res = state.registers.A;
-  if (res & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-  if (res == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-  // TODO: Parity
-  CLEAR_FLAG(N_FLAG, state.registers);
-  CLEAR_FLAG(C_FLAG, state.registers);
-  return 4;
-}
-
-int ArithmeticOpcodes::cp8(ProcessorState &state, emulator_types::byte val) {
-  // CP is like SUB but result not stored
-  int res = state.registers.A - val;
-
-  if ((res & 0xFF) == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  if (res & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-  if (state.registers.A < val)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-
-  // H flag
-  if ((state.registers.A & 0x0F) < (val & 0x0F))
-    SET_FLAG(H_FLAG, state.registers);
-  else
-    CLEAR_FLAG(H_FLAG, state.registers);
-
-  // P/V (Overflow)
-  int op1 = (int8_t)state.registers.A;
-  int op2 = (int8_t)val;
-  int r = (int8_t)(res & 0xFF);
-  if (((op1 > 0 && op2 < 0) && r < 0) || ((op1 < 0 && op2 > 0) && r > 0)) {
-    SET_FLAG(P_FLAG, state.registers);
-  } else {
-    CLEAR_FLAG(P_FLAG, state.registers);
-  }
-
-  SET_FLAG(N_FLAG, state.registers);
-  return 4;
-}
 
 int ArithmeticOpcodes::processSCF(ProcessorState &state) {
   SET_FLAG(C_FLAG, state.registers);

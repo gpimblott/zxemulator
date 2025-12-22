@@ -4,8 +4,6 @@
 //
 
 #include "InterruptOpcodes.h"
-#include "../../../utils/debug.h"
-#include <cstdio>
 
 InterruptOpcodes::InterruptOpcodes() : OpCodeProvider() {
   createOpCode(DI, "DI", processDI);
@@ -36,7 +34,7 @@ InterruptOpcodes::InterruptOpcodes() : OpCodeProvider() {
  */
 int InterruptOpcodes::processDI(ProcessorState &state) {
   state.setInterrupts(false);
-  debug("%s", "Interrupts disabled\n");
+  // debug("%s", "Interrupts disabled\n");
   return 4;
 };
 
@@ -48,6 +46,6 @@ int InterruptOpcodes::processDI(ProcessorState &state) {
  */
 int InterruptOpcodes::processEI(ProcessorState &state) {
   state.setInterrupts(true);
-  debug("%s", "Interrupts enabled\n");
+  // debug("%s", "Interrupts enabled\n");
   return 4;
 }

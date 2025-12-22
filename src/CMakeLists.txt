@@ -3,6 +3,7 @@ project(ZXEmulator)
 
 set(EXECUTABLE_NAME ${PROJECT_NAME})
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Need to ensure that the SFML libraries are included in the runtime path
 # set(MY_DEPENDANCIES_PATHS /SFML/SFML-2.5.1/bin) # Removed legacy path

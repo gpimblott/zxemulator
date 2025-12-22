@@ -15,7 +15,9 @@
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/build/ZXEmulator",
-            "args": [],
+            "args": [
+                "-d"
+            ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build"
         }

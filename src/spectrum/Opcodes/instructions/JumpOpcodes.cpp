@@ -17,14 +17,12 @@ JumpOpcodes::JumpOpcodes() : OpCodeProvider() {
       return processJR(s);
     }
     s.incPC();
-    s.incPC();
     return 7;
   });
   createOpCode(0x28, "JR Z, e", [](ProcessorState &s) {
     if (GET_FLAG(Z_FLAG, s.registers)) {
       return processJR(s);
     }
-    s.incPC();
     s.incPC();
     return 7;
   });
@@ -33,14 +31,12 @@ JumpOpcodes::JumpOpcodes() : OpCodeProvider() {
       return processJR(s);
     }
     s.incPC();
-    s.incPC();
     return 7;
   });
   createOpCode(JR_C, "JR C, e", [](ProcessorState &s) {
     if (GET_FLAG(C_FLAG, s.registers)) {
       return processJR(s);
     }
-    s.incPC();
     s.incPC();
     return 7;
   });
@@ -287,7 +283,7 @@ int JumpOpcodes::processRST(ProcessorState &state, int address) {
 
   // Jump
   state.setPC(address);
-  debug("RST %02X\n", address);
+  // debug("RST %02X\n", address);
   return 11;
 }
 
@@ -309,7 +305,7 @@ int JumpOpcodes::processJR(ProcessorState &state) { return processJR_E(state); }
 
 int JumpOpcodes::processCALL(ProcessorState &state) {
   word address = state.getNextWordFromPC();
-  debug("CALL %04X\n", address);
+  // debug("CALL %04X\n", address);
 
   // Return address is PC + 2 (skipping the 2 bytes of the address we just read)
   // Note: PC currently points to the low byte of the address.
@@ -332,7 +328,7 @@ int JumpOpcodes::processRET(ProcessorState &state) {
 
   word address = (high << 8) | low;
   state.setPC(address);
-  debug("RET\n");
+  // debug("RET\n");
   return 10;
 }
 

@@ -2,7 +2,6 @@
 // Created by Antigravity
 
 #include "ExtendedOpcodes.h"
-#include "../../utils/debug.h"
 
 ExtendedOpcodes::ExtendedOpcodes() : OpCodeProvider() {
   createOpCode(0xED, "EXTENDED", processExtended);
@@ -56,9 +55,9 @@ int ExtendedOpcodes::processExtended(ProcessorState &state) {
   switch (extOpcode) {
   case 0x47: // LD I, A
     state.registers.I = state.registers.A;
-    debug("LD I, A\n");
+    // debug("LD I, A\n");
     state.registers.I = state.registers.A;
-    debug("LD I, A\n");
+    // debug("LD I, A\n");
     return 9;
   case 0x78: // IN A, (C)
     // Input from port BC
@@ -75,20 +74,20 @@ int ExtendedOpcodes::processExtended(ProcessorState &state) {
     SET_FLAG(P_FLAG, state.registers); // Parity even
     CLEAR_FLAG(N_FLAG, state.registers);
 
-    debug("IN A, (C)\n");
+    // debug("IN A, (C)\n");
     return 12;
 
   case 0x4F: // LD R, A
     state.registers.R = state.registers.A;
-    debug("LD R, A\n");
+    // debug("LD R, A\n");
     return 9;
   case 0x56: // IM 1
     // TODO: Set Interrupt Mode 1
-    debug("IM 1\n");
+    // debug("IM 1\n");
     return 8;
   case 0x5E: // IM 2
     // TODO: Set Interrupt Mode 2
-    debug("IM 2\n");
+    // debug("IM 2\n");
     return 8;
 
   // SBC HL, rr
@@ -138,7 +137,7 @@ int ExtendedOpcodes::processExtended(ProcessorState &state) {
   case 0xB1: // CPIR
     return processCPIR(state);
   default:
-    debug("Unknown Extended Opcode %02X\n", extOpcode);
+    // debug("Unknown Extended Opcode %02X\n", extOpcode);
     return 0;
   }
 }
@@ -157,7 +156,7 @@ int ExtendedOpcodes::processCPIR(ProcessorState &state) {
   state.registers.HL = HL + 1;
   state.registers.BC = BC - 1;
 
-  debug("CPIR (BC=%d)\n", state.registers.BC);
+  // debug("CPIR (BC=%d)\n", state.registers.BC);
 
   if (!equal && state.registers.BC != 0) {
     state.decPC(2); // Repeat instruction (ED B1)
