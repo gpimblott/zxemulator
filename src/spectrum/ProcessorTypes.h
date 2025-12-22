@@ -78,9 +78,9 @@ struct Z80Registers {
   emulator_types::word IX; // Index Register X
   emulator_types::word IY; // Index Register Y
 
-  emulator_types::byte flags; // flags register (Deprecated? Use F in AF)
-  emulator_types::byte I;     // Interrupt Vector
-  emulator_types::byte R;     // Refresh Register
+  // emulator_types::byte flags; // Deprecated. Use F in AF.
+  emulator_types::byte I; // Interrupt Vector
+  emulator_types::byte R; // Refresh Register
 };
 
 #endif // ZXEMULATOR_PROCESSORTYPES_H

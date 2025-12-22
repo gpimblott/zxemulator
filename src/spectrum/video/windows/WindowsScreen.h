@@ -67,6 +67,10 @@ private:
 
   void drawBorder(unsigned char **pixel, sf::Color colour) const;
 
+  void handleKey(sf::Keyboard::Key key, bool pressed);
+  void mapSymbol(bool pressed, int unshiftedLine, int unshiftedBit,
+                 int shiftedLine, int shiftedBit);
+
 public:
   sf::RenderWindow debugWindow;
   sf::Font debugFont;

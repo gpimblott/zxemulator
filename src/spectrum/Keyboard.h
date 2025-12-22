@@ -22,36 +22,44 @@
  * SOFTWARE.
  */
 
-#ifndef ZXEMULATOR_PROCESSORSTATE_H
-#define ZXEMULATOR_PROCESSORSTATE_H
+#ifndef ZXEMULATOR_KEYBOARD_H
+#define ZXEMULATOR_KEYBOARD_H
 
-#include "Keyboard.h"
-#include "Memory.h"
-#include "ProcessorTypes.h"
+#include "../utils/BaseTypes.h"
+#include <vector>
 
-class ProcessorState {
+class Keyboard {
 private:
-  bool interruptsEnabled = false;
-  bool halted = false;
+  // 8 rows (lines), 5 bits each.
+  // Index 0 = 0xFE (SHIFT ... V)
+  // Index 1 = 0xFD (A ... G)
+  // ...
+  // Store as bytes where 0 = pressed, 1 = released?
+  // Usually it's easier to store 1=pressed internally and invert on read.
+  // Let's store 1 = pressed for simplicity, return ~(pressed) masked.
+  emulator_types::byte keyLines[8];
 
 public:
-  Z80Registers registers;
-  Memory memory;
-  Keyboard keyboard;
+  Keyboard();
 
-  // Supporting routines
-  void setInterrupts(bool value);
-  bool areInterruptsEnabled() const { return interruptsEnabled; }
-  void setHalted(bool value) { halted = value; }
-  bool isHalted() const { return halted; }
-  word getNextWordFromPC();
-  byte getNextByteFromPC();
+  /**
+   * Set the state of a specific key
+   * @param line 0-7 (corresponding to high byte bit 0-7 being 0)
+   * @param bit 0-4 (D0-D4)
+   * @param pressed true if pressed
+   */
+  void setKey(int line, int bit, bool pressed);
 
-  // Program counter util functions
-  long incPC();
-  long incPC(int value);
-  long decPC(int value);
-  long setPC(long address);
+  /**
+   * Read the input port
+   * @param highByte The high byte of the port address (e.g. 0xFE, 0xFD...)
+   * @return The data byte (D0-D4 contain key status). Bits set to 1 if NOT
+   * pressed.
+   */
+  emulator_types::byte readPort(emulator_types::byte highByte);
+
+  // Reset all keys
+  void reset();
 };
 
-#endif // ZXEMULATOR_PROCESSORSTATE_H
+#endif // ZXEMULATOR_KEYBOARD_H

@@ -65,6 +65,6 @@ int InterruptOpcodes::processDI(ProcessorState &state) {
  */
 int InterruptOpcodes::processEI(ProcessorState &state) {
   state.setInterrupts(true);
-  // debug("%s", "Interrupts enabled\n");
+  // debug("%s", "EI Executed: Interrupts enabled\n");
   return 4;
 }

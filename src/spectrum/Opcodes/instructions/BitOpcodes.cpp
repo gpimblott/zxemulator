@@ -23,7 +23,6 @@
  */
 
 #include "BitOpcodes.h"
-#include "../../../utils/debug.h"
 
 BitOpcodes::BitOpcodes() : OpCodeProvider() {
   createOpCode(0xCB, "CB Prefix", processCB);

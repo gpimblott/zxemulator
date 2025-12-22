@@ -4,5 +4,4 @@
 /build/
 /build_test/
 /.cache/
-/roms/
-
+roms/*.tzx

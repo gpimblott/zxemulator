@@ -36,8 +36,8 @@
 #define Z_FLAG 0b01000000
 #define S_FLAG 0b10000000
 
-#define CLEAR_FLAG(flag, registers) (registers.flags &= ~flag)
-#define SET_FLAG(flag, registers) (registers.flags |= flag)
-#define GET_FLAG(flag, registers) (registers.flags & flag)
+#define CLEAR_FLAG(flag, registers) (registers.F &= ~flag)
+#define SET_FLAG(flag, registers) (registers.F |= flag)
+#define GET_FLAG(flag, registers) (registers.F & flag)
 
 #endif // ZXEMULATOR_PROCESSORMACROS_H

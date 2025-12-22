@@ -23,6 +23,7 @@
  */
 
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Window/Keyboard.hpp>
 #include <cstdio>
 
 #include "../../../utils/PeriodTimer.h"
@@ -247,9 +248,6 @@ void WindowsScreen::drawDebugWindow() {
 
   debugWindow.clear(sf::Color(50, 50, 50));
 
-  if (!processor)
-    return;
-
   ProcessorState &state = processor->getState();
 
   char buffer[256];
@@ -368,7 +366,13 @@ bool WindowsScreen::processEvents() {
         debugWindow.close();
       return false;
     } else if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-      /* D key removed */
+      handleKey(keyPressed->code, true);
+    } else if (const auto *keyReleased =
+                   event->getIf<sf::Event::KeyReleased>()) {
+      handleKey(keyReleased->code, false);
+    } else if (const auto *textEntered =
+                   event->getIf<sf::Event::TextEntered>()) {
+      // Consume to avoid warnings
     } else if (const auto *mouseButton =
                    event->getIf<sf::Event::MouseButtonPressed>()) {
       if (mouseButton->button == sf::Mouse::Button::Left) {
@@ -426,6 +430,174 @@ bool WindowsScreen::processEvents() {
   }
 
   return theWindow.isOpen();
+}
+
+void WindowsScreen::handleKey(sf::Keyboard::Key key, bool pressed) {
+  if (!processor)
+    return;
+
+  // Mapping
+  // Line 0 (0xFE): SHIFT (0), Z (1), X (2), C (3), V (4)
+  if (key == sf::Keyboard::Key::LShift || key == sf::Keyboard::Key::RShift)
+    processor->getState().keyboard.setKey(0, 0, pressed);
+  if (key == sf::Keyboard::Key::Z)
+    processor->getState().keyboard.setKey(0, 1, pressed);
+  if (key == sf::Keyboard::Key::X)
+    processor->getState().keyboard.setKey(0, 2, pressed);
+  if (key == sf::Keyboard::Key::C)
+    processor->getState().keyboard.setKey(0, 3, pressed);
+  if (key == sf::Keyboard::Key::V)
+    processor->getState().keyboard.setKey(0, 4, pressed);
+
+  // Line 1 (0xFD): A (0), S (1), D (2), F (3), G (4)
+  if (key == sf::Keyboard::Key::A)
+    processor->getState().keyboard.setKey(1, 0, pressed);
+  if (key == sf::Keyboard::Key::S)
+    processor->getState().keyboard.setKey(1, 1, pressed);
+  if (key == sf::Keyboard::Key::D)
+    processor->getState().keyboard.setKey(1, 2, pressed);
+  if (key == sf::Keyboard::Key::F)
+    processor->getState().keyboard.setKey(1, 3, pressed);
+  if (key == sf::Keyboard::Key::G)
+    processor->getState().keyboard.setKey(1, 4, pressed);
+
+  // Line 2 (0xFB): Q (0), W (1), E (2), R (3), T (4)
+  if (key == sf::Keyboard::Key::Q)
+    processor->getState().keyboard.setKey(2, 0, pressed);
+  if (key == sf::Keyboard::Key::W)
+    processor->getState().keyboard.setKey(2, 1, pressed);
+  if (key == sf::Keyboard::Key::E)
+    processor->getState().keyboard.setKey(2, 2, pressed);
+  if (key == sf::Keyboard::Key::R)
+    processor->getState().keyboard.setKey(2, 3, pressed);
+  if (key == sf::Keyboard::Key::T)
+    processor->getState().keyboard.setKey(2, 4, pressed);
+
+  // Line 3 (0xF7): 1 (0), 2 (1), 3 (2), 4 (3), 5 (4)
+  if (key == sf::Keyboard::Key::Num1)
+    processor->getState().keyboard.setKey(3, 0, pressed);
+  if (key == sf::Keyboard::Key::Num2)
+    processor->getState().keyboard.setKey(3, 1, pressed);
+  if (key == sf::Keyboard::Key::Num3)
+    processor->getState().keyboard.setKey(3, 2, pressed);
+  if (key == sf::Keyboard::Key::Num4)
+    processor->getState().keyboard.setKey(3, 3, pressed);
+  if (key == sf::Keyboard::Key::Num5)
+    processor->getState().keyboard.setKey(3, 4, pressed);
+
+  // Line 4 (0xEF): 0 (0), 9 (1), 8 (2), 7 (3), 6 (4)
+  if (key == sf::Keyboard::Key::Num0)
+    processor->getState().keyboard.setKey(4, 0, pressed);
+  if (key == sf::Keyboard::Key::Num9)
+    processor->getState().keyboard.setKey(4, 1, pressed);
+  if (key == sf::Keyboard::Key::Num8)
+    processor->getState().keyboard.setKey(4, 2, pressed);
+  if (key == sf::Keyboard::Key::Num7)
+    processor->getState().keyboard.setKey(4, 3, pressed);
+  if (key == sf::Keyboard::Key::Num6)
+    processor->getState().keyboard.setKey(4, 4, pressed);
+
+  // Line 5 (0xDF): P (0), O (1), I (2), U (3), Y (4)
+  if (key == sf::Keyboard::Key::P)
+    processor->getState().keyboard.setKey(5, 0, pressed);
+  if (key == sf::Keyboard::Key::O)
+    processor->getState().keyboard.setKey(5, 1, pressed);
+  if (key == sf::Keyboard::Key::I)
+    processor->getState().keyboard.setKey(5, 2, pressed);
+  if (key == sf::Keyboard::Key::U)
+    processor->getState().keyboard.setKey(5, 3, pressed);
+  if (key == sf::Keyboard::Key::Y)
+    processor->getState().keyboard.setKey(5, 4, pressed);
+
+  // Line 6 (0xBF): ENTER (0), L (1), K (2), J (3), H (4)
+  if (key == sf::Keyboard::Key::Enter)
+    processor->getState().keyboard.setKey(6, 0, pressed);
+  if (key == sf::Keyboard::Key::L)
+    processor->getState().keyboard.setKey(6, 1, pressed);
+  if (key == sf::Keyboard::Key::K)
+    processor->getState().keyboard.setKey(6, 2, pressed);
+  if (key == sf::Keyboard::Key::J)
+    processor->getState().keyboard.setKey(6, 3, pressed);
+  if (key == sf::Keyboard::Key::H)
+    processor->getState().keyboard.setKey(6, 4, pressed);
+
+  // Line 7 (0x7F): SPACE (0), SYM (1), M (2), N (3), B (4)
+  if (key == sf::Keyboard::Key::Space)
+    processor->getState().keyboard.setKey(7, 0, pressed);
+  if (key == sf::Keyboard::Key::LControl || key == sf::Keyboard::Key::RControl)
+    processor->getState().keyboard.setKey(
+        7, 1,
+        pressed); // Symbol Shift mapped to Ctrl
+  if (key == sf::Keyboard::Key::M)
+    processor->getState().keyboard.setKey(7, 2, pressed);
+  if (key == sf::Keyboard::Key::N)
+    processor->getState().keyboard.setKey(7, 3, pressed);
+  if (key == sf::Keyboard::Key::B)
+    processor->getState().keyboard.setKey(7, 4, pressed);
+
+  // Special Keys
+  // Delete (Shift + 0)
+  if (key == sf::Keyboard::Key::Backspace) {
+    processor->getState().keyboard.setKey(0, 0, pressed); // Shift
+    processor->getState().keyboard.setKey(4, 0, pressed); // 0
+  }
+
+  // Extended Mode Shortcut (Left Alt / Option) -> Caps Shift + Symbol Shift
+  if (key == sf::Keyboard::Key::LAlt || key == sf::Keyboard::Key::RAlt) {
+    processor->getState().keyboard.setKey(0, 0, pressed); // Caps Shift
+    processor->getState().keyboard.setKey(7, 1, pressed); // Symbol Shift
+  }
+
+  // Quote handling (" and ')
+  // Quote handling (" and ')
+  if (key == sf::Keyboard::Key::Apostrophe) {
+    mapSymbol(pressed, 4, 3, 5, 0); // Unshifted: 7 ('), Shifted: P (")
+  }
+
+  // Punctuation Mappings
+  if (key == sf::Keyboard::Key::Hyphen)
+    mapSymbol(pressed, 6, 3, 4, 0); // J (-), 0 (_)
+  if (key == sf::Keyboard::Key::Equal)
+    mapSymbol(pressed, 6, 1, 6, 2); // L (=), K (+)
+  if (key == sf::Keyboard::Key::Semicolon)
+    mapSymbol(pressed, 5, 1, 0, 1); // O (;), Z (:)
+  if (key == sf::Keyboard::Key::Comma)
+    mapSymbol(pressed, 7, 3, 2, 3); // N (,), R (<)
+  if (key == sf::Keyboard::Key::Period)
+    mapSymbol(pressed, 7, 2, 2, 4); // M (.), T (>)
+  if (key == sf::Keyboard::Key::Slash)
+    mapSymbol(pressed, 0, 4, 0, 3); // V (/), C (?)
+}
+
+void WindowsScreen::mapSymbol(bool pressed, int unshiftedLine, int unshiftedBit,
+                              int shiftedLine, int shiftedBit) {
+  if (!processor)
+    return;
+
+  bool shift = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) ||
+               sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RShift);
+
+  // Symbol Shift always needed for both
+  processor->getState().keyboard.setKey(7, 1, pressed);
+
+  if (pressed) {
+    if (shift) {
+      processor->getState().keyboard.setKey(shiftedLine, shiftedBit, true);
+      // Force Caps Shift OFF to enable symbol mode without Extended Mode
+      processor->getState().keyboard.setKey(0, 0, false);
+    } else {
+      processor->getState().keyboard.setKey(unshiftedLine, unshiftedBit, true);
+    }
+  } else {
+    // RELEASE: Release BOTH to ensure no keys stuck if Shift changed state
+    processor->getState().keyboard.setKey(shiftedLine, shiftedBit, false);
+    processor->getState().keyboard.setKey(unshiftedLine, unshiftedBit, false);
+
+    // Restore Caps Shift if it is physically held
+    if (shift) {
+      processor->getState().keyboard.setKey(0, 0, true);
+    }
+  }
 }
 
 void WindowsScreen::setDebugMode(bool debug) {

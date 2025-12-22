@@ -23,6 +23,7 @@
  */
 
 #include "ExtendedOpcodes.h"
+#include "../../utils/debug.h"
 
 ExtendedOpcodes::ExtendedOpcodes() : OpCodeProvider() {
   createOpCode(0xED, "EXTENDED", processExtended);
@@ -81,22 +82,56 @@ int ExtendedOpcodes::processExtended(ProcessorState &state) {
     // debug("LD I, A\n");
     return 9;
   case 0x78: // IN A, (C)
+  {
     // Input from port BC
-    // TODO: Actually read input
-    state.registers.A = 0xFF; // Floating bus
+    // The port address is in BC.
+    // Spectrum ULA responds to all even ports (bit 0 = 0).
+    int port = state.registers.BC;
+    if ((port & 1) == 0) {
+      state.registers.A = state.keyboard.readPort((port >> 8) & 0xFF);
+    } else {
+      state.registers.A = 0xFF;
+    }
 
     // Flags: S, Z, H, P/V, N affected. C preserved.
-    // P/V is parity
-    state.registers.AF = (state.registers.AF & 0x01); // Keep Carry
-    // Set result flags based on 0xFF
-    SET_FLAG(S_FLAG, state.registers); // 0xFF is negative
-    CLEAR_FLAG(Z_FLAG, state.registers);
+    // Preserve Carry
+    bool carry = GET_FLAG(C_FLAG, state.registers);
+
+    // Clear all except C? No, standard behavior is specific updates.
+    // But usually we build F from scratch or modify.
+    // Let's reset F but keep C.
+    state.registers.F = 0;
+    if (carry)
+      SET_FLAG(C_FLAG, state.registers);
+
+    // Set result flags based on result
+    if (state.registers.A & 0x80)
+      SET_FLAG(S_FLAG, state.registers);
+    else
+      CLEAR_FLAG(S_FLAG, state.registers);
+
+    if (state.registers.A == 0)
+      SET_FLAG(Z_FLAG, state.registers);
+    else
+      CLEAR_FLAG(Z_FLAG, state.registers);
+
     CLEAR_FLAG(H_FLAG, state.registers);
-    SET_FLAG(P_FLAG, state.registers); // Parity even
+
+    // Parity
+    int parity = 0;
+    for (int i = 0; i < 8; i++) {
+      if ((state.registers.A >> i) & 1)
+        parity++;
+    }
+    if (parity % 2 == 0)
+      SET_FLAG(P_FLAG, state.registers); // P/V Set if Parity Even
+    else
+      CLEAR_FLAG(P_FLAG, state.registers);
+
     CLEAR_FLAG(N_FLAG, state.registers);
 
-    // debug("IN A, (C)\n");
     return 12;
+  }
 
   case 0x4F: // LD R, A
     state.registers.R = state.registers.A;

@@ -97,7 +97,6 @@ void Processor::executeFrame() {
       // increment past the opcode
       this->state.registers.PC++;
 
-      // execute the opcode
       tStates += opCode->execute(this->state);
     } else {
       byte unknownOpcode = state.memory[state.registers.PC];

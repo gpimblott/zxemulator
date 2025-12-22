@@ -23,7 +23,6 @@
  */
 
 #include "IOOpcodes.h"
-#include "../../../utils/debug.h"
 
 IOOpcodes::IOOpcodes() : OpCodeProvider() {
   createOpCode(OUT, "OUT", processOUT);
@@ -52,9 +51,24 @@ int IOOpcodes::processIN_A_N(ProcessorState &state) {
   state.incPC();
   // debug("IN A, (%02X)", port);
 
-  // TODO: Actual Input from Keyboard/Port
-  // For now return 0xFF (floating bus)
-  state.registers.A = 0xFF;
+  // Keyboard/Ear Reading
+  // Port address: In Z80, I/O IN A,(n) places A on the high half of the address
+  // bus and n on the low half. The keyboard is read by checking the high byte
+  // (A).
+  byte highByte = state.registers.A;
+
+  // Actually IN A, (n) reads port (A << 8) | n
+  // But for the ULA, we primarily care about the high byte for keyboard rows
+  // (FE, FD, etc) And the low byte usually is FE for ULA.
+
+  // Technically we should check if the low byte (port) is FE (254).
+  // But the Spectrum ULA responds to any even port number.
+  if ((port & 0x01) == 0) {
+    state.registers.A = state.keyboard.readPort(highByte);
+  } else {
+    // Floating bus or other devices?
+    state.registers.A = 0xFF;
+  }
 
   return 11;
 }
