@@ -26,6 +26,8 @@
 #include "../utils/BinaryFileLoader.h"
 #include "../utils/Logger.h"
 #include "../utils/debug.h"
+#include <chrono>
+#include <thread>
 
 Processor::Processor() : state(), audio() {
   // Set up the default state of the registers
@@ -444,6 +446,13 @@ void Processor::executeFrame() {
     }
   }
   audio.flush();
+
+  // Audio Sync: Throttle execution to match audio consumption rate
+  // If buffer has > 3 frames of audio (approx 60ms), slow down.
+  // This locks emulation speed to the audio card clock (44.1kHz).
+  while (audio.getBufferSize() > 2646) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
 
   // Auto-Type Logic (Frame based)
   if (autoLoadTape && running && !paused) {

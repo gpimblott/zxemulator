@@ -37,6 +37,7 @@ public:
 
   void update(int tStates, bool speakerBit, bool earBit);
   void flush();
+  size_t getBufferSize();
   void start();
   void reset();
 };

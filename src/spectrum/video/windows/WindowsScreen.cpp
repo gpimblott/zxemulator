@@ -79,7 +79,8 @@ void WindowsScreen::show() {
                                               FULL_HEIGHT * WINDOW_SCALE)),
                    "ZX Emulator");
 
-  theWindow.setFramerateLimit(50);
+  // theWindow.setVerticalSyncEnabled(true);
+  // theWindow.setFramerateLimit(50);
   theWindow.clear(sf::Color::White);
 }
 

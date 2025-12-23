@@ -8,7 +8,10 @@
 #include <cmath>
 
 Audio::Audio() {
-  tStatesPerSample = CPU_FREQUENCY / (double)SAMPLE_RATE;
+  // Precise timing for 50Hz frame structure (69888 T-States per frame)
+  // We need exactly 44100/50 = 882 samples per frame.
+  // 69888 / 882 = 79.238095...
+  tStatesPerSample = 69888.0 / ((double)SAMPLE_RATE / 50.0);
   tStateAccumulator = 0.0;
 
   // Reserve logical buffer size
@@ -56,7 +59,7 @@ void Audio::update(int tStates, bool speakerBit, bool earBit) {
   }
 
   // Auto-flush small chunks to keep the stream fluid
-  if (pendingSamples.size() >= 500) {
+  if (pendingSamples.size() >= 100) {
     flush();
   }
 }
@@ -68,6 +71,11 @@ void Audio::flush() {
   std::lock_guard<std::mutex> lock(mutex);
   buffer.insert(buffer.end(), pendingSamples.begin(), pendingSamples.end());
   pendingSamples.clear();
+}
+
+size_t Audio::getBufferSize() {
+  std::lock_guard<std::mutex> lock(mutex);
+  return buffer.size();
 }
 
 bool Audio::onGetData(Chunk &data) {
@@ -86,7 +94,10 @@ bool Audio::onGetData(Chunk &data) {
   }
 
   // Return all available data
-  samples = buffer;
+  // Use swap to avoid copying data and minimize time holding the lock
+  samples.swap(buffer);
+
+  // Clear the buffer (now containing old samples data) to keep capacity
   buffer.clear();
 
   if (!samples.empty()) {
