@@ -23,11 +23,9 @@
  */
 
 #include "spectrum/Processor.h"
-#include "spectrum/Rom.h"
+#include "spectrum/TapeLoader.h"
 #include "spectrum/video/Screen.h"
-#include "utils/BinaryFileLoader.h"
 #include "utils/Logger.h"
-#include "utils/RegisterUtils.h"
 
 using namespace std;
 using namespace utils;
@@ -74,7 +72,8 @@ int main(int argc, char *argv[]) {
     // processor.setFastLoad(fastLoad); // Will add this method
 
     if (!tapeFile.empty()) {
-      processor.loadTape(tapeFile.c_str());
+      Tape tape = TapeLoader::load(tapeFile.c_str());
+      processor.loadTape(tape);
       if (fastLoad) {
         processor.getState().setFastLoad(true);
       }

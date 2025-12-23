@@ -36,10 +36,22 @@ private:
   bool playing = false;
   std::vector<utils::TapeBlock> blocks;
 
+  // Playback state
+  enum TapeState { STOPPED, PILOT, SYNC1, SYNC2, DATA, PAUSE };
+  TapeState currentState = STOPPED;
+  size_t currentBlockIndex = 0;
+  size_t currentByteIndex = 0;
+  int currentBitIndex = 0;
+  int pulseCount = 0;
+  long tStateCounter = 0;
+  long nextEdgeTState = 0;
+  bool earBit = false;
+
 public:
   Tape();
 
-  bool load(const std::string &filename);
+  void setFilename(const std::string &fn) { filename = fn; }
+  void setBlocks(const std::vector<utils::TapeBlock> &blks) { blocks = blks; }
   void play();
   void stop();
 
@@ -56,6 +68,8 @@ public:
   bool fastLoadBlock(emulator_types::byte expectedFlag,
                      emulator_types::word length,
                      emulator_types::word startAddress, class Memory &memory);
+
+  bool hasBlocks() const { return !blocks.empty(); }
 };
 
 #endif // ZXEMULATOR_TAPE_H

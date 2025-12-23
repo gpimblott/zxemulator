@@ -24,7 +24,6 @@
 
 #include "Tape.h"
 #include "../utils/Logger.h"
-#include "../utils/TZXLoader.h"
 
 using namespace utils;
 using namespace emulator_types;
@@ -39,40 +38,9 @@ const int BIT1_PULSE = 1710;
 const int PILOT_HEADER_COUNT = 8063; // ~5 seconds? No, pulses.
 const int PILOT_DATA_COUNT = 3223;
 
-enum TapeState { STOPPED, PILOT, SYNC1, SYNC2, DATA, PAUSE };
-
-// State variables
-TapeState currentState = STOPPED;
-size_t currentBlockIndex = 0;
-size_t currentByteIndex = 0;
-int currentBitIndex = 0;
-int pulseCount = 0;
-long tStateCounter = 0;
-long nextEdgeTState = 0;
-bool earBit = false;
-
 // Internal helpers
-void nextBlock() {
-  // Logic to move to next block
-}
 
 Tape::Tape() {}
-
-bool Tape::load(const std::string &filename) {
-  this->filename = filename;
-  std::string msg = "Loading tape: " + filename;
-  Logger::write(msg.c_str());
-
-  TZXLoader loader(filename.c_str());
-  if (loader.isValid()) {
-    loader.parse();
-    this->blocks = loader.getBlocks();
-    return true;
-  } else {
-    Logger::write("Failed to load or invalid TZX file");
-    return false;
-  }
-}
 
 void Tape::play() {
   if (!blocks.empty()) {
@@ -117,6 +85,11 @@ void Tape::update(int tStates) {
       // We need to look ahead at data[0] to determine pilot length if not set?
       // Standard: 8063 if header (flag < 128), 3223 if data (flag >= 128)
       {
+        if (currentBlockIndex >= blocks.size()) {
+          stop();
+          return;
+        }
+
         int pilotLength = PILOT_HEADER_COUNT;
         if (blocks[currentBlockIndex].data.size() > 0) {
           byte flag = blocks[currentBlockIndex].data[0];
@@ -273,16 +246,14 @@ bool Tape::fastLoadBlock(byte expectedFlag, word length, word startAddress,
         // Advance Tape
         currentBlockIndex = scanIndex + 1;
 
-        // Reset state to ensure we don't play pulses for this block
-        // We are effectively "done" with this block.
-        // If we are playing, the update loop might interfere if we don't
-        // reset pulse counters But update() relies on currentBlockIndex.
-        // Changing currentBlockIndex effectively jumps to next block.
-        // We should reset state machine for the NEW block.
-        currentState = PILOT;
-        tStateCounter = 0;
-        nextEdgeTState = PILOT_PULSE;
-        pulseCount = 0;
+        if (currentBlockIndex < blocks.size()) {
+          currentState = PILOT;
+          tStateCounter = 0;
+          nextEdgeTState = PILOT_PULSE;
+          pulseCount = 0;
+        } else {
+          stop();
+        }
 
         return true;
       } else {

@@ -26,7 +26,6 @@
 #define ZXEMULATOR_PROCESSOR_H
 
 #include "Opcodes/OpCodeCatalogue.h"
-#include "ProcessorTypes.h"
 
 #include "Audio.h"
 
@@ -76,9 +75,8 @@ public:
   OpCode *getOpCode(byte b) { return catalogue.lookupOpcode(b); }
 
   void init(const char *romFile);
-  void loadTape(const char *filename);
+  void loadTape(Tape tape);
   void loadSnapshot(const char *filename);
-  void loadZ80Snapshot(const char *filename);
 
   void run();
   void executeFrame();

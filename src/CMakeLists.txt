@@ -16,7 +16,9 @@ add_executable(${EXECUTABLE_NAME} main.cpp utils/Logger.cpp utils/Logger.h utils
     utils/TZXLoader.cpp utils/TZXLoader.h
     spectrum/Keyboard.cpp spectrum/Keyboard.h
     spectrum/Opcodes/instructions/BitOpcodes.cpp spectrum/Opcodes/ExtendedOpcodes.h spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp spectrum/Opcodes/instructions/ArithmeticOpcodes.h spectrum/Opcodes/instructions/RotateOpcodes.cpp spectrum/Opcodes/instructions/RotateOpcodes.h
-    spectrum/Audio.cpp spectrum/Audio.h)
+    spectrum/Audio.cpp spectrum/Audio.h
+    spectrum/SnapshotLoader.cpp spectrum/SnapshotLoader.h
+    spectrum/TapeLoader.cpp spectrum/TapeLoader.h)
 
 
 # Detect and add SFML
