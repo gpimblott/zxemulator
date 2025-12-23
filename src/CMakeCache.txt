@@ -343,17 +343,11 @@ gmock_BINARY_DIR:STATIC=/Users/gpimblott/projects/zxemulator/src/_deps/googletes
 //Value Computed by CMake
 gmock_IS_TOP_LEVEL:STATIC=OFF
 
-//Dependencies for the target
-gmock_LIB_DEPENDS:STATIC=general;gtest;
-
 //Value Computed by CMake
 gmock_SOURCE_DIR:STATIC=/Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googlemock
 
 //Build all of Google Mock's own tests.
 gmock_build_tests:BOOL=OFF
-
-//Dependencies for the target
-gmock_main_LIB_DEPENDS:STATIC=general;gmock;
 
 //Value Computed by CMake
 googletest-distribution_BINARY_DIR:STATIC=/Users/gpimblott/projects/zxemulator/src/_deps/googletest-build
@@ -388,9 +382,6 @@ gtest_force_shared_crt:BOOL=ON
 
 //Build gtest with internal symbols hidden in shared libraries.
 gtest_hide_internal_symbols:BOOL=OFF
-
-//Dependencies for the target
-gtest_main_LIB_DEPENDS:STATIC=general;gtest;
 
 
 ########################

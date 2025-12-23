@@ -1,0 +1,224 @@
+[
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/main.cpp.o -c /Users/gpimblott/projects/zxemulator/src/main.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/main.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/main.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/utils/Logger.cpp.o -c /Users/gpimblott/projects/zxemulator/src/utils/Logger.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/utils/Logger.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/utils/Logger.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/utils/BinaryFileLoader.cpp.o -c /Users/gpimblott/projects/zxemulator/src/utils/BinaryFileLoader.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/utils/BinaryFileLoader.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/utils/BinaryFileLoader.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/utils/RegisterUtils.cpp.o -c /Users/gpimblott/projects/zxemulator/src/utils/RegisterUtils.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/utils/RegisterUtils.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/utils/RegisterUtils.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Rom.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Rom.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Rom.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Rom.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Memory.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Memory.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Memory.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Memory.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/OpCode.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/OpCode.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/OpCode.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/OpCode.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Processor.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Processor.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Processor.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Processor.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/OpCodeCatalogue.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/OpCodeCatalogue.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/OpCodeCatalogue.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/OpCodeCatalogue.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/InterruptOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/InterruptOpcodes.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/InterruptOpcodes.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/InterruptOpcodes.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/LoadOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/LoadOpcodes.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/LoadOpcodes.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/LoadOpcodes.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/LogicOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/LogicOpcodes.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/LogicOpcodes.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/LogicOpcodes.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/OpCodeProvider.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/OpCodeProvider.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/OpCodeProvider.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/OpCodeProvider.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/video/Screen.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/video/Screen.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/video/Screen.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/video/Screen.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/video/windows/WindowsScreen.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/video/windows/WindowsScreen.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/video/windows/WindowsScreen.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/video/windows/WindowsScreen.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/video/VideoBuffer.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/video/VideoBuffer.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/video/VideoBuffer.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/video/VideoBuffer.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/utils/PeriodTimer.cpp.o -c /Users/gpimblott/projects/zxemulator/src/utils/PeriodTimer.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/utils/PeriodTimer.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/utils/PeriodTimer.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/JumpOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/JumpOpcodes.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/JumpOpcodes.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/JumpOpcodes.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/ProcessorState.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/ProcessorState.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/ProcessorState.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/ProcessorState.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/IOOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/IOOpcodes.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/IOOpcodes.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/IOOpcodes.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/ExtendedOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/ExtendedOpcodes.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/ExtendedOpcodes.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/ExtendedOpcodes.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/IndexOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/IndexOpcodes.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/IndexOpcodes.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/IndexOpcodes.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/StackOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/StackOpcodes.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/StackOpcodes.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/StackOpcodes.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Tape.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Tape.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Tape.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Tape.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/utils/TZXLoader.cpp.o -c /Users/gpimblott/projects/zxemulator/src/utils/TZXLoader.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/utils/TZXLoader.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/utils/TZXLoader.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Keyboard.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Keyboard.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Keyboard.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Keyboard.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/BitOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/BitOpcodes.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/BitOpcodes.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/BitOpcodes.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/RotateOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/RotateOpcodes.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/RotateOpcodes.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/RotateOpcodes.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Audio.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Audio.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Audio.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Audio.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/SnapshotLoader.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/SnapshotLoader.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/SnapshotLoader.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/SnapshotLoader.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/TapeLoader.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/TapeLoader.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/TapeLoader.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/TapeLoader.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src/tests",
+  "command": "/usr/bin/c++  -isystem /Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googletest/include -isystem /Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googletest -std=gnu++17 -arch arm64 -o CMakeFiles/Google_Tests_run.dir/ProcessorTest.cpp.o -c /Users/gpimblott/projects/zxemulator/src/tests/ProcessorTest.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/tests/ProcessorTest.cpp",
+  "output": "tests/CMakeFiles/Google_Tests_run.dir/ProcessorTest.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src/_deps/googletest-build/googlemock",
+  "command": "/usr/bin/c++  -I/Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googlemock/include -I/Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googlemock -isystem /Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googletest/include -isystem /Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googletest -std=c++17 -arch arm64  -DGTEST_HAS_PTHREAD=1   -o CMakeFiles/gmock.dir/src/gmock-all.cc.o -c /Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googlemock/src/gmock-all.cc",
+  "file": "/Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googlemock/src/gmock-all.cc",
+  "output": "_deps/googletest-build/googlemock/CMakeFiles/gmock.dir/src/gmock-all.cc.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src/_deps/googletest-build/googlemock",
+  "command": "/usr/bin/c++  -isystem /Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googlemock/include -isystem /Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googlemock -isystem /Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googletest/include -isystem /Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googletest -std=c++17 -arch arm64  -DGTEST_HAS_PTHREAD=1   -o CMakeFiles/gmock_main.dir/src/gmock_main.cc.o -c /Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googlemock/src/gmock_main.cc",
+  "file": "/Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googlemock/src/gmock_main.cc",
+  "output": "_deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/src/gmock_main.cc.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src/_deps/googletest-build/googletest",
+  "command": "/usr/bin/c++  -I/Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googletest/include -I/Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googletest -std=c++17 -arch arm64  -DGTEST_HAS_PTHREAD=1   -o CMakeFiles/gtest.dir/src/gtest-all.cc.o -c /Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googletest/src/gtest-all.cc",
+  "file": "/Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googletest/src/gtest-all.cc",
+  "output": "_deps/googletest-build/googletest/CMakeFiles/gtest.dir/src/gtest-all.cc.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src/_deps/googletest-build/googletest",
+  "command": "/usr/bin/c++  -isystem /Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googletest/include -isystem /Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googletest -std=c++17 -arch arm64  -DGTEST_HAS_PTHREAD=1   -o CMakeFiles/gtest_main.dir/src/gtest_main.cc.o -c /Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googletest/src/gtest_main.cc",
+  "file": "/Users/gpimblott/projects/zxemulator/src/_deps/googletest-src/googletest/src/gtest_main.cc",
+  "output": "_deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/src/gtest_main.cc.o"
+}
+]

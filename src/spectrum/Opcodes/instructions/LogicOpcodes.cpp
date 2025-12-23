@@ -23,49 +23,11 @@
  */
 
 #include "LogicOpcodes.h"
-#include "../../../utils/debug.h"
-#include <cstdio>
 
-LogicOpcodes::LogicOpcodes() : OpCodeProvider() {
-  createOpCode(XOR_A, "XOR_A", processXOR_A);
-  createOpCode(CP_N, "CP_N", processCP_N);
-  createOpCode(NOP, "NOP", processNOP);
+LogicOpcodes::LogicOpcodes()
+    : OpCodeProvider() {
 
-  createOpCode(CP_B, "CP_B", processCP_B);
-  createOpCode(CP_C, "CP_C", processCP_C);
-  createOpCode(CP_D, "CP_D", processCP_D);
-  createOpCode(CP_E, "CP_E", processCP_E);
-  createOpCode(CP_H, "CP_H", processCP_H);
-  createOpCode(CP_L, "CP_L", processCP_L);
-  createOpCode(CP_HL, "CP_HL", processCP_HL);
-  createOpCode(CP_A, "CP_A", processCP_A);
-
-  createOpCode(AND_B, "AND_B", processAND_B);
-  createOpCode(AND_C, "AND_C", processAND_C);
-  createOpCode(AND_D, "AND_D", processAND_D);
-  createOpCode(AND_E, "AND_E", processAND_E);
-  createOpCode(AND_H, "AND_H", processAND_H);
-  createOpCode(AND_L, "AND_L", processAND_L);
-  createOpCode(AND_HL, "AND_HL", processAND_HL);
-  createOpCode(AND_A, "AND_A", processAND_A);
-
-  createOpCode(XOR_B, "XOR_B", processXOR_B);
-  createOpCode(XOR_C, "XOR_C", processXOR_C);
-  createOpCode(XOR_D, "XOR_D", processXOR_D);
-  createOpCode(XOR_E, "XOR_E", processXOR_E);
-  createOpCode(XOR_H, "XOR_H", processXOR_H);
-  createOpCode(XOR_L, "XOR_L", processXOR_L);
-  createOpCode(XOR_HL, "XOR_HL", processXOR_HL);
-
-  createOpCode(OR_B, "OR_B", processOR_B);
-  createOpCode(OR_C, "OR_C", processOR_C);
-  createOpCode(OR_D, "OR_D", processOR_D);
-  createOpCode(OR_E, "OR_E", processOR_E);
-  createOpCode(OR_H, "OR_H", processOR_H);
-  createOpCode(OR_L, "OR_L", processOR_L);
-  createOpCode(OR_HL, "OR_HL", processOR_HL);
-  createOpCode(OR_A, "OR_A", processOR_A);
-};
+      };
 
 /**
  *

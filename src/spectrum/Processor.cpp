@@ -255,6 +255,26 @@ void Processor::executeFrame() {
       break;
     }
 
+    // ------------------------------------------------------------------------
+    // 16-bit Arithmetic
+    // ------------------------------------------------------------------------
+    case 0x09: // ADD HL, BC
+      add16(state.registers.HL, state.registers.BC);
+      cycles = 11;
+      break;
+    case 0x19: // ADD HL, DE
+      add16(state.registers.HL, state.registers.DE);
+      cycles = 11;
+      break;
+    case 0x29: // ADD HL, HL
+      add16(state.registers.HL, state.registers.HL);
+      cycles = 11;
+      break;
+    case 0x39: // ADD HL, SP
+      add16(state.registers.HL, state.registers.SP);
+      cycles = 11;
+      break;
+
     case 0xC9: { // RET
       byte low = m_memory[state.registers.SP];
       byte high = m_memory[state.registers.SP + 1];
@@ -271,16 +291,40 @@ void Processor::executeFrame() {
       // Push PC
       state.registers.SP -= 2;
       word pc = state.registers.PC;
-      m_memory[state.registers.SP] = (byte)(pc & 0xFF);
-      m_memory[state.registers.SP + 1] = (byte)((pc >> 8) & 0xFF);
+      writeMem(state.registers.SP, (byte)(pc & 0xFF));
+      writeMem(state.registers.SP + 1, (byte)((pc >> 8) & 0xFF));
       state.registers.PC = address;
       cycles = 17;
+      break;
+    }
+
+    case 0xE3: { // EX (SP), HL
+      byte l = m_memory[state.registers.SP];
+      byte h = m_memory[state.registers.SP + 1];
+      writeMem(state.registers.SP, state.registers.L);
+      writeMem(state.registers.SP + 1, state.registers.H);
+      state.registers.H = h;
+      state.registers.L = l;
+      cycles = 19; // 4 + 3 + 4 + 3 + 5 wait? Z80 Manual says 19.
+      break;
+    }
+
+    case 0xEB: { // EX DE, HL
+      word temp = state.registers.HL;
+      state.registers.HL = state.registers.DE;
+      state.registers.DE = temp;
+      cycles = 4;
       break;
     }
 
     case 0xF3: // DI
       state.setInterrupts(false);
       cycles = 4;
+      break;
+
+    case 0xF9: // LD SP, HL
+      state.registers.SP = state.registers.HL;
+      cycles = 6;
       break;
 
     case 0xFB: // EI
@@ -489,32 +533,32 @@ void Processor::executeFrame() {
 
     // LD (HL), r
     case 0x70:
-      m_memory[state.registers.HL] = state.registers.B;
+      writeMem(state.registers.HL, state.registers.B);
       cycles = 7;
       break;
     case 0x71:
-      m_memory[state.registers.HL] = state.registers.C;
+      writeMem(state.registers.HL, state.registers.C);
       cycles = 7;
       break;
     case 0x72:
-      m_memory[state.registers.HL] = state.registers.D;
+      writeMem(state.registers.HL, state.registers.D);
       cycles = 7;
       break;
     case 0x73:
-      m_memory[state.registers.HL] = state.registers.E;
+      writeMem(state.registers.HL, state.registers.E);
       cycles = 7;
       break;
     case 0x74:
-      m_memory[state.registers.HL] = state.registers.H;
+      writeMem(state.registers.HL, state.registers.H);
       cycles = 7;
       break;
     case 0x75:
-      m_memory[state.registers.HL] = state.registers.L;
+      writeMem(state.registers.HL, state.registers.L);
       cycles = 7;
       break;
     // 0x76 is HALT (already handled above)
     case 0x77:
-      m_memory[state.registers.HL] = state.registers.A;
+      writeMem(state.registers.HL, state.registers.A);
       cycles = 7;
       break;
 
@@ -553,7 +597,7 @@ void Processor::executeFrame() {
 
     // LD (BC), A and LD A, (BC)
     case 0x02:
-      m_memory[state.registers.BC] = state.registers.A;
+      writeMem(state.registers.BC, state.registers.A);
       cycles = 7;
       break;
     case 0x0A:
@@ -563,7 +607,7 @@ void Processor::executeFrame() {
 
     // LD (DE), A and LD A, (DE)
     case 0x12:
-      m_memory[state.registers.DE] = state.registers.A;
+      writeMem(state.registers.DE, state.registers.A);
       cycles = 7;
       break;
     case 0x1A:
@@ -599,6 +643,79 @@ void Processor::executeFrame() {
       break;
     }
 
+    case 0x22: { // LD (nn), HL
+      word address = m_memory[state.registers.PC] |
+                     (m_memory[state.registers.PC + 1] << 8);
+      state.registers.PC += 2;
+      writeMem(address, state.registers.L);
+      writeMem(address + 1, state.registers.H);
+      cycles = 16;
+      break;
+    }
+
+    case 0x2A: { // LD HL, (nn)
+      word address = m_memory[state.registers.PC] |
+                     (m_memory[state.registers.PC + 1] << 8);
+      state.registers.PC += 2;
+      state.registers.L = m_memory[address];
+      state.registers.H = m_memory[address + 1];
+      cycles = 16;
+      break;
+    }
+
+    // ------------------------------------------------------------------------
+    // Stack Operations (PUSH/POP)
+    // ------------------------------------------------------------------------
+    case 0xC1: // POP BC
+      state.registers.C = m_memory[state.registers.SP];
+      state.registers.B = m_memory[state.registers.SP + 1];
+      state.registers.SP += 2;
+      cycles = 10;
+      break;
+    case 0xD1: // POP DE
+      state.registers.E = m_memory[state.registers.SP];
+      state.registers.D = m_memory[state.registers.SP + 1];
+      state.registers.SP += 2;
+      cycles = 10;
+      break;
+    case 0xE1: // POP HL
+      state.registers.L = m_memory[state.registers.SP];
+      state.registers.H = m_memory[state.registers.SP + 1];
+      state.registers.SP += 2;
+      cycles = 10;
+      break;
+    case 0xF1: // POP AF
+      state.registers.F = m_memory[state.registers.SP];
+      state.registers.A = m_memory[state.registers.SP + 1];
+      state.registers.SP += 2;
+      cycles = 10;
+      break;
+
+    case 0xC5: // PUSH BC
+      state.registers.SP -= 2;
+      writeMem(state.registers.SP, state.registers.C);
+      writeMem(state.registers.SP + 1, state.registers.B);
+      cycles = 11;
+      break;
+    case 0xD5: // PUSH DE
+      state.registers.SP -= 2;
+      writeMem(state.registers.SP, state.registers.E);
+      writeMem(state.registers.SP + 1, state.registers.D);
+      cycles = 11;
+      break;
+    case 0xE5: // PUSH HL
+      state.registers.SP -= 2;
+      writeMem(state.registers.SP, state.registers.L);
+      writeMem(state.registers.SP + 1, state.registers.H);
+      cycles = 11;
+      break;
+    case 0xF5: // PUSH AF
+      state.registers.SP -= 2;
+      writeMem(state.registers.SP, state.registers.F);
+      writeMem(state.registers.SP + 1, state.registers.A);
+      cycles = 11;
+      break;
+
     case 0x31: { // LD SP, nn
       word value = m_memory[state.registers.PC] |
                    (m_memory[state.registers.PC + 1] << 8);
@@ -608,9 +725,27 @@ void Processor::executeFrame() {
       break;
     }
 
+    case 0x32: { // LD (nn), A
+      word address = m_memory[state.registers.PC] |
+                     (m_memory[state.registers.PC + 1] << 8);
+      state.registers.PC += 2;
+      writeMem(address, state.registers.A);
+      cycles = 13;
+      break;
+    }
+
+    case 0x3A: { // LD A, (nn)
+      word address = m_memory[state.registers.PC] |
+                     (m_memory[state.registers.PC + 1] << 8);
+      state.registers.PC += 2;
+      state.registers.A = m_memory[address];
+      cycles = 13;
+      break;
+    }
+
     case 0x36: { // LD (HL), n
       byte value = m_memory[state.registers.PC++];
-      m_memory[state.registers.HL] = value;
+      writeMem(state.registers.HL, value);
       cycles = 10;
       break;
     }
@@ -1007,14 +1142,14 @@ void Processor::executeFrame() {
     case 0x34: { // INC (HL)
       byte val = m_memory[state.registers.HL];
       inc8(val);
-      m_memory[state.registers.HL] = val;
+      writeMem(state.registers.HL, val);
       cycles = 11;
       break;
     }
     case 0x35: { // DEC (HL)
       byte val = m_memory[state.registers.HL];
       dec8(val);
-      m_memory[state.registers.HL] = val;
+      writeMem(state.registers.HL, val);
       cycles = 11;
       break;
     }
@@ -1023,22 +1158,21 @@ void Processor::executeFrame() {
     // Misc
     // ------------------------------------------------------------------------
     case 0x27: { // DAA
-      // Complex logic, maybe defer to helper or implement here?
-      // Let's implement here as it's small enough but uses flags.
       byte initA = state.registers.A;
       byte correction = 0;
       bool C = GET_FLAG(C_FLAG, state.registers);
       bool H = GET_FLAG(H_FLAG, state.registers);
+      bool N = GET_FLAG(N_FLAG, state.registers);
 
-      if (H || (initA & 0x0F) > 9) {
+      if (H || ((initA & 0x0F) > 9)) {
         correction += 6;
       }
-      if (C || initA > 0x99) {
+      if (C || (initA > 0x99)) {
         correction += 0x60;
         SET_FLAG(C_FLAG, state.registers);
       }
 
-      if (GET_FLAG(N_FLAG, state.registers)) {
+      if (N) {
         state.registers.A -= correction;
       } else {
         state.registers.A += correction;
@@ -1046,15 +1180,42 @@ void Processor::executeFrame() {
 
       // Flags
       byte res = state.registers.A;
+      // S, Z
       if (res & 0x80)
         SET_FLAG(S_FLAG, state.registers);
       else
         CLEAR_FLAG(S_FLAG, state.registers);
+
       if (res == 0)
         SET_FLAG(Z_FLAG, state.registers);
       else
         CLEAR_FLAG(Z_FLAG, state.registers);
-      // H flag special behavior not fully implemented in old code either
+
+      // P/V (Parity)
+      int bits = 0;
+      for (int i = 0; i < 8; i++) {
+        if (res & (1 << i))
+          bits++;
+      }
+      if (bits % 2 == 0)
+        SET_FLAG(P_FLAG, state.registers); // Even parity
+      else
+        CLEAR_FLAG(P_FLAG, state.registers);
+
+      // H Flag calculation (Simpler heuristic that often works for ROM boot)
+      // "If there was a correction to the lower nibble, H is usually set?"
+      // A common accurate formula:
+      bool h_update = false;
+      if (N) {
+        h_update = (H && (initA & 0x0F) < 6);
+      } else {
+        h_update = ((initA & 0x0F) > 9);
+      }
+      if (h_update)
+        SET_FLAG(H_FLAG, state.registers);
+      else
+        CLEAR_FLAG(H_FLAG, state.registers);
+
       cycles = 4;
       break;
     }
@@ -1289,6 +1450,10 @@ void Processor::reset() {
   running = true;
   paused = false;
   audio.reset();
+}
+
+void Processor::writeMem(word address, byte value) {
+  state.memory.fastWrite(address, value);
 }
 
 /**
@@ -1610,7 +1775,29 @@ void Processor::exec_index_opcode(byte prefix) {
 }
 
 // 16-bit Stubs
-void Processor::add16(word &dest, word src) { /* TODO */ }
+void Processor::add16(word &dest, word src) {
+  long result = dest + src;
+
+  // H flag: Carry from bit 11
+  // If sum of lower 12 bits > 0x0FFF, then carry out of bit 11 occurred
+  if ((dest & 0x0FFF) + (src & 0x0FFF) > 0x0FFF) {
+    SET_FLAG(H_FLAG, state.registers);
+  } else {
+    CLEAR_FLAG(H_FLAG, state.registers);
+  }
+
+  // C flag: Carry from bit 15
+  if (result > 0xFFFF) {
+    SET_FLAG(C_FLAG, state.registers);
+  } else {
+    CLEAR_FLAG(C_FLAG, state.registers);
+  }
+
+  // N flag: Reset
+  CLEAR_FLAG(N_FLAG, state.registers);
+
+  dest = (word)result;
+}
 void Processor::adc16(word &dest, word src) { /* TODO */ }
 void Processor::sbc16(word &dest, word src) { /* TODO */ }
 

@@ -53,6 +53,9 @@ private:
   // Fast direct memory access
   byte *m_memory = nullptr;
 
+  // Write with ROM protection
+  void writeMem(word address, byte value);
+
   // Helper methods for instruction groups
   void op_load(byte opcode);
   void op_arithmetic(byte opcode);

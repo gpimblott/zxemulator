@@ -33,7 +33,6 @@ StackOpcodes::StackOpcodes() : OpCodeProvider() {
   createOpCode(POP_BC, "POP BC", processPOP_BC);
   createOpCode(POP_DE, "POP DE", processPOP_DE);
   createOpCode(POP_HL, "POP HL", processPOP_HL);
-  createOpCode(POP_AF, "POP AF", processPOP_AF);
 }
 
 void StackOpcodes::push(ProcessorState &state, emulator_types::word val) {

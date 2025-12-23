@@ -87,7 +87,7 @@ rebuild_cache/fast: rebuild_cache
 
 # Special rule for the target list_install_components
 list_install_components:
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"gmock\" \"gtest\""
 .PHONY : list_install_components
 
 # Special rule for the target list_install_components
@@ -136,6 +136,13 @@ all: cmake_check_build_system
 	cd /Users/gpimblott/projects/zxemulator/src && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/gpimblott/projects/zxemulator/src/CMakeFiles 0
 .PHONY : all
+
+# The main codegen target
+codegen: cmake_check_build_system
+	cd /Users/gpimblott/projects/zxemulator/src && $(CMAKE_COMMAND) -E cmake_progress_start /Users/gpimblott/projects/zxemulator/src/CMakeFiles /Users/gpimblott/projects/zxemulator/src/tests//CMakeFiles/progress.marks
+	cd /Users/gpimblott/projects/zxemulator/src && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/codegen
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/gpimblott/projects/zxemulator/src/CMakeFiles 0
+.PHONY : codegen
 
 # The main clean target
 clean:
@@ -205,6 +212,7 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
+	@echo "... codegen"
 	@echo "... edit_cache"
 	@echo "... install"
 	@echo "... install/local"

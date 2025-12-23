@@ -87,7 +87,7 @@ rebuild_cache/fast: rebuild_cache
 
 # Special rule for the target list_install_components
 list_install_components:
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"gmock\" \"gtest\""
 .PHONY : list_install_components
 
 # Special rule for the target list_install_components
@@ -136,6 +136,13 @@ all: cmake_check_build_system
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/gpimblott/projects/zxemulator/src/CMakeFiles 0
 .PHONY : all
+
+# The main codegen target
+codegen: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/gpimblott/projects/zxemulator/src/CMakeFiles /Users/gpimblott/projects/zxemulator/src//CMakeFiles/progress.marks
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 codegen
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/gpimblott/projects/zxemulator/src/CMakeFiles 0
+.PHONY : codegen
 
 # The main clean target
 clean:
@@ -262,6 +269,54 @@ main.s: main.cpp.s
 main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/main.cpp.s
 .PHONY : main.cpp.s
+
+spectrum/Audio.o: spectrum/Audio.cpp.o
+.PHONY : spectrum/Audio.o
+
+# target to build an object file
+spectrum/Audio.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Audio.cpp.o
+.PHONY : spectrum/Audio.cpp.o
+
+spectrum/Audio.i: spectrum/Audio.cpp.i
+.PHONY : spectrum/Audio.i
+
+# target to preprocess a source file
+spectrum/Audio.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Audio.cpp.i
+.PHONY : spectrum/Audio.cpp.i
+
+spectrum/Audio.s: spectrum/Audio.cpp.s
+.PHONY : spectrum/Audio.s
+
+# target to generate assembly for a file
+spectrum/Audio.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Audio.cpp.s
+.PHONY : spectrum/Audio.cpp.s
+
+spectrum/Keyboard.o: spectrum/Keyboard.cpp.o
+.PHONY : spectrum/Keyboard.o
+
+# target to build an object file
+spectrum/Keyboard.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Keyboard.cpp.o
+.PHONY : spectrum/Keyboard.cpp.o
+
+spectrum/Keyboard.i: spectrum/Keyboard.cpp.i
+.PHONY : spectrum/Keyboard.i
+
+# target to preprocess a source file
+spectrum/Keyboard.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Keyboard.cpp.i
+.PHONY : spectrum/Keyboard.cpp.i
+
+spectrum/Keyboard.s: spectrum/Keyboard.cpp.s
+.PHONY : spectrum/Keyboard.s
+
+# target to generate assembly for a file
+spectrum/Keyboard.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Keyboard.cpp.s
+.PHONY : spectrum/Keyboard.cpp.s
 
 spectrum/Memory.o: spectrum/Memory.cpp.o
 .PHONY : spectrum/Memory.o
@@ -695,6 +750,78 @@ spectrum/Rom.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Rom.cpp.s
 .PHONY : spectrum/Rom.cpp.s
 
+spectrum/SnapshotLoader.o: spectrum/SnapshotLoader.cpp.o
+.PHONY : spectrum/SnapshotLoader.o
+
+# target to build an object file
+spectrum/SnapshotLoader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/SnapshotLoader.cpp.o
+.PHONY : spectrum/SnapshotLoader.cpp.o
+
+spectrum/SnapshotLoader.i: spectrum/SnapshotLoader.cpp.i
+.PHONY : spectrum/SnapshotLoader.i
+
+# target to preprocess a source file
+spectrum/SnapshotLoader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/SnapshotLoader.cpp.i
+.PHONY : spectrum/SnapshotLoader.cpp.i
+
+spectrum/SnapshotLoader.s: spectrum/SnapshotLoader.cpp.s
+.PHONY : spectrum/SnapshotLoader.s
+
+# target to generate assembly for a file
+spectrum/SnapshotLoader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/SnapshotLoader.cpp.s
+.PHONY : spectrum/SnapshotLoader.cpp.s
+
+spectrum/Tape.o: spectrum/Tape.cpp.o
+.PHONY : spectrum/Tape.o
+
+# target to build an object file
+spectrum/Tape.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Tape.cpp.o
+.PHONY : spectrum/Tape.cpp.o
+
+spectrum/Tape.i: spectrum/Tape.cpp.i
+.PHONY : spectrum/Tape.i
+
+# target to preprocess a source file
+spectrum/Tape.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Tape.cpp.i
+.PHONY : spectrum/Tape.cpp.i
+
+spectrum/Tape.s: spectrum/Tape.cpp.s
+.PHONY : spectrum/Tape.s
+
+# target to generate assembly for a file
+spectrum/Tape.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Tape.cpp.s
+.PHONY : spectrum/Tape.cpp.s
+
+spectrum/TapeLoader.o: spectrum/TapeLoader.cpp.o
+.PHONY : spectrum/TapeLoader.o
+
+# target to build an object file
+spectrum/TapeLoader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/TapeLoader.cpp.o
+.PHONY : spectrum/TapeLoader.cpp.o
+
+spectrum/TapeLoader.i: spectrum/TapeLoader.cpp.i
+.PHONY : spectrum/TapeLoader.i
+
+# target to preprocess a source file
+spectrum/TapeLoader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/TapeLoader.cpp.i
+.PHONY : spectrum/TapeLoader.cpp.i
+
+spectrum/TapeLoader.s: spectrum/TapeLoader.cpp.s
+.PHONY : spectrum/TapeLoader.s
+
+# target to generate assembly for a file
+spectrum/TapeLoader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/TapeLoader.cpp.s
+.PHONY : spectrum/TapeLoader.cpp.s
+
 spectrum/video/Screen.o: spectrum/video/Screen.cpp.o
 .PHONY : spectrum/video/Screen.o
 
@@ -863,12 +990,37 @@ utils/RegisterUtils.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/utils/RegisterUtils.cpp.s
 .PHONY : utils/RegisterUtils.cpp.s
 
+utils/TZXLoader.o: utils/TZXLoader.cpp.o
+.PHONY : utils/TZXLoader.o
+
+# target to build an object file
+utils/TZXLoader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/utils/TZXLoader.cpp.o
+.PHONY : utils/TZXLoader.cpp.o
+
+utils/TZXLoader.i: utils/TZXLoader.cpp.i
+.PHONY : utils/TZXLoader.i
+
+# target to preprocess a source file
+utils/TZXLoader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/utils/TZXLoader.cpp.i
+.PHONY : utils/TZXLoader.cpp.i
+
+utils/TZXLoader.s: utils/TZXLoader.cpp.s
+.PHONY : utils/TZXLoader.s
+
+# target to generate assembly for a file
+utils/TZXLoader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/utils/TZXLoader.cpp.s
+.PHONY : utils/TZXLoader.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
+	@echo "... codegen"
 	@echo "... edit_cache"
 	@echo "... install"
 	@echo "... install/local"
@@ -884,6 +1036,12 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... spectrum/Audio.o"
+	@echo "... spectrum/Audio.i"
+	@echo "... spectrum/Audio.s"
+	@echo "... spectrum/Keyboard.o"
+	@echo "... spectrum/Keyboard.i"
+	@echo "... spectrum/Keyboard.s"
 	@echo "... spectrum/Memory.o"
 	@echo "... spectrum/Memory.i"
 	@echo "... spectrum/Memory.s"
@@ -938,6 +1096,15 @@ help:
 	@echo "... spectrum/Rom.o"
 	@echo "... spectrum/Rom.i"
 	@echo "... spectrum/Rom.s"
+	@echo "... spectrum/SnapshotLoader.o"
+	@echo "... spectrum/SnapshotLoader.i"
+	@echo "... spectrum/SnapshotLoader.s"
+	@echo "... spectrum/Tape.o"
+	@echo "... spectrum/Tape.i"
+	@echo "... spectrum/Tape.s"
+	@echo "... spectrum/TapeLoader.o"
+	@echo "... spectrum/TapeLoader.i"
+	@echo "... spectrum/TapeLoader.s"
 	@echo "... spectrum/video/Screen.o"
 	@echo "... spectrum/video/Screen.i"
 	@echo "... spectrum/video/Screen.s"
@@ -959,6 +1126,9 @@ help:
 	@echo "... utils/RegisterUtils.o"
 	@echo "... utils/RegisterUtils.i"
 	@echo "... utils/RegisterUtils.s"
+	@echo "... utils/TZXLoader.o"
+	@echo "... utils/TZXLoader.i"
+	@echo "... utils/TZXLoader.s"
 .PHONY : help
 
 

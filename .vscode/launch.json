@@ -52,7 +52,7 @@
             "program": "${workspaceFolder}/build/ZXEmulator",
             "args": [
                 "-t",
-                "${workspaceFolder}/roms/jetsetwilly.tzx"
+                "${workspaceFolder}/roms/hobbit.tzx"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build"
