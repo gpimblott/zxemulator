@@ -33,6 +33,7 @@ Processor::Processor() : state(), audio() {
   // Set up the default state of the registers
   reset();
   audio.start();
+  m_memory = state.memory.getRawMemory();
 }
 
 /**
@@ -442,38 +443,157 @@ void Processor::executeFrame() {
       continue;
     }
 
-    OpCode *opCode = getNextInstruction();
-    if (opCode != nullptr) {
-      // Increment Refresh Register (Lower 7 bits)
-      state.registers.R =
-          (state.registers.R & 0x80) | ((state.registers.R + 1) & 0x7F);
+    // Fetch opcode
+    byte opcode = m_memory[state.registers.PC];
 
-      // increment past the opcode
-      this->state.registers.PC++;
+    // Increment Refresh Register (Lower 7 bits) - happens on M1 cycle
+    state.registers.R =
+        (state.registers.R & 0x80) | ((state.registers.R + 1) & 0x7F);
 
-      int cycles = opCode->execute(this->state);
+    // Increment PC past opcode
+    state.registers.PC++;
+
+    int cycles = 0;
+    bool handled = true;
+
+    // Hybrid dispatch: switch for common opcodes, catalogue for others
+    switch (opcode) {
+    case 0x00: // NOP
+      cycles = 4;
+      break;
+
+    case 0x76: // HALT
+      state.setHalted(true);
+      cycles = 4;
+      break;
+
+    case 0x3E: { // LD A, n
+      byte value = m_memory[state.registers.PC++];
+      state.registers.A = value;
+      cycles = 7;
+      break;
+    }
+
+    case 0x06: { // LD B, n
+      byte value = m_memory[state.registers.PC++];
+      state.registers.B = value;
+      cycles = 7;
+      break;
+    }
+
+    case 0x0E: { // LD C, n
+      byte value = m_memory[state.registers.PC++];
+      state.registers.C = value;
+      cycles = 7;
+      break;
+    }
+
+    case 0x16: { // LD D, n
+      byte value = m_memory[state.registers.PC++];
+      state.registers.D = value;
+      cycles = 7;
+      break;
+    }
+
+    case 0x1E: { // LD E, n
+      byte value = m_memory[state.registers.PC++];
+      state.registers.E = value;
+      cycles = 7;
+      break;
+    }
+
+    case 0x26: { // LD H, n
+      byte value = m_memory[state.registers.PC++];
+      state.registers.H = value;
+      cycles = 7;
+      break;
+    }
+
+    case 0x2E: { // LD L, n
+      byte value = m_memory[state.registers.PC++];
+      state.registers.L = value;
+      cycles = 7;
+      break;
+    }
+
+    case 0xC3: { // JP nn
+      word address = m_memory[state.registers.PC] |
+                     (m_memory[state.registers.PC + 1] << 8);
+      state.registers.PC = address;
+      cycles = 10;
+      break;
+    }
+
+    case 0xC9: { // RET
+      byte low = m_memory[state.registers.SP];
+      byte high = m_memory[state.registers.SP + 1];
+      state.registers.PC = (high << 8) | low;
+      state.registers.SP += 2;
+      cycles = 10;
+      break;
+    }
+
+    case 0xCD: { // CALL nn
+      word address = m_memory[state.registers.PC] |
+                     (m_memory[state.registers.PC + 1] << 8);
+      state.registers.PC += 2;
+      // Push PC
+      state.registers.SP -= 2;
+      word pc = state.registers.PC;
+      m_memory[state.registers.SP] = (byte)(pc & 0xFF);
+      m_memory[state.registers.SP + 1] = (byte)((pc >> 8) & 0xFF);
+      state.registers.PC = address;
+      cycles = 17;
+      break;
+    }
+
+    case 0xF3: // DI
+      state.setInterrupts(false);
+      cycles = 4;
+      break;
+
+    case 0xFB: // EI
+      state.setInterrupts(true);
+      cycles = 4;
+      break;
+
+    default:
+      // Fall back to catalogue for opcodes not yet migrated
+      handled = false;
+      break;
+    }
+
+    if (handled) {
       tStates += cycles;
       state.addFrameTStates(cycles);
       this->state.tape.update(cycles);
-      // Audio Update
-
-      audio.update(
-          cycles, state.getSpeakerBit(),
-          state.tape.getEarBit()); // Use tape ear bit directly? Or state mic?
-      // EAR bit comes from Tape. Speaker bit comes from state.
-      // Wait, state.tape.getEarBit() is what the ULA reads.
-      // We can use that.
-
+      audio.update(cycles, state.getSpeakerBit(), state.tape.getEarBit());
     } else {
-      byte unknownOpcode = state.memory[state.registers.PC];
-      char errorMsg[100];
-      snprintf(errorMsg, sizeof(errorMsg), "Unknown opcode %02X at address %d",
-               unknownOpcode, this->state.registers.PC);
-      lastError = std::string(errorMsg);
+      // Fallback to old catalogue system
+      state.registers.PC--; // Rewind PC for catalogue lookup
+      OpCode *opCode = getNextInstruction();
+      if (opCode != nullptr) {
+        // increment past the opcode
+        this->state.registers.PC++;
 
-      debug("Unknown opcode %02X at address %d\n", unknownOpcode,
-            this->state.registers.PC);
-      running = false;
+        int cycles = opCode->execute(this->state);
+        tStates += cycles;
+        state.addFrameTStates(cycles);
+        this->state.tape.update(cycles);
+        audio.update(cycles, state.getSpeakerBit(), state.tape.getEarBit());
+
+      } else {
+        byte unknownOpcode = state.memory[state.registers.PC];
+        char errorMsg[100];
+        snprintf(errorMsg, sizeof(errorMsg),
+                 "Unknown opcode %02X at address %d", unknownOpcode,
+                 this->state.registers.PC);
+        lastError = std::string(errorMsg);
+
+        debug("Unknown opcode %02X at address %d\n", unknownOpcode,
+              this->state.registers.PC);
+        running = false;
+      }
     }
   }
   audio.flush();
@@ -615,4 +735,56 @@ OpCode *Processor::getNextInstruction() {
 
   byte opcode = state.memory[state.registers.PC];
   return catalogue.lookupOpcode(opcode);
+}
+
+// ============================================================================
+// Opcode Helper Methods (Placeholders)
+// ============================================================================
+
+void Processor::op_load(byte opcode) {
+  // To be implemented
+}
+
+void Processor::op_arithmetic(byte opcode) {
+  // To be implemented
+}
+
+void Processor::op_logic(byte opcode) {
+  // To be implemented
+}
+
+void Processor::op_rotate_shift(byte opcode) {
+  // To be implemented
+}
+
+void Processor::op_bit(byte opcode) {
+  // To be implemented
+}
+
+void Processor::op_jump(byte opcode) {
+  // To be implemented
+}
+
+void Processor::op_stack(byte opcode) {
+  // To be implemented
+}
+
+void Processor::op_io(byte opcode) {
+  // To be implemented
+}
+
+void Processor::op_misc(byte opcode) {
+  // To be implemented
+}
+
+void Processor::exec_ed_opcode() {
+  // To be implemented
+}
+
+void Processor::exec_cb_opcode() {
+  // To be implemented
+}
+
+void Processor::exec_index_opcode(byte prefix) {
+  // To be implemented
 }

@@ -45,6 +45,7 @@ Run the emulator from the project root. By default, it loads the standard 48K RO
 | `-r <file>` | Load a custom ROM file. | `./build/ZXEmulator -r roms/brendanalford.bin` |
 | `-s <file>` | Load a Snapshot file (`.sna` or `.z80`). | `./build/ZXEmulator -s roms/pacman.z80` |
 | `-t <file>` | Load a Tape file (`.tzx` or `.tap`). | `./build/ZXEmulator -t roms/game.tzx` |
+| `-f <file>` | Fast Load a Tape file (skips loading time). | `./build/ZXEmulator -f roms/game.tzx` |
 | `-d` | Start in Debug mode (paused). | `./build/ZXEmulator -d` |
 
 ## Controls
@@ -56,18 +57,15 @@ The emulator maps standard ZX Spectrum keys to the PC keyboard.
 - **Caps Shift**: Left Shift.
 - **Enter**: Return/Enter.
 - **Space**: Space.
-
-
-## Compatibility
-
+- **Kempston Joystick**: Arrow Keys + Left Alt (Fire).
 
 ## Compatibility
 
 | Software | Format | Status | Notes |
 | :--- | :--- | :--- | :--- |
-| **Jet Set Willy** | Tape(.tsz) | **Partial** |  Loads correctly, Keeps ending game when you clisk enter to start |
-| **Horace Goes Skiing** | Tape (.tzx) | **Partial** | Works Perfectly|
-| **Manic Miner** | Tape (.tzx) | **Partial** | Loads correctly, audio/video synced.  Keeps ending game when you clisk enter to start |
+| **Manic Miner** | Tape (.tzx) | **Working** | Loads correctly (fast/slow). Audio/video synced. Playable with Arrow Keys (Kempston). |
+| **Jet Set Willy** | Tape (.tzx) | **Working** | Loads correctly. Playable with Arrow Keys (Kempston). |
+| **Horace Goes Skiing** | Tape (.tzx) | **Working** | Loads correctly, runs perfectly. |
 | **Pacman** | Snapshot (.z80) | **Working** | Loads and runs. |
 | **ZX Diagnostics** | ROM | **Partial** | Passes initial diagnostic tests. Still some issues. |
 

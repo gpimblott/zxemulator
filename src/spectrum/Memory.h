@@ -75,6 +75,18 @@ public:
   // Override operators
   emulator_types::byte &operator[](long i);
 
+  byte *getRawMemory() const { return m_memory; }
+
+  // Fast inline accessors for the processor
+  inline byte fastRead(long address) const { return m_memory[address]; }
+
+  inline void fastWrite(long address, byte value) {
+    if (address >= ROM_SIZE) {
+      m_memory[address] = value;
+    }
+    // Note: detailed screen/contention logic would go here if/when added
+  }
+
   void dump(long start, long size);
 };
 

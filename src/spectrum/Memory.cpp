@@ -118,8 +118,9 @@ void Memory::dump(long start, long size) {
  * @return The word at the specified address
  */
 word Memory::getWord(long address) {
-  word *ptr = reinterpret_cast<word *>(m_memory + address);
-  return *(ptr);
+  // Avoid reinterpret_cast for safety and endianness independence (Z80 is
+  // Little Endian)
+  return m_memory[address] | (m_memory[address + 1] << 8);
 }
 
 /**

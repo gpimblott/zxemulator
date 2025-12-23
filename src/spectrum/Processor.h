@@ -51,6 +51,25 @@ private:
   // Internal methods
   OpCode *getNextInstruction();
 
+  // Fast direct memory access
+  byte *m_memory = nullptr;
+
+  // Helper methods for instruction groups
+  void op_load(byte opcode);
+  void op_arithmetic(byte opcode);
+  void op_logic(byte opcode);
+  void op_rotate_shift(byte opcode);
+  void op_bit(byte opcode);
+  void op_jump(byte opcode);
+  void op_stack(byte opcode);
+  void op_io(byte opcode);
+  void op_misc(byte opcode);
+
+  // Extended instruction handlers
+  void exec_ed_opcode();
+  void exec_cb_opcode();
+  void exec_index_opcode(byte prefix); // DD or FD
+
 public:
   explicit Processor();
 
