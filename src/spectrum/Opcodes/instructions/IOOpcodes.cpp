@@ -45,8 +45,8 @@ int IOOpcodes::processOUT(ProcessorState &state) {
                                                   state.getFrameTStates());
 
     // Bit 4: Speaker, Bit 3: MIC
-    state.setSpeakerBit((port & 0x10) != 0);
-    state.setMicBit((port & 0x08) != 0);
+    state.setSpeakerBit((value & 0x10) != 0);
+    state.setMicBit((value & 0x08) != 0);
   }
 
   return 11;
