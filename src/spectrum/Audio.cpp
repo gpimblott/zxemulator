@@ -56,7 +56,7 @@ void Audio::update(int tStates, bool speakerBit, bool earBit) {
   }
 
   // Auto-flush small chunks to keep the stream fluid
-  if (pendingSamples.size() >= 128) {
+  if (pendingSamples.size() >= 500) {
     flush();
   }
 }
