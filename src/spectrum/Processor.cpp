@@ -557,6 +557,333 @@ void Processor::executeFrame() {
       cycles = 4;
       break;
 
+    // LD r, r' instructions (0x40-0x7F range, very common)
+    // LD B, r
+    case 0x40:
+      cycles = 4;
+      break; // LD B, B (NOP-like)
+    case 0x41:
+      state.registers.B = state.registers.C;
+      cycles = 4;
+      break;
+    case 0x42:
+      state.registers.B = state.registers.D;
+      cycles = 4;
+      break;
+    case 0x43:
+      state.registers.B = state.registers.E;
+      cycles = 4;
+      break;
+    case 0x44:
+      state.registers.B = state.registers.H;
+      cycles = 4;
+      break;
+    case 0x45:
+      state.registers.B = state.registers.L;
+      cycles = 4;
+      break;
+    case 0x46:
+      state.registers.B = m_memory[state.registers.HL];
+      cycles = 7;
+      break; // LD B, (HL)
+    case 0x47:
+      state.registers.B = state.registers.A;
+      cycles = 4;
+      break;
+
+    // LD C, r
+    case 0x48:
+      state.registers.C = state.registers.B;
+      cycles = 4;
+      break;
+    case 0x49:
+      cycles = 4;
+      break; // LD C, C
+    case 0x4A:
+      state.registers.C = state.registers.D;
+      cycles = 4;
+      break;
+    case 0x4B:
+      state.registers.C = state.registers.E;
+      cycles = 4;
+      break;
+    case 0x4C:
+      state.registers.C = state.registers.H;
+      cycles = 4;
+      break;
+    case 0x4D:
+      state.registers.C = state.registers.L;
+      cycles = 4;
+      break;
+    case 0x4E:
+      state.registers.C = m_memory[state.registers.HL];
+      cycles = 7;
+      break; // LD C, (HL)
+    case 0x4F:
+      state.registers.C = state.registers.A;
+      cycles = 4;
+      break;
+
+    // LD D, r
+    case 0x50:
+      state.registers.D = state.registers.B;
+      cycles = 4;
+      break;
+    case 0x51:
+      state.registers.D = state.registers.C;
+      cycles = 4;
+      break;
+    case 0x52:
+      cycles = 4;
+      break; // LD D, D
+    case 0x53:
+      state.registers.D = state.registers.E;
+      cycles = 4;
+      break;
+    case 0x54:
+      state.registers.D = state.registers.H;
+      cycles = 4;
+      break;
+    case 0x55:
+      state.registers.D = state.registers.L;
+      cycles = 4;
+      break;
+    case 0x56:
+      state.registers.D = m_memory[state.registers.HL];
+      cycles = 7;
+      break; // LD D, (HL)
+    case 0x57:
+      state.registers.D = state.registers.A;
+      cycles = 4;
+      break;
+
+    // LD E, r
+    case 0x58:
+      state.registers.E = state.registers.B;
+      cycles = 4;
+      break;
+    case 0x59:
+      state.registers.E = state.registers.C;
+      cycles = 4;
+      break;
+    case 0x5A:
+      state.registers.E = state.registers.D;
+      cycles = 4;
+      break;
+    case 0x5B:
+      cycles = 4;
+      break; // LD E, E
+    case 0x5C:
+      state.registers.E = state.registers.H;
+      cycles = 4;
+      break;
+    case 0x5D:
+      state.registers.E = state.registers.L;
+      cycles = 4;
+      break;
+    case 0x5E:
+      state.registers.E = m_memory[state.registers.HL];
+      cycles = 7;
+      break; // LD E, (HL)
+    case 0x5F:
+      state.registers.E = state.registers.A;
+      cycles = 4;
+      break;
+
+    // LD H, r
+    case 0x60:
+      state.registers.H = state.registers.B;
+      cycles = 4;
+      break;
+    case 0x61:
+      state.registers.H = state.registers.C;
+      cycles = 4;
+      break;
+    case 0x62:
+      state.registers.H = state.registers.D;
+      cycles = 4;
+      break;
+    case 0x63:
+      state.registers.H = state.registers.E;
+      cycles = 4;
+      break;
+    case 0x64:
+      cycles = 4;
+      break; // LD H, H
+    case 0x65:
+      state.registers.H = state.registers.L;
+      cycles = 4;
+      break;
+    case 0x66:
+      state.registers.H = m_memory[state.registers.HL];
+      cycles = 7;
+      break; // LD H, (HL)
+    case 0x67:
+      state.registers.H = state.registers.A;
+      cycles = 4;
+      break;
+
+    // LD L, r
+    case 0x68:
+      state.registers.L = state.registers.B;
+      cycles = 4;
+      break;
+    case 0x69:
+      state.registers.L = state.registers.C;
+      cycles = 4;
+      break;
+    case 0x6A:
+      state.registers.L = state.registers.D;
+      cycles = 4;
+      break;
+    case 0x6B:
+      state.registers.L = state.registers.E;
+      cycles = 4;
+      break;
+    case 0x6C:
+      state.registers.L = state.registers.H;
+      cycles = 4;
+      break;
+    case 0x6D:
+      cycles = 4;
+      break; // LD L, L
+    case 0x6E:
+      state.registers.L = m_memory[state.registers.HL];
+      cycles = 7;
+      break; // LD L, (HL)
+    case 0x6F:
+      state.registers.L = state.registers.A;
+      cycles = 4;
+      break;
+
+    // LD (HL), r
+    case 0x70:
+      m_memory[state.registers.HL] = state.registers.B;
+      cycles = 7;
+      break;
+    case 0x71:
+      m_memory[state.registers.HL] = state.registers.C;
+      cycles = 7;
+      break;
+    case 0x72:
+      m_memory[state.registers.HL] = state.registers.D;
+      cycles = 7;
+      break;
+    case 0x73:
+      m_memory[state.registers.HL] = state.registers.E;
+      cycles = 7;
+      break;
+    case 0x74:
+      m_memory[state.registers.HL] = state.registers.H;
+      cycles = 7;
+      break;
+    case 0x75:
+      m_memory[state.registers.HL] = state.registers.L;
+      cycles = 7;
+      break;
+    // 0x76 is HALT (already handled above)
+    case 0x77:
+      m_memory[state.registers.HL] = state.registers.A;
+      cycles = 7;
+      break;
+
+    // LD A, r
+    case 0x78:
+      state.registers.A = state.registers.B;
+      cycles = 4;
+      break;
+    case 0x79:
+      state.registers.A = state.registers.C;
+      cycles = 4;
+      break;
+    case 0x7A:
+      state.registers.A = state.registers.D;
+      cycles = 4;
+      break;
+    case 0x7B:
+      state.registers.A = state.registers.E;
+      cycles = 4;
+      break;
+    case 0x7C:
+      state.registers.A = state.registers.H;
+      cycles = 4;
+      break;
+    case 0x7D:
+      state.registers.A = state.registers.L;
+      cycles = 4;
+      break;
+    case 0x7E:
+      state.registers.A = m_memory[state.registers.HL];
+      cycles = 7;
+      break; // LD A, (HL)
+    case 0x7F:
+      cycles = 4;
+      break; // LD A, A
+
+    // LD (BC), A and LD A, (BC)
+    case 0x02:
+      m_memory[state.registers.BC] = state.registers.A;
+      cycles = 7;
+      break;
+    case 0x0A:
+      state.registers.A = m_memory[state.registers.BC];
+      cycles = 7;
+      break;
+
+    // LD (DE), A and LD A, (DE)
+    case 0x12:
+      m_memory[state.registers.DE] = state.registers.A;
+      cycles = 7;
+      break;
+    case 0x1A:
+      state.registers.A = m_memory[state.registers.DE];
+      cycles = 7;
+      break;
+
+    // 16-bit loads with immediates
+    case 0x01: { // LD BC, nn
+      word value = m_memory[state.registers.PC] |
+                   (m_memory[state.registers.PC + 1] << 8);
+      state.registers.PC += 2;
+      state.registers.BC = value;
+      cycles = 10;
+      break;
+    }
+
+    case 0x11: { // LD DE, nn
+      word value = m_memory[state.registers.PC] |
+                   (m_memory[state.registers.PC + 1] << 8);
+      state.registers.PC += 2;
+      state.registers.DE = value;
+      cycles = 10;
+      break;
+    }
+
+    case 0x21: { // LD HL, nn
+      word value = m_memory[state.registers.PC] |
+                   (m_memory[state.registers.PC + 1] << 8);
+      state.registers.PC += 2;
+      state.registers.HL = value;
+      cycles = 10;
+      break;
+    }
+
+    case 0x31: { // LD SP, nn
+      word value = m_memory[state.registers.PC] |
+                   (m_memory[state.registers.PC + 1] << 8);
+      state.registers.PC += 2;
+      state.registers.SP = value;
+      cycles = 10;
+      break;
+    }
+
+    case 0x36: { // LD (HL), n
+      byte value = m_memory[state.registers.PC++];
+      m_memory[state.registers.HL] = value;
+      cycles = 10;
+      break;
+    }
+
     default:
       // Fall back to catalogue for opcodes not yet migrated
       handled = false;
