@@ -25,6 +25,7 @@
 #include "Processor.h"
 #include "../utils/Logger.h"
 #include "../utils/debug.h"
+#include "ProcessorMacros.h"
 #include "SnapshotLoader.h"
 #include <chrono>
 #include <thread>
@@ -614,6 +615,512 @@ void Processor::executeFrame() {
       break;
     }
 
+    // ------------------------------------------------------------------------
+    // Arithmetic Ops (0x80 - 0xBF)
+    // ------------------------------------------------------------------------
+
+    // ADD A, r (0x80-0x87)
+    case 0x80:
+      add8(state.registers.B);
+      cycles = 4;
+      break;
+    case 0x81:
+      add8(state.registers.C);
+      cycles = 4;
+      break;
+    case 0x82:
+      add8(state.registers.D);
+      cycles = 4;
+      break;
+    case 0x83:
+      add8(state.registers.E);
+      cycles = 4;
+      break;
+    case 0x84:
+      add8(state.registers.H);
+      cycles = 4;
+      break;
+    case 0x85:
+      add8(state.registers.L);
+      cycles = 4;
+      break;
+    case 0x86:
+      add8(m_memory[state.registers.HL]);
+      cycles = 7;
+      break;
+    case 0x87:
+      add8(state.registers.A);
+      cycles = 4;
+      break;
+
+    // ADC A, r (0x88-0x8F)
+    case 0x88:
+      adc8(state.registers.B);
+      cycles = 4;
+      break;
+    case 0x89:
+      adc8(state.registers.C);
+      cycles = 4;
+      break;
+    case 0x8A:
+      adc8(state.registers.D);
+      cycles = 4;
+      break;
+    case 0x8B:
+      adc8(state.registers.E);
+      cycles = 4;
+      break;
+    case 0x8C:
+      adc8(state.registers.H);
+      cycles = 4;
+      break;
+    case 0x8D:
+      adc8(state.registers.L);
+      cycles = 4;
+      break;
+    case 0x8E:
+      adc8(m_memory[state.registers.HL]);
+      cycles = 7;
+      break;
+    case 0x8F:
+      adc8(state.registers.A);
+      cycles = 4;
+      break;
+
+    // SUB r (0x90-0x97)
+    case 0x90:
+      sub8(state.registers.B);
+      cycles = 4;
+      break;
+    case 0x91:
+      sub8(state.registers.C);
+      cycles = 4;
+      break;
+    case 0x92:
+      sub8(state.registers.D);
+      cycles = 4;
+      break;
+    case 0x93:
+      sub8(state.registers.E);
+      cycles = 4;
+      break;
+    case 0x94:
+      sub8(state.registers.H);
+      cycles = 4;
+      break;
+    case 0x95:
+      sub8(state.registers.L);
+      cycles = 4;
+      break;
+    case 0x96:
+      sub8(m_memory[state.registers.HL]);
+      cycles = 7;
+      break;
+    case 0x97:
+      sub8(state.registers.A);
+      cycles = 4;
+      break;
+
+    // SBC A, r (0x98-0x9F)
+    case 0x98:
+      sbc8(state.registers.B);
+      cycles = 4;
+      break;
+    case 0x99:
+      sbc8(state.registers.C);
+      cycles = 4;
+      break;
+    case 0x9A:
+      sbc8(state.registers.D);
+      cycles = 4;
+      break;
+    case 0x9B:
+      sbc8(state.registers.E);
+      cycles = 4;
+      break;
+    case 0x9C:
+      sbc8(state.registers.H);
+      cycles = 4;
+      break;
+    case 0x9D:
+      sbc8(state.registers.L);
+      cycles = 4;
+      break;
+    case 0x9E:
+      sbc8(m_memory[state.registers.HL]);
+      cycles = 7;
+      break;
+    case 0x9F:
+      sbc8(state.registers.A);
+      cycles = 4;
+      break;
+
+    // AND r (0xA0-0xA7)
+    case 0xA0:
+      and8(state.registers.B);
+      cycles = 4;
+      break;
+    case 0xA1:
+      and8(state.registers.C);
+      cycles = 4;
+      break;
+    case 0xA2:
+      and8(state.registers.D);
+      cycles = 4;
+      break;
+    case 0xA3:
+      and8(state.registers.E);
+      cycles = 4;
+      break;
+    case 0xA4:
+      and8(state.registers.H);
+      cycles = 4;
+      break;
+    case 0xA5:
+      and8(state.registers.L);
+      cycles = 4;
+      break;
+    case 0xA6:
+      and8(m_memory[state.registers.HL]);
+      cycles = 7;
+      break;
+    case 0xA7:
+      and8(state.registers.A);
+      cycles = 4;
+      break;
+
+    // XOR r (0xA8-0xAF)
+    case 0xA8:
+      xor8(state.registers.B);
+      cycles = 4;
+      break;
+    case 0xA9:
+      xor8(state.registers.C);
+      cycles = 4;
+      break;
+    case 0xAA:
+      xor8(state.registers.D);
+      cycles = 4;
+      break;
+    case 0xAB:
+      xor8(state.registers.E);
+      cycles = 4;
+      break;
+    case 0xAC:
+      xor8(state.registers.H);
+      cycles = 4;
+      break;
+    case 0xAD:
+      xor8(state.registers.L);
+      cycles = 4;
+      break;
+    case 0xAE:
+      xor8(m_memory[state.registers.HL]);
+      cycles = 7;
+      break;
+    case 0xAF:
+      xor8(state.registers.A);
+      cycles = 4;
+      break;
+
+    // OR r (0xB0-0xB7)
+    case 0xB0:
+      or8(state.registers.B);
+      cycles = 4;
+      break;
+    case 0xB1:
+      or8(state.registers.C);
+      cycles = 4;
+      break;
+    case 0xB2:
+      or8(state.registers.D);
+      cycles = 4;
+      break;
+    case 0xB3:
+      or8(state.registers.E);
+      cycles = 4;
+      break;
+    case 0xB4:
+      or8(state.registers.H);
+      cycles = 4;
+      break;
+    case 0xB5:
+      or8(state.registers.L);
+      cycles = 4;
+      break;
+    case 0xB6:
+      or8(m_memory[state.registers.HL]);
+      cycles = 7;
+      break;
+    case 0xB7:
+      or8(state.registers.A);
+      cycles = 4;
+      break;
+
+    // CP r (0xB8-0xBF)
+    case 0xB8:
+      cp8(state.registers.B);
+      cycles = 4;
+      break;
+    case 0xB9:
+      cp8(state.registers.C);
+      cycles = 4;
+      break;
+    case 0xBA:
+      cp8(state.registers.D);
+      cycles = 4;
+      break;
+    case 0xBB:
+      cp8(state.registers.E);
+      cycles = 4;
+      break;
+    case 0xBC:
+      cp8(state.registers.H);
+      cycles = 4;
+      break;
+    case 0xBD:
+      cp8(state.registers.L);
+      cycles = 4;
+      break;
+    case 0xBE:
+      cp8(m_memory[state.registers.HL]);
+      cycles = 7;
+      break;
+    case 0xBF:
+      cp8(state.registers.A);
+      cycles = 4;
+      break;
+
+    // ------------------------------------------------------------------------
+    // Immediate Arithmetic (0xC6, 0xCE, 0xD6, 0xDE, 0xE6, 0xEE, 0xF6, 0xFE)
+    // ------------------------------------------------------------------------
+    case 0xC6: { // ADD A, n
+      byte n = m_memory[state.registers.PC++];
+      add8(n);
+      cycles = 7;
+      break;
+    }
+    case 0xCE: { // ADC A, n
+      byte n = m_memory[state.registers.PC++];
+      adc8(n);
+      cycles = 7;
+      break;
+    }
+    case 0xD6: { // SUB n
+      byte n = m_memory[state.registers.PC++];
+      sub8(n);
+      cycles = 7;
+      break;
+    }
+    case 0xDE: { // SBC A, n
+      byte n = m_memory[state.registers.PC++];
+      sbc8(n);
+      cycles = 7;
+      break;
+    }
+    case 0xE6: { // AND n
+      byte n = m_memory[state.registers.PC++];
+      and8(n);
+      cycles = 7;
+      break;
+    }
+    case 0xEE: { // XOR n
+      byte n = m_memory[state.registers.PC++];
+      xor8(n);
+      cycles = 7;
+      break;
+    }
+    case 0xF6: { // OR n
+      byte n = m_memory[state.registers.PC++];
+      or8(n);
+      cycles = 7;
+      break;
+    }
+    case 0xFE: { // CP n
+      byte n = m_memory[state.registers.PC++];
+      cp8(n);
+      cycles = 7;
+      break;
+    }
+
+    // ------------------------------------------------------------------------
+    // INC/DEC 8-bit
+    // ------------------------------------------------------------------------
+    case 0x04:
+      inc8(state.registers.B);
+      cycles = 4;
+      break;
+    case 0x05:
+      dec8(state.registers.B);
+      cycles = 4;
+      break;
+    case 0x0C:
+      inc8(state.registers.C);
+      cycles = 4;
+      break;
+    case 0x0D:
+      dec8(state.registers.C);
+      cycles = 4;
+      break;
+    case 0x14:
+      inc8(state.registers.D);
+      cycles = 4;
+      break;
+    case 0x15:
+      dec8(state.registers.D);
+      cycles = 4;
+      break;
+    case 0x1C:
+      inc8(state.registers.E);
+      cycles = 4;
+      break;
+    case 0x1D:
+      dec8(state.registers.E);
+      cycles = 4;
+      break;
+    case 0x24:
+      inc8(state.registers.H);
+      cycles = 4;
+      break;
+    case 0x25:
+      dec8(state.registers.H);
+      cycles = 4;
+      break;
+    case 0x2C:
+      inc8(state.registers.L);
+      cycles = 4;
+      break;
+    case 0x2D:
+      dec8(state.registers.L);
+      cycles = 4;
+      break;
+
+    case 0x3C:
+      inc8(state.registers.A);
+      cycles = 4;
+      break;
+    case 0x3D:
+      dec8(state.registers.A);
+      cycles = 4;
+      break;
+
+    case 0x34: { // INC (HL)
+      byte val = m_memory[state.registers.HL];
+      inc8(val);
+      m_memory[state.registers.HL] = val;
+      cycles = 11;
+      break;
+    }
+    case 0x35: { // DEC (HL)
+      byte val = m_memory[state.registers.HL];
+      dec8(val);
+      m_memory[state.registers.HL] = val;
+      cycles = 11;
+      break;
+    }
+
+    // ------------------------------------------------------------------------
+    // Misc
+    // ------------------------------------------------------------------------
+    case 0x27: { // DAA
+      // Complex logic, maybe defer to helper or implement here?
+      // Let's implement here as it's small enough but uses flags.
+      byte initA = state.registers.A;
+      byte correction = 0;
+      bool C = GET_FLAG(C_FLAG, state.registers);
+      bool H = GET_FLAG(H_FLAG, state.registers);
+
+      if (H || (initA & 0x0F) > 9) {
+        correction += 6;
+      }
+      if (C || initA > 0x99) {
+        correction += 0x60;
+        SET_FLAG(C_FLAG, state.registers);
+      }
+
+      if (GET_FLAG(N_FLAG, state.registers)) {
+        state.registers.A -= correction;
+      } else {
+        state.registers.A += correction;
+      }
+
+      // Flags
+      byte res = state.registers.A;
+      if (res & 0x80)
+        SET_FLAG(S_FLAG, state.registers);
+      else
+        CLEAR_FLAG(S_FLAG, state.registers);
+      if (res == 0)
+        SET_FLAG(Z_FLAG, state.registers);
+      else
+        CLEAR_FLAG(Z_FLAG, state.registers);
+      // H flag special behavior not fully implemented in old code either
+      cycles = 4;
+      break;
+    }
+    case 0x2F: { // CPL
+      state.registers.A = ~state.registers.A;
+      SET_FLAG(H_FLAG, state.registers);
+      SET_FLAG(N_FLAG, state.registers);
+      cycles = 4;
+      break;
+    }
+    case 0x37: { // SCF
+      SET_FLAG(C_FLAG, state.registers);
+      CLEAR_FLAG(N_FLAG, state.registers);
+      CLEAR_FLAG(H_FLAG, state.registers);
+      cycles = 4;
+      break;
+    }
+    case 0x3F: { // CCF
+      if (GET_FLAG(C_FLAG, state.registers)) {
+        CLEAR_FLAG(C_FLAG, state.registers);
+        SET_FLAG(H_FLAG, state.registers);
+      } else {
+        SET_FLAG(C_FLAG, state.registers);
+        CLEAR_FLAG(H_FLAG, state.registers);
+      }
+      CLEAR_FLAG(N_FLAG, state.registers);
+      cycles = 4;
+      break;
+    }
+
+    // ------------------------------------------------------------------------
+    // INC/DEC 16-bit (BC, DE, HL, SP)
+    // ------------------------------------------------------------------------
+    case 0x03:
+      inc16(state.registers.BC);
+      cycles = 6;
+      break;
+    case 0x0B:
+      dec16(state.registers.BC);
+      cycles = 6;
+      break;
+    case 0x13:
+      inc16(state.registers.DE);
+      cycles = 6;
+      break;
+    case 0x1B:
+      dec16(state.registers.DE);
+      cycles = 6;
+      break;
+    case 0x23:
+      inc16(state.registers.HL);
+      cycles = 6;
+      break;
+    case 0x2B:
+      dec16(state.registers.HL);
+      cycles = 6;
+      break;
+    case 0x33:
+      inc16(state.registers.SP);
+      cycles = 6;
+      break;
+    case 0x3B:
+      dec16(state.registers.SP);
+      cycles = 6;
+      break;
+
     default:
       // Fall back to catalogue for opcodes not yet migrated
       handled = false;
@@ -795,8 +1302,321 @@ OpCode *Processor::getNextInstruction() {
 }
 
 // ============================================================================
-// Opcode Helper Methods (Placeholders)
+// Opcode Helper Methods
 // ============================================================================
+
+void Processor::add8(byte val) {
+  int res = state.registers.A + val;
+
+  // Flags
+  if ((res & 0xFF) == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  if (res & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+  if (res > 0xFF)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  if (((state.registers.A & 0x0F) + (val & 0x0F)) > 0x0F)
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  // Overflow (P/V)
+  int op1 = (int8_t)state.registers.A;
+  int op2 = (int8_t)val;
+  int r = (int8_t)(res & 0xFF);
+  if (((op1 > 0 && op2 > 0) && r < 0) || ((op1 < 0 && op2 < 0) && r > 0)) {
+    SET_FLAG(P_FLAG, state.registers);
+  } else {
+    CLEAR_FLAG(P_FLAG, state.registers);
+  }
+
+  CLEAR_FLAG(N_FLAG, state.registers);
+  state.registers.A = (byte)res;
+}
+
+void Processor::adc8(byte val) {
+  int carry = GET_FLAG(C_FLAG, state.registers) ? 1 : 0;
+  int res = state.registers.A + val + carry;
+
+  if ((res & 0xFF) == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+
+  if (res & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  if (res > 0xFF)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+
+  if (((state.registers.A & 0x0F) + (val & 0x0F) + carry) > 0x0F)
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  // Overflow
+  int op1 = (int8_t)state.registers.A;
+  int op2 = (int8_t)val;
+  int r = (int8_t)(res & 0xFF);
+  if (((op1 > 0 && op2 > 0) && r < 0) || ((op1 < 0 && op2 < 0) && r > 0)) {
+    SET_FLAG(P_FLAG, state.registers);
+  } else {
+    CLEAR_FLAG(P_FLAG, state.registers);
+  }
+
+  CLEAR_FLAG(N_FLAG, state.registers);
+  state.registers.A = (byte)res;
+}
+
+void Processor::sub8(byte val) {
+  int res = state.registers.A - val;
+
+  if ((res & 0xFF) == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+
+  if (res & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  if (state.registers.A < val)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+
+  if ((state.registers.A & 0x0F) < (val & 0x0F))
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  // Overflow
+  int op1 = (int8_t)state.registers.A;
+  int op2 = (int8_t)val;
+  int r = (int8_t)(res & 0xFF);
+  if (((op1 > 0 && op2 < 0) && r < 0) || ((op1 < 0 && op2 > 0) && r > 0)) {
+    SET_FLAG(P_FLAG, state.registers);
+  } else {
+    CLEAR_FLAG(P_FLAG, state.registers);
+  }
+
+  SET_FLAG(N_FLAG, state.registers);
+  state.registers.A = (byte)res;
+}
+
+void Processor::sbc8(byte val) {
+  int carry = GET_FLAG(C_FLAG, state.registers) ? 1 : 0;
+  int res = state.registers.A - val - carry;
+
+  if ((res & 0xFF) == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+
+  if (res & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  if ((int)state.registers.A < ((int)val + carry))
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+
+  if (((state.registers.A & 0x0F) - (val & 0x0F) - carry) < 0)
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  // Overflow
+  int op1 = (int8_t)state.registers.A;
+  int op2 = (int8_t)val;
+  int r = (int8_t)(res & 0xFF);
+  if (((op1 > 0 && op2 < 0) && r < 0) || ((op1 < 0 && op2 > 0) && r > 0)) {
+    SET_FLAG(P_FLAG, state.registers);
+  } else {
+    CLEAR_FLAG(P_FLAG, state.registers);
+  }
+
+  SET_FLAG(N_FLAG, state.registers);
+  state.registers.A = (byte)res;
+}
+
+void Processor::and8(byte val) {
+  state.registers.A &= val;
+  CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  SET_FLAG(H_FLAG, state.registers);
+
+  if (state.registers.A == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+
+  if (state.registers.A & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  // Parity (P/V) calculation needed for logical ops
+  // For now we skip P/V for logical ops to save time or use utility?
+  // Existing LogicOpcodes didn't fully implement it either ("TODO")
+  // So we match that behavior.
+}
+
+void Processor::xor8(byte val) {
+  state.registers.A ^= val;
+  CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+
+  if (state.registers.A == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+
+  if (state.registers.A & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+}
+
+void Processor::or8(byte val) {
+  state.registers.A |= val;
+  CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+
+  if (state.registers.A == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+
+  if (state.registers.A & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+}
+
+void Processor::cp8(byte val) {
+  int result = state.registers.A - val;
+
+  if ((result & 0xFF) == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+
+  if (state.registers.A < val)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+
+  // S Flag
+  if (result & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  // N Flag
+  SET_FLAG(N_FLAG, state.registers);
+
+  // H Flag
+  if ((state.registers.A & 0x0F) < (val & 0x0F))
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  // P/V (Overflow) for CP is same as SUB
+  int op1 = (int8_t)state.registers.A;
+  int op2 = (int8_t)val;
+  int r = (int8_t)(result & 0xFF);
+  if (((op1 > 0 && op2 < 0) && r < 0) || ((op1 < 0 && op2 > 0) && r > 0)) {
+    SET_FLAG(P_FLAG, state.registers);
+  } else {
+    CLEAR_FLAG(P_FLAG, state.registers);
+  }
+}
+
+void Processor::inc8(byte &reg) {
+  reg++;
+  CLEAR_FLAG(N_FLAG, state.registers);
+
+  if (reg == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+
+  if (reg & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  if ((reg & 0x0F) == 0x00)
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  if (reg == 0x80)
+    SET_FLAG(P_FLAG, state.registers);
+  else
+    CLEAR_FLAG(P_FLAG, state.registers);
+}
+
+void Processor::dec8(byte &reg) {
+  reg--;
+  SET_FLAG(N_FLAG, state.registers);
+
+  if (reg == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+
+  if (reg & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  if ((reg & 0x0F) == 0x0F)
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  if (reg == 0x7F)
+    SET_FLAG(P_FLAG, state.registers);
+  else
+    CLEAR_FLAG(P_FLAG, state.registers);
+}
+
+// Stubs for extended instructions
+void Processor::exec_ed_opcode() {
+  // To be implemented
+}
+void Processor::exec_cb_opcode() {
+  // To be implemented
+}
+void Processor::exec_index_opcode(byte prefix) {
+  // To be implemented
+}
+
+// 16-bit Stubs
+void Processor::add16(word &dest, word src) { /* TODO */ }
+void Processor::adc16(word &dest, word src) { /* TODO */ }
+void Processor::sbc16(word &dest, word src) { /* TODO */ }
+
+void Processor::inc16(word &reg) { reg++; }
+
+void Processor::dec16(word &reg) { reg--; }
 
 void Processor::op_load(byte opcode) {
   // To be implemented
@@ -831,17 +1651,5 @@ void Processor::op_io(byte opcode) {
 }
 
 void Processor::op_misc(byte opcode) {
-  // To be implemented
-}
-
-void Processor::exec_ed_opcode() {
-  // To be implemented
-}
-
-void Processor::exec_cb_opcode() {
-  // To be implemented
-}
-
-void Processor::exec_index_opcode(byte prefix) {
   // To be implemented
 }

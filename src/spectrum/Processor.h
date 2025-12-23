@@ -69,6 +69,25 @@ private:
   void exec_cb_opcode();
   void exec_index_opcode(byte prefix); // DD or FD
 
+  // ALU Helpers
+  void add8(byte val); // ADD A, val
+  void adc8(byte val); // ADC A, val
+  void sub8(byte val); // SUB val
+  void sbc8(byte val); // SBC A, val
+  void and8(byte val); // AND val
+  void xor8(byte val); // XOR val
+  void or8(byte val);  // OR val
+  void cp8(byte val);  // CP val
+  void inc8(byte &reg);
+  void dec8(byte &reg);
+
+  // 16-bit ALU Helpers for convenience (optional, but good for consistency)
+  void add16(word &dest, word src);
+  void adc16(word &dest, word src);
+  void sbc16(word &dest, word src);
+  void inc16(word &reg);
+  void dec16(word &reg);
+
 public:
   explicit Processor();
 
