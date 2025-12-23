@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
   try {
     const char *romFileLocation = "./roms/48k.bin";
     bool debugMode = false;
+    bool fastLoad = false;
 
     std::string tapeFile = "";
     std::string snapshotFile = "";
@@ -57,6 +58,11 @@ int main(int argc, char *argv[]) {
         if (i + 1 < argc) {
           snapshotFile = argv[++i];
         }
+      } else if (arg == "-f" || arg == "--fast-load") {
+        if (i + 1 < argc) {
+          tapeFile = argv[++i];
+          fastLoad = true;
+        }
       }
     }
 
@@ -65,9 +71,13 @@ int main(int argc, char *argv[]) {
     // Create a processor and load the basic ROM
     Processor processor;
     processor.init(romFileLocation);
+    // processor.setFastLoad(fastLoad); // Will add this method
 
     if (!tapeFile.empty()) {
       processor.loadTape(tapeFile.c_str());
+      if (fastLoad) {
+        processor.getState().setFastLoad(true);
+      }
     }
 
     if (!snapshotFile.empty()) {

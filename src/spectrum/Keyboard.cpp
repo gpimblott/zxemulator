@@ -30,6 +30,7 @@ void Keyboard::reset() {
   for (int i = 0; i < 8; ++i) {
     keyLines[i] = 0; // 0 = no keys pressed
   }
+  kempstonState = 0;
 }
 
 void Keyboard::setKey(int line, int bit, bool pressed) {
@@ -73,3 +74,17 @@ emulator_types::byte Keyboard::readPort(emulator_types::byte highByte) {
   // actual EAR value. Bits 5 and 7 are usually 1.
   return result | 0xA0;
 }
+
+void Keyboard::setKempstonKey(int bit, bool pressed) {
+  if (bit < 0 || bit > 4)
+    return;
+
+  // Kempston is Active High (1 = Pressed)
+  if (pressed) {
+    kempstonState |= (1 << bit);
+  } else {
+    kempstonState &= ~(1 << bit);
+  }
+}
+
+emulator_types::byte Keyboard::readKempstonPort() { return kempstonState; }

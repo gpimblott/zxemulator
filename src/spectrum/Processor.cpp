@@ -411,6 +411,37 @@ void Processor::executeFrame() {
       continue; // Skip fetch/execute
     }
 
+    // Fast Load Trap
+    if (state.isFastLoad() && state.registers.PC == 0x0556) {
+      // 0x0556 is LD_BYTES.
+      // inputs: IX=Dest, DE=Length, A=Flag(00=Header, FF=Data), Carry set=Load
+      // outputs: Carry set=Success.
+
+      // We delegate to Tape to see if it can satisfy this request from current
+      // block Note: We ignore the 'Verify' case (Carry clear on entry usually
+      // means Verify, but ROM routine handles both) We assume Load.
+      bool success =
+          state.tape.fastLoadBlock(state.registers.A, state.registers.DE,
+                                   state.registers.IX, state.memory);
+
+      if (success) {
+        // Set Carry
+        state.registers.F |= 1;
+      } else {
+        // Clear Carry
+        state.registers.F &= ~1;
+      }
+
+      // Execute RET (Pop PC)
+      byte low = state.memory[state.registers.SP];
+      byte high = state.memory[state.registers.SP + 1];
+      state.registers.PC = (high << 8) | low;
+      state.registers.SP += 2;
+
+      // Don't execute instruction at 0x0556
+      continue;
+    }
+
     OpCode *opCode = getNextInstruction();
     if (opCode != nullptr) {
       // Increment Refresh Register (Lower 7 bits)

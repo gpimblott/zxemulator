@@ -227,10 +227,84 @@ void Tape::update(int tStates) {
       break;
     }
   }
+} // End update
+
+#include "../spectrum/Memory.h"
+
+// ... existing code ...
+
+bool Tape::fastLoadBlock(byte expectedFlag, word length, word startAddress,
+                         Memory &memory) {
+  if (!playing && !blocks.empty()) {
+    // If not playing but we have blocks (e.g. started via -f), ensure we are
+    // ready. Or just leverage currentBlockIndex. Let's assume user calls
+    // play() or we manually manage index.
+  }
+
+  // Look for next data block
+  size_t scanIndex = currentBlockIndex;
+
+  while (scanIndex < blocks.size()) {
+    if (blocks[scanIndex].id == 0x10) { // Standard Block
+      // Check Flag
+      if (blocks[scanIndex].data.size() > 0 &&
+          blocks[scanIndex].data[0] == expectedFlag) {
+        // Found match!
+        // Verify size. TZX Block Data includes Flag + Data + Checksum.
+        // We need to load 'length' bytes.
+        // The block size should be at least length + 2.
+        // Actually ROM expects 'length' bytes. plus Flag (1) and Checksum
+        // (1). So total block size must be >= length + 2.
+
+        if (blocks[scanIndex].data.size() < (size_t)(length + 2)) {
+          // Error: Block too short?
+          return false;
+        }
+
+        // Load Data
+        // Skip Flag (index 0)
+        // Copy length bytes to memory
+        // rom routine loads to IX.
+        const std::vector<byte> &data = blocks[scanIndex].data;
+        for (size_t i = 0; i < length; i++) {
+          memory[(startAddress + i) & 0xFFFF] = data[i + 1];
+        }
+
+        // Advance Tape
+        currentBlockIndex = scanIndex + 1;
+
+        // Reset state to ensure we don't play pulses for this block
+        // We are effectively "done" with this block.
+        // If we are playing, the update loop might interfere if we don't
+        // reset pulse counters But update() relies on currentBlockIndex.
+        // Changing currentBlockIndex effectively jumps to next block.
+        // We should reset state machine for the NEW block.
+        currentState = PILOT;
+        tStateCounter = 0;
+        nextEdgeTState = PILOT_PULSE;
+        pulseCount = 0;
+
+        return true;
+      } else {
+        // Flag mismatch. (e.g. found Header when looking for Data).
+        // Should we skip it? No, if we expect Data but find Header, strict
+        // trapping says Fail. The ROM would read the flag, see mismatch, and
+        // fail (or retry). However, for Fast Load, if we are desynced, maybe
+        // we search? Standard behavior: Return false. The ROM will then fail
+        // (Carry Clear) and maybe retry? Or we just return false and let the
+        // ROM execute normally (and likely fail if tape not playing). But if
+        // we are -fast-loading, we want to force it? If we find a Header (00)
+        // and we wanted Data (FF), it's a fail. BUT, if we have Block 0x30
+        // (Text), we should skip it. My loop below skips ID != 0x10.
+
+        // If we found 0x10 block and flag doesn't match...
+        // Maybe we should just return false.
+        return false;
+      }
+    }
+    // Skip non-data blocks (Text, etc)
+    scanIndex++;
+  }
+
+  return false;
 }
-// Stubbing complex logic for now to allow build, full impl requires careful
-// coding. For the immediate user request "it reads but runs basic rom", just
-// getting the tape *ready* with valid blocks is step 1. The user needs
-// automation to type LOAD "". I will implement a simpler "Play" that just logs
-// "Playing" for now if we don't have full pulse logic ready. Actually, I
-// promised signal generation.

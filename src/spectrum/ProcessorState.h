@@ -38,6 +38,7 @@ private:
   bool speakerBit = false;
   bool micBit = false;
   long frameTStates = 0;
+  bool fastLoad = false;
 
 public:
   Z80Registers registers;
@@ -61,6 +62,9 @@ public:
   void setFrameTStates(long ts) { frameTStates = ts; }
   long getFrameTStates() const { return frameTStates; }
   void addFrameTStates(long ts) { frameTStates += ts; }
+
+  void setFastLoad(bool value) { fastLoad = value; }
+  bool isFastLoad() const { return fastLoad; }
 
   word getNextWordFromPC();
   byte getNextByteFromPC();

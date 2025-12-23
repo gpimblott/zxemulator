@@ -84,7 +84,7 @@ void Memory::loadIntoMemory(Rom &rom) {
  * @return The byte value or throw a <code>MemoryExceptom</code>
  */
 emulator_types::byte &Memory::operator[](long i) {
-  if (i > m_totalMemory)
+  if (i >= m_totalMemory)
     throw MemoryException(i);
 
   // ROM Protection (0x0000 - 0x3FFF)

@@ -92,6 +92,21 @@ void TZXLoader::parse() {
       Logger::write(msg);
 
       offset += length;
+    } else if (blockId == 0x30) {
+      // Text Description Block
+      // 0x00: Length (N)
+      // 0x01..N: Text
+      if (offset + 1 > this->size)
+        break;
+      byte length = this->data[offset++];
+
+      if (offset + length > this->size)
+        break;
+
+      std::string text((char *)(this->data + offset), length);
+      Logger::write(("TZX Info: " + text).c_str());
+
+      offset += length;
     } else {
       // Unknown block, abort for safety or skip if length known?
       // TZX structure is complex, for MVP we abort on unknown to verify 0x10

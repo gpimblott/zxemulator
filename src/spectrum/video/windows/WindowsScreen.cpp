@@ -81,6 +81,7 @@ void WindowsScreen::show() {
 
   // theWindow.setVerticalSyncEnabled(true);
   // theWindow.setFramerateLimit(50);
+  theWindow.setKeyRepeatEnabled(false);
   theWindow.clear(sf::Color::White);
 }
 
@@ -436,6 +437,20 @@ bool WindowsScreen::processEvents() {
 void WindowsScreen::handleKey(sf::Keyboard::Key key, bool pressed) {
   if (!processor)
     return;
+
+  // Kempston Joystick Mapping
+  // Right (0), Left (1), Down (2), Up (3), Fire (4)
+  if (key == sf::Keyboard::Key::Right)
+    processor->getState().keyboard.setKempstonKey(0, pressed);
+  if (key == sf::Keyboard::Key::Left)
+    processor->getState().keyboard.setKempstonKey(1, pressed);
+  if (key == sf::Keyboard::Key::Down)
+    processor->getState().keyboard.setKempstonKey(2, pressed);
+  if (key == sf::Keyboard::Key::Up)
+    processor->getState().keyboard.setKempstonKey(3, pressed);
+  if (key == sf::Keyboard::Key::LAlt || key == sf::Keyboard::Key::RAlt ||
+      key == sf::Keyboard::Key::RControl)
+    processor->getState().keyboard.setKempstonKey(4, pressed);
 
   // Mapping
   // Line 0 (0xFE): SHIFT (0), Z (1), X (2), C (3), V (4)

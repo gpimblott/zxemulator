@@ -57,6 +57,20 @@ The emulator maps standard ZX Spectrum keys to the PC keyboard.
 - **Enter**: Return/Enter.
 - **Space**: Space.
 
+
+## Compatibility
+
+
+## Compatibility
+
+| Software | Format | Status | Notes |
+| :--- | :--- | :--- | :--- |
+| **Jet Set Willy** | Tape(.tsz) | **Partial** |  Loads correctly, Keeps ending game when you clisk enter to start |
+| **Horace Goes Skiing** | Tape (.tzx) | **Partial** | Works Perfectly|
+| **Manic Miner** | Tape (.tzx) | **Partial** | Loads correctly, audio/video synced.  Keeps ending game when you clisk enter to start |
+| **Pacman** | Snapshot (.z80) | **Working** | Loads and runs. |
+| **ZX Diagnostics** | ROM | **Partial** | Passes initial diagnostic tests. Still some issues. |
+
 ## Project Structure
 
 - `src/`: Source code.

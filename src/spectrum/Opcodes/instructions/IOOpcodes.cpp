@@ -73,9 +73,8 @@ int IOOpcodes::processIN_A_N(ProcessorState &state) {
     byte ear = state.tape.getEarBit() ? 0x40 : 0x00; // EAR is bit 6
     state.registers.A = state.keyboard.readPort(highByte) | ear;
   } else if ((port & 0x1F) == 0x1F) {
-    // Kempston Joystick (Port 31). Return 0 (no input) to avoid "stuck keys"
-    // detection
-    state.registers.A = 0x00;
+    // Kempston Joystick (Port 31)
+    state.registers.A = state.keyboard.readKempstonPort();
   } else {
     // Floating bus or other devices?
     state.registers.A = 0xFF;

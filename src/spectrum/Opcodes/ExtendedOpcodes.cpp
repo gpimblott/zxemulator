@@ -319,7 +319,7 @@ int ExtendedOpcodes::processIN_r_C(ProcessorState &state,
     result |= (state.tape.getEarBit() ? 0x40 : 0x00);
   } else if ((port & 0x1F) == 0x1F) {
     // Kempston Joystick
-    result = 0x00;
+    result = state.keyboard.readKempstonPort();
   }
 
   reg = result;

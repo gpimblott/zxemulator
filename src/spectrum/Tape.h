@@ -50,6 +50,12 @@ public:
   void update(int tStates);
 
   bool isPlaying() const { return playing; }
+
+  // Fast Load Support
+  // Returns true if block found and loaded, false otherwise
+  bool fastLoadBlock(emulator_types::byte expectedFlag,
+                     emulator_types::word length,
+                     emulator_types::word startAddress, class Memory &memory);
 };
 
 #endif // ZXEMULATOR_TAPE_H

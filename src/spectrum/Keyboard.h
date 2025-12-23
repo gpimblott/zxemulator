@@ -60,6 +60,12 @@ public:
 
   // Reset all keys
   void reset();
+
+  void setKempstonKey(int bit, bool pressed);
+  emulator_types::byte readKempstonPort();
+
+private:
+  emulator_types::byte kempstonState;
 };
 
 #endif // ZXEMULATOR_KEYBOARD_H
