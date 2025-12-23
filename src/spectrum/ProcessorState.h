@@ -35,6 +35,9 @@ private:
   bool interruptsEnabled = false;
   int interruptMode = 0; // Default IM 0 on reset
   bool halted = false;
+  bool speakerBit = false;
+  bool micBit = false;
+  long frameTStates = 0;
 
 public:
   Z80Registers registers;
@@ -49,6 +52,16 @@ public:
   int getInterruptMode() const { return interruptMode; }
   void setHalted(bool value) { halted = value; }
   bool isHalted() const { return halted; }
+
+  void setSpeakerBit(bool value) { speakerBit = value; }
+  bool getSpeakerBit() const { return speakerBit; }
+  void setMicBit(bool value) { micBit = value; }
+  bool getMicBit() const { return micBit; }
+
+  void setFrameTStates(long ts) { frameTStates = ts; }
+  long getFrameTStates() const { return frameTStates; }
+  void addFrameTStates(long ts) { frameTStates += ts; }
+
   word getNextWordFromPC();
   byte getNextByteFromPC();
 

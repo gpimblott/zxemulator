@@ -59,6 +59,31 @@ int IndexOpcodes::processIndex(ProcessorState &state,
     indexReg = (high << 8) | low;
     return 14;
   }
+  case 0x22: // LD (nn), IX/IY
+  {
+    byte low = state.getNextByteFromPC();
+    state.incPC();
+    byte high = state.getNextByteFromPC();
+    state.incPC();
+    word addr = (high << 8) | low;
+
+    state.memory[addr] = (indexReg & 0xFF);
+    state.memory[addr + 1] = ((indexReg >> 8) & 0xFF);
+    return 20;
+  }
+  case 0x2A: // LD IX/IY, (nn)
+  {
+    byte low = state.getNextByteFromPC();
+    state.incPC();
+    byte high = state.getNextByteFromPC();
+    state.incPC();
+    word addr = (high << 8) | low;
+
+    byte iL = state.memory[addr];
+    byte iH = state.memory[addr + 1];
+    indexReg = (iH << 8) | iL;
+    return 20;
+  }
   case 0x09: // ADD IX/IY, BC
     return ArithmeticOpcodes::add16(state, indexReg, state.registers.BC) + 4;
   case 0x19: // ADD IX/IY, DE
@@ -91,6 +116,20 @@ int IndexOpcodes::processIndex(ProcessorState &state,
       CLEAR_FLAG(P_FLAG, state.registers); // Overflow V
     CLEAR_FLAG(N_FLAG, state.registers);
     return 8;
+  }
+  case 0x26: // LD IXH/IYH, n (Undocumented)
+  {
+    byte n = state.getNextByteFromPC();
+    state.incPC();
+    indexReg = (indexReg & 0x00FF) | (n << 8);
+    return 11;
+  }
+  case 0x2E: // LD IXL/IYL, n (Undocumented)
+  {
+    byte n = state.getNextByteFromPC();
+    state.incPC();
+    indexReg = (indexReg & 0xFF00) | n;
+    return 11;
   }
   case 0x54: // LD D, IXH/IYH (Undocumented)
     state.registers.D = (byte)((indexReg >> 8) & 0xFF);

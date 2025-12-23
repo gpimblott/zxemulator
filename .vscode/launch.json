@@ -44,6 +44,18 @@
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build"
+        },
+        {
+            "name": "ZXEmulator TZX",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/ZXEmulator",
+            "args": [
+                "-t",
+                "${workspaceFolder}/roms/manicminer.tzx"
+            ],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build"
         }
     ]
 }

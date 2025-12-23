@@ -116,12 +116,12 @@ void WindowsScreen::update() {
   for (int y = 0; y < FULL_HEIGHT; y++) {
     if ((y < BORDER_WIDTH) || (y >= (FULL_HEIGHT - BORDER_WIDTH))) {
       // Draw the top and bottom borders
-      drawBorderRow(&currentPixelPtr);
+      drawBorderRow(&currentPixelPtr, y);
     } else {
       // Draw a row from the video buffer
       // y is absolute screen y. Need relative y for video buffer (0-191)
       int videoY = y - BORDER_WIDTH;
-      drawRow(&currentPixelPtr, videoY);
+      drawRow(&currentPixelPtr, videoY, y); // Pass absolute y too
     }
 
     // screenBufferPtr += BYTES_PER_ROW;
@@ -154,8 +154,8 @@ void WindowsScreen::update() {
  * @param pixels
  * @return
  */
-void WindowsScreen::drawBorderRow(std::uint8_t **pixels) const {
-  byte borderIdx = (*videoBuffer).getBorderColor();
+void WindowsScreen::drawBorderRow(std::uint8_t **pixels, int y) const {
+  byte borderIdx = (*videoBuffer).getBorderColorAtLine(y);
   sf::Color borderColour = colors[borderIdx];
 
   for (int x = 0; x < FULL_WIDTH; x++) {
@@ -169,8 +169,8 @@ void WindowsScreen::drawBorderRow(std::uint8_t **pixels) const {
  * @param y
  * @return
  */
-void WindowsScreen::drawRow(std::uint8_t **pixels, int y) const {
-  byte borderIdx = (*videoBuffer).getBorderColor();
+void WindowsScreen::drawRow(std::uint8_t **pixels, int y, int absY) const {
+  byte borderIdx = (*videoBuffer).getBorderColorAtLine(absY);
   sf::Color borderColour = colors[borderIdx];
 
   // Draw the left border

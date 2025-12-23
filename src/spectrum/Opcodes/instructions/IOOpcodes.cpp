@@ -30,8 +30,9 @@ IOOpcodes::IOOpcodes() : OpCodeProvider() {
 }
 
 int IOOpcodes::processOUT(ProcessorState &state) {
-  byte port = state.getNextByteFromPC();
+  byte port = state.getNextByteFromPC(); // Port address from n
   state.incPC();
+  byte value = state.registers.A; // Value to write is in A
   // debug("OUT (%02X), A", port);
 
   // Port FE (or any even port on 48K) controls border color and speaker
@@ -40,7 +41,12 @@ int IOOpcodes::processOUT(ProcessorState &state) {
   // Bit 4: Speaker (beeper)
   if ((port & 0x01) == 0) {
     byte borderColor = state.registers.A & 0x07;
-    state.memory.getVideoBuffer()->setBorderColor(borderColor);
+    state.memory.getVideoBuffer()->setBorderColor(borderColor,
+                                                  state.getFrameTStates());
+
+    // Bit 4: Speaker, Bit 3: MIC
+    state.setSpeakerBit((port & 0x10) != 0);
+    state.setMicBit((port & 0x08) != 0);
   }
 
   return 11;

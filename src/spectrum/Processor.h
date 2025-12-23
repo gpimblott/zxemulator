@@ -28,16 +28,25 @@
 #include "Opcodes/OpCodeCatalogue.h"
 #include "ProcessorTypes.h"
 
+#include "Audio.h"
+
 class Processor {
 
 private:
   // State variables
   ProcessorState state;
+  Audio audio;
   OpCodeCatalogue catalogue = OpCodeCatalogue();
 
   bool running = false;
   bool paused = false;
   bool stepRequest = false;
+
+  // Auto-Load
+  bool autoLoadTape = false;
+  long frameCounter = 0;
+  int autoLoadStep = 0;
+  int keyHoldFrames = 0;
 
   // Internal methods
   OpCode *getNextInstruction();

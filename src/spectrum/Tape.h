@@ -26,6 +26,7 @@
 #define ZXEMULATOR_TAPE_H
 
 #include "../utils/BaseTypes.h"
+#include "../utils/TZXLoader.h"
 #include <string>
 #include <vector>
 
@@ -33,6 +34,7 @@ class Tape {
 private:
   std::string filename;
   bool playing = false;
+  std::vector<utils::TapeBlock> blocks;
 
 public:
   Tape();

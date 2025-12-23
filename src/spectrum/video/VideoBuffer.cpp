@@ -38,6 +38,36 @@ VideoBuffer::VideoBuffer(emulator_types::byte *memoryMap) {
   // Set attributes to White Paper (7), Black Ink (0), Bright 0, Flash 0 -> 00
   // 111 000 -> 0x38
   memset(colourAttributes, 0x38, VIDEO_ATTR_DATA);
+
+  scanlineBorderColors.resize(312, 7); // 312 lines (PAL), default white
+}
+
+void VideoBuffer::newFrame() {
+  // Fill with current border color (carry over from previous frame)
+  std::fill(scanlineBorderColors.begin(), scanlineBorderColors.end(),
+            borderColor);
+}
+
+void VideoBuffer::setBorderColor(emulator_types::byte color, long tStates) {
+  borderColor = color & 0x07;
+  // 224 T-states per line
+  int line = tStates / 224;
+  if (line < 0)
+    line = 0;
+  if (line >= scanlineBorderColors.size())
+    return;
+
+  // Set from current line to end
+  std::fill(scanlineBorderColors.begin() + line, scanlineBorderColors.end(),
+            borderColor);
+}
+
+emulator_types::byte VideoBuffer::getBorderColorAtLine(int line) const {
+  if (line < 0)
+    return scanlineBorderColors[0];
+  if (line >= scanlineBorderColors.size())
+    return scanlineBorderColors.back();
+  return scanlineBorderColors[line];
 }
 
 /**

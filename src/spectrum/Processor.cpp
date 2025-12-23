@@ -27,9 +27,10 @@
 #include "../utils/Logger.h"
 #include "../utils/debug.h"
 
-Processor::Processor() : state() {
+Processor::Processor() : state(), audio() {
   // Set up the default state of the registers
   reset();
+  audio.start();
 }
 
 /**
@@ -51,7 +52,10 @@ void Processor::init(const char *romFile) {
 
 void Processor::loadTape(const char *filename) {
   if (state.tape.load(filename)) {
-    state.tape.play();
+    // Don't play yet. Wait for Basic to boot and type LOAD ""
+    autoLoadTape = true;
+    frameCounter = 0;
+    autoLoadStep = 0;
   }
 }
 
@@ -342,6 +346,11 @@ void Processor::executeFrame() {
   int tStates = 0;
   const int frameCycles = 69888;
 
+  state.setFrameTStates(0);
+  if (state.memory.getVideoBuffer()) {
+    state.memory.getVideoBuffer()->newFrame();
+  }
+
   // Fire an interrupt
   if (!paused && state.areInterruptsEnabled()) {
     // If we were halted, we are no longer halted
@@ -365,6 +374,7 @@ void Processor::executeFrame() {
       state.registers.PC = dest;
       // Cycles: 19
       tStates += 19;
+      state.addFrameTStates(19);
     } else {
       // IM 0/1: RST 38 (0x0038)
       // Note: IM 0 executes instruction on bus. Spectrum bus usually 0xFF (RST
@@ -372,6 +382,7 @@ void Processor::executeFrame() {
       state.registers.PC = 0x0038;
       // Cycles: 13
       tStates += 13;
+      state.addFrameTStates(13);
     }
 
     // Disable interrupts (standard Z80 behavior on accept)
@@ -390,6 +401,7 @@ void Processor::executeFrame() {
     if (state.isHalted()) {
       // CPU executes NOPs (4 T-states) while halted
       tStates += 4;
+      state.addFrameTStates(4);
       this->state.tape.update(4);
       // R register is incremented during NOPs too (M1 cycles)
       state.registers.R =
@@ -408,7 +420,17 @@ void Processor::executeFrame() {
 
       int cycles = opCode->execute(this->state);
       tStates += cycles;
+      state.addFrameTStates(cycles);
       this->state.tape.update(cycles);
+      // Audio Update
+
+      audio.update(
+          cycles, state.getSpeakerBit(),
+          state.tape.getEarBit()); // Use tape ear bit directly? Or state mic?
+      // EAR bit comes from Tape. Speaker bit comes from state.
+      // Wait, state.tape.getEarBit() is what the ULA reads.
+      // We can use that.
+
     } else {
       byte unknownOpcode = state.memory[state.registers.PC];
       char errorMsg[100];
@@ -419,6 +441,102 @@ void Processor::executeFrame() {
       debug("Unknown opcode %02X at address %d\n", unknownOpcode,
             this->state.registers.PC);
       running = false;
+    }
+  }
+  audio.flush();
+
+  // Auto-Type Logic (Frame based)
+  if (autoLoadTape && running && !paused) {
+    frameCounter++;
+    // Wait 120 frames (~2.4s) for boot
+    if (frameCounter > 120) {
+      // Steps:
+      // 0: Start J
+      // 1: Release J
+      // 2: Start Sym+P
+      // 3: Release P
+      // 4: Start Sym+P
+      // 5: Release P
+      // 6: Release Sym
+      // 7: Start Enter
+      // 8: Release Enter
+      // 9: Play Tape + End
+
+      keyHoldFrames++;
+      const int PRESS_DURATION = 5;
+      const int GAP_DURATION = 5;
+
+      switch (autoLoadStep) {
+      case 0:                              // J
+        state.keyboard.setKey(6, 3, true); // J
+        if (keyHoldFrames > PRESS_DURATION) {
+          autoLoadStep++;
+          keyHoldFrames = 0;
+        }
+        break;
+      case 1: // Release J
+        state.keyboard.setKey(6, 3, false);
+        if (keyHoldFrames > GAP_DURATION) {
+          autoLoadStep++;
+          keyHoldFrames = 0;
+        }
+        break;
+      case 2:                              // Sym+P
+        state.keyboard.setKey(7, 1, true); // Sym
+        state.keyboard.setKey(5, 0, true); // P
+        if (keyHoldFrames > PRESS_DURATION) {
+          autoLoadStep++;
+          keyHoldFrames = 0;
+        }
+        break;
+      case 3: // Release P (keep Sym)
+        state.keyboard.setKey(5, 0, false);
+        if (keyHoldFrames > GAP_DURATION) {
+          autoLoadStep++;
+          keyHoldFrames = 0;
+        }
+        break;
+      case 4:                              // Sym+P (again for second quote)
+        state.keyboard.setKey(5, 0, true); // P
+                                           // Sym already held
+        if (keyHoldFrames > PRESS_DURATION) {
+          autoLoadStep++;
+          keyHoldFrames = 0;
+        }
+        break;
+      case 5: // Release P
+        state.keyboard.setKey(5, 0, false);
+        if (keyHoldFrames > GAP_DURATION) {
+          autoLoadStep++;
+          keyHoldFrames = 0;
+        }
+        break;
+      case 6: // Release Sym
+        state.keyboard.setKey(7, 1, false);
+        if (keyHoldFrames > GAP_DURATION) {
+          autoLoadStep++;
+          keyHoldFrames = 0;
+        }
+        break;
+      case 7: // Enter
+        state.keyboard.setKey(6, 0, true);
+        if (keyHoldFrames > PRESS_DURATION) {
+          autoLoadStep++;
+          keyHoldFrames = 0;
+        }
+        break;
+      case 8: // Release Enter
+        state.keyboard.setKey(6, 0, false);
+        if (keyHoldFrames > GAP_DURATION) {
+          autoLoadStep++;
+          keyHoldFrames = 0;
+        }
+        break;
+      case 9: // Play
+        state.tape.play();
+        autoLoadTape = false;
+        break;
+      }
     }
   }
 }
@@ -446,6 +564,7 @@ void Processor::reset() {
   lastError = "";
   running = true;
   paused = false;
+  audio.reset();
 }
 
 /**

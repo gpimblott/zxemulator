@@ -59,11 +59,11 @@ private:
 
   sf::Color colors[16];
 
-  void drawRow(unsigned char **pixels, int y) const;
+  void drawRow(unsigned char **pixels, int y, int absY) const;
 
   void setPixel(unsigned char **pixel, sf::Color colour) const;
 
-  void drawBorderRow(unsigned char **pixels) const;
+  void drawBorderRow(unsigned char **pixels, int y) const;
 
   void drawBorder(unsigned char **pixel, sf::Color colour) const;
 

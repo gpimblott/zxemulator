@@ -27,6 +27,7 @@
 
 #include "../../utils/BaseTypes.h"
 #include <string>
+#include <vector>
 
 #define VIDEO_PIXEL_START                                                      \
   0x4000 // Start of the video videoBuffer in the memory map
@@ -55,6 +56,7 @@ private:
   emulator_types::byte *videoBuffer;
   emulator_types::byte *colourAttributes;
   emulator_types::byte borderColor = 7; // Default white border
+  std::vector<emulator_types::byte> scanlineBorderColors;
 
   emulator_types::word encodeAddress(int x, int y) const;
   void printBits(std::string msg, size_t const size,
@@ -69,8 +71,16 @@ public:
 
   void setBorderColor(emulator_types::byte color) {
     borderColor = color & 0x07;
+    // Fallback: fill all?
+    std::fill(scanlineBorderColors.begin(), scanlineBorderColors.end(),
+              borderColor);
   }
+
+  void setBorderColor(emulator_types::byte color, long tStates);
+  void newFrame();
+
   emulator_types::byte getBorderColor() const { return borderColor; }
+  emulator_types::byte getBorderColorAtLine(int line) const;
 
   // Override operators
   emulator_types::byte &operator[](int index);
