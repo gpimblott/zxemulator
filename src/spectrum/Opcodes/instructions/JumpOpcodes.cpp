@@ -23,7 +23,6 @@
  */
 
 #include "JumpOpcodes.h"
-#include "../../../utils/debug.h"
 
 JumpOpcodes::JumpOpcodes() : OpCodeProvider() {
   createOpCode(JP_XX, "JP_XX", processJP_XX);
@@ -59,7 +58,7 @@ JumpOpcodes::JumpOpcodes() : OpCodeProvider() {
     s.incPC();
     return 7;
   });
-  createOpCode(0xC3, "JP nn", processJP);
+
   createOpCode(RST_00, "RST 00",
                [](ProcessorState &s) { return processRST(s, 0x00); });
   createOpCode(RST_08, "RST 08",
@@ -82,9 +81,6 @@ JumpOpcodes::JumpOpcodes() : OpCodeProvider() {
     s.setPC(s.registers.HL);
     return 4;
   });
-
-  createOpCode(CALL_NN, "CALL nn", processCALL);
-  createOpCode(RET, "RET", processRET);
 
   // Conditional RETs
   createOpCode(0xC0, "RET NZ", [](ProcessorState &s) {

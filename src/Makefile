@@ -534,30 +534,6 @@ spectrum/Opcodes/instructions/IOOpcodes.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/IOOpcodes.cpp.s
 .PHONY : spectrum/Opcodes/instructions/IOOpcodes.cpp.s
 
-spectrum/Opcodes/instructions/InterruptOpcodes.o: spectrum/Opcodes/instructions/InterruptOpcodes.cpp.o
-.PHONY : spectrum/Opcodes/instructions/InterruptOpcodes.o
-
-# target to build an object file
-spectrum/Opcodes/instructions/InterruptOpcodes.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/InterruptOpcodes.cpp.o
-.PHONY : spectrum/Opcodes/instructions/InterruptOpcodes.cpp.o
-
-spectrum/Opcodes/instructions/InterruptOpcodes.i: spectrum/Opcodes/instructions/InterruptOpcodes.cpp.i
-.PHONY : spectrum/Opcodes/instructions/InterruptOpcodes.i
-
-# target to preprocess a source file
-spectrum/Opcodes/instructions/InterruptOpcodes.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/InterruptOpcodes.cpp.i
-.PHONY : spectrum/Opcodes/instructions/InterruptOpcodes.cpp.i
-
-spectrum/Opcodes/instructions/InterruptOpcodes.s: spectrum/Opcodes/instructions/InterruptOpcodes.cpp.s
-.PHONY : spectrum/Opcodes/instructions/InterruptOpcodes.s
-
-# target to generate assembly for a file
-spectrum/Opcodes/instructions/InterruptOpcodes.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/InterruptOpcodes.cpp.s
-.PHONY : spectrum/Opcodes/instructions/InterruptOpcodes.cpp.s
-
 spectrum/Opcodes/instructions/JumpOpcodes.o: spectrum/Opcodes/instructions/JumpOpcodes.cpp.o
 .PHONY : spectrum/Opcodes/instructions/JumpOpcodes.o
 
@@ -997,9 +973,6 @@ help:
 	@echo "... spectrum/Opcodes/instructions/IOOpcodes.o"
 	@echo "... spectrum/Opcodes/instructions/IOOpcodes.i"
 	@echo "... spectrum/Opcodes/instructions/IOOpcodes.s"
-	@echo "... spectrum/Opcodes/instructions/InterruptOpcodes.o"
-	@echo "... spectrum/Opcodes/instructions/InterruptOpcodes.i"
-	@echo "... spectrum/Opcodes/instructions/InterruptOpcodes.s"
 	@echo "... spectrum/Opcodes/instructions/JumpOpcodes.o"
 	@echo "... spectrum/Opcodes/instructions/JumpOpcodes.i"
 	@echo "... spectrum/Opcodes/instructions/JumpOpcodes.s"
