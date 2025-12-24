@@ -231,8 +231,18 @@ bool Tape::fastLoadBlock(byte expectedFlag, word length, word startAddress,
 
         if (blocks[scanIndex].data.size() < (size_t)(length + 2)) {
           // Error: Block too short?
+          Logger::write("Block too short for fast load");
           return false;
         }
+
+        // Debug Logging
+        char msg[128];
+        snprintf(msg, sizeof(msg),
+                 "FastLoad: Flag=%02X Exp=%02X Len=%d IX=%04X Data[0]=%02X "
+                 "Data[1]=%02X",
+                 blocks[scanIndex].data[0], expectedFlag, length, startAddress,
+                 blocks[scanIndex].data[0], blocks[scanIndex].data[1]);
+        Logger::write(msg);
 
         // Load Data
         // Skip Flag (index 0)
@@ -240,7 +250,8 @@ bool Tape::fastLoadBlock(byte expectedFlag, word length, word startAddress,
         // rom routine loads to IX.
         const std::vector<byte> &data = blocks[scanIndex].data;
         for (size_t i = 0; i < length; i++) {
-          memory[(startAddress + i) & 0xFFFF] = data[i + 1];
+          if (i + 1 < data.size())
+            memory[(startAddress + i) & 0xFFFF] = data[i + 1];
         }
 
         // Advance Tape

@@ -583,6 +583,13 @@ void WindowsScreen::handleKey(sf::Keyboard::Key key, bool pressed) {
     mapSymbol(pressed, 7, 2, 2, 4); // M (.), T (>)
   if (key == sf::Keyboard::Key::Slash)
     mapSymbol(pressed, 0, 4, 0, 3); // V (/), C (?)
+
+  // F9: Toggle Fast Load
+  if (key == sf::Keyboard::Key::F9 && pressed) {
+    bool current = processor->getState().isFastLoad();
+    processor->getState().setFastLoad(!current);
+    printf("Fast Load Toggled: %s\n", !current ? "ON" : "OFF");
+  }
 }
 
 void WindowsScreen::mapSymbol(bool pressed, int unshiftedLine, int unshiftedBit,

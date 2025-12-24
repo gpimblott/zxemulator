@@ -388,3 +388,37 @@ TEST_F(InstructionTest, ED_LDDR_SingleStep) {
   // BC is 0, so should NOT loop. PC -> 0x8002
   EXPECT_EQ(state->registers.PC, 0x8002);
 }
+
+TEST_F(InstructionTest, DAA_Add_NoCarry) {
+  state->registers.A = 0x15;
+  state->registers.F = 0;
+  executeInstruction({0x27}, 0x8000);
+  EXPECT_EQ(state->registers.A, 0x15);
+  EXPECT_FALSE(checkFlag(C_FLAG));
+  EXPECT_FALSE(checkFlag(H_FLAG));
+}
+
+TEST_F(InstructionTest, DAA_Add_LowNibble) {
+  state->registers.A = 0x0A;
+  state->registers.F = 0;
+  executeInstruction({0x27}, 0x8000);
+  EXPECT_EQ(state->registers.A, 0x10);
+  EXPECT_TRUE(checkFlag(H_FLAG));
+}
+
+TEST_F(InstructionTest, DAA_Add_Carry) {
+  state->registers.A = 0x80;
+  state->registers.F = C_FLAG;
+  executeInstruction({0x27}, 0x8000);
+  EXPECT_EQ(state->registers.A, 0xE0);
+  EXPECT_TRUE(checkFlag(C_FLAG));
+}
+
+TEST_F(InstructionTest, DAA_Sub_LowNibble) {
+  state->registers.A = 0x15;
+  state->registers.F = N_FLAG | H_FLAG;
+  executeInstruction({0x27}, 0x8000);
+  EXPECT_EQ(state->registers.A, 0x0F);
+  EXPECT_TRUE(checkFlag(H_FLAG));
+  EXPECT_TRUE(checkFlag(N_FLAG));
+}

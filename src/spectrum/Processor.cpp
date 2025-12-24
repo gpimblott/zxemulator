@@ -53,6 +53,7 @@ void Processor::init(const char *romFile) {
 
   // set up the start point
   state.registers.PC = ROM_LOCATION;
+  state.setFastLoad(false); // Default to Slow/Authentic load
 }
 
 void Processor::loadTape(Tape tape) {
@@ -235,6 +236,27 @@ void Processor::executeFrame() {
       cycles = 4;
       break;
     }
+
+    case 0xDD: // IX
+      exec_index_opcode(0xDD);
+      // exec_index_opcode does its own T-State updates because of complexity
+      // so we set cycles=0 here to avoid double counting?
+      // My impl logic: "state.addFrameTStates(cycles);" at end of
+      // exec_index_opcode. executeFrame loop adds 'tStates += cycles'. If I
+      // return void and add internally, executeFrame's 'cycles' local var is 0.
+      // lines 1832: "if (handled) { tStates += cycles;
+      // state.addFrameTStates(cycles); ... }" If I set handled=true (default),
+      // and cycles=0, then `addFrameTStates(0)` adds nothing. But `tStates +=
+      // 0` adds nothing. AND my function added usage. BUT `executeFrame` also
+      // calls tapes/audio updates. My function calls them. So I should ensure
+      // `executeFrame` does NOT duplicate.
+      cycles = 0;
+      break;
+
+    case 0xFD: // IY
+      exec_index_opcode(0xFD);
+      cycles = 0;
+      break;
 
     case 0x0F: // RRCA
     {
@@ -858,19 +880,9 @@ void Processor::executeFrame() {
       break;
     }
 
-    case 0xF3: // DI
-      state.setInterrupts(false);
-      cycles = 4;
-      break;
-
     case 0xF9: // LD SP, HL
       state.registers.SP = state.registers.HL;
       cycles = 6;
-      break;
-
-    case 0xFB: // EI
-      state.setInterrupts(true);
-      cycles = 4;
       break;
 
     // LD r, r' instructions (0x40-0x7F range, very common)
@@ -1695,85 +1707,10 @@ void Processor::executeFrame() {
       break;
     }
 
-    // ------------------------------------------------------------------------
-    // Misc
-    // ------------------------------------------------------------------------
-    case 0x27: { // DAA
-      byte initA = state.registers.A;
-      byte correction = 0;
-      bool C = GET_FLAG(C_FLAG, state.registers);
-      bool H = GET_FLAG(H_FLAG, state.registers);
-      bool N = GET_FLAG(N_FLAG, state.registers);
+      // ------------------------------------------------------------------------
+      // Misc
+      // ------------------------------------------------------------------------
 
-      if (H || ((initA & 0x0F) > 9)) {
-        correction += 6;
-      }
-      if (C || (initA > 0x99)) {
-        correction += 0x60;
-        SET_FLAG(C_FLAG, state.registers);
-      }
-
-      if (N) {
-        state.registers.A -= correction;
-      } else {
-        state.registers.A += correction;
-      }
-
-      // Flags
-      byte res = state.registers.A;
-      // S, Z
-      if (res & 0x80)
-        SET_FLAG(S_FLAG, state.registers);
-      else
-        CLEAR_FLAG(S_FLAG, state.registers);
-
-      if (res == 0)
-        SET_FLAG(Z_FLAG, state.registers);
-      else
-        CLEAR_FLAG(Z_FLAG, state.registers);
-
-      // P/V (Parity)
-      int bits = 0;
-      for (int i = 0; i < 8; i++) {
-        if (res & (1 << i))
-          bits++;
-      }
-      if (bits % 2 == 0)
-        SET_FLAG(P_FLAG, state.registers); // Even parity
-      else
-        CLEAR_FLAG(P_FLAG, state.registers);
-
-      // H Flag calculation (Simpler heuristic that often works for ROM boot)
-      // "If there was a correction to the lower nibble, H is usually set?"
-      // A common accurate formula:
-      bool h_update = false;
-      if (N) {
-        h_update = (H && (initA & 0x0F) < 6);
-      } else {
-        h_update = ((initA & 0x0F) > 9);
-      }
-      if (h_update)
-        SET_FLAG(H_FLAG, state.registers);
-      else
-        CLEAR_FLAG(H_FLAG, state.registers);
-
-      cycles = 4;
-      break;
-    }
-    case 0x2F: { // CPL
-      state.registers.A = ~state.registers.A;
-      SET_FLAG(H_FLAG, state.registers);
-      SET_FLAG(N_FLAG, state.registers);
-      cycles = 4;
-      break;
-    }
-    case 0x37: { // SCF
-      SET_FLAG(C_FLAG, state.registers);
-      CLEAR_FLAG(N_FLAG, state.registers);
-      CLEAR_FLAG(H_FLAG, state.registers);
-      cycles = 4;
-      break;
-    }
     case 0x3F: { // CCF
       if (GET_FLAG(C_FLAG, state.registers)) {
         CLEAR_FLAG(C_FLAG, state.registers);
@@ -1786,6 +1723,91 @@ void Processor::executeFrame() {
       cycles = 4;
       break;
     }
+
+    case 0x27: // DAA
+    {
+      byte a = state.registers.A;
+      byte correction = 0;
+      bool n = GET_FLAG(N_FLAG, state.registers);
+      bool c = GET_FLAG(C_FLAG, state.registers);
+      bool h = GET_FLAG(H_FLAG, state.registers);
+
+      // Wait, DAA flags are specific. sub8/add8 overwrite flags including C, H,
+      // N. DAA should preserve N. Set P/V to parity. S, Z from result. And H is
+      // diff. Re-doing DAA manually.
+
+      int res = a;
+      if (!n) {
+        if (h || (a & 0x0F) > 9)
+          res += 0x06;
+        if (c || (a > 0x9F))
+          res += 0x60;
+      } else {
+        if (h || (a & 0x0F) > 9)
+          res -= 0x06;
+        if (c || res > 0x99)
+          res -= 0x60;
+      }
+
+      // Flags
+      if (c || (!n && a > 0x99))
+        SET_FLAG(C_FLAG, state.registers);
+      // Logic for H is complex.
+      if ((!n && (a & 0x0F) > 9) || (n && h && (a & 0x0F) < 6))
+        SET_FLAG(H_FLAG, state.registers); // Approximate
+      else
+        CLEAR_FLAG(H_FLAG, state.registers);
+
+      state.registers.A = (byte)res;
+      // Parity
+      int bits = 0;
+      for (int i = 0; i < 8; i++)
+        if (res & (1 << i))
+          bits++;
+      if (bits % 2 == 0)
+        SET_FLAG(P_FLAG, state.registers);
+      else
+        CLEAR_FLAG(P_FLAG, state.registers);
+      if ((res & 0xFF) == 0)
+        SET_FLAG(Z_FLAG, state.registers);
+      else
+        CLEAR_FLAG(Z_FLAG, state.registers);
+      if (res & 0x80)
+        SET_FLAG(S_FLAG, state.registers);
+      else
+        CLEAR_FLAG(S_FLAG, state.registers);
+
+      cycles = 4;
+      break;
+    }
+
+    case 0x2F: // CPL
+      state.registers.A = ~state.registers.A;
+      SET_FLAG(H_FLAG, state.registers);
+      SET_FLAG(N_FLAG, state.registers);
+      cycles = 4;
+      break;
+
+    case 0x37: // SCF
+      SET_FLAG(C_FLAG, state.registers);
+      CLEAR_FLAG(H_FLAG, state.registers);
+      CLEAR_FLAG(N_FLAG, state.registers);
+      cycles = 4;
+      break;
+
+    case 0xF3: // DI
+      state.setInterrupts(false);
+      state.registers.IFF1 = 0;
+      state.registers.IFF2 = 0;
+      cycles = 4;
+      break;
+
+    case 0xFB: // EI
+      state.setInterrupts(true);
+      state.registers.IFF1 = 1;
+      state.registers.IFF2 = 1;
+      cycles = 4;
+      break;
 
     // ------------------------------------------------------------------------
     // INC/DEC 16-bit (BC, DE, HL, SP)
@@ -2469,7 +2491,578 @@ int Processor::exec_cb_opcode() {
   return cycles;
 }
 void Processor::exec_index_opcode(byte prefix) {
-  // To be implemented
+  // Determine Index Register
+  word &idx = (prefix == 0xDD) ? state.registers.IX : state.registers.IY;
+
+  // Fetch opcode
+  byte opcode = state.getNextByteFromPC();
+  state.registers.PC++;
+
+  // Handle DD CB d <opcode>
+  if (opcode == 0xCB) {
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    byte cbOp = state.getNextByteFromPC();
+    state.registers.PC++;
+
+    word addr = idx + (int8_t)d;
+    byte val = state.memory[addr];
+
+    int x = (cbOp >> 6) & 3;
+    int y = (cbOp >> 3) & 7;
+    int z = cbOp & 7;
+
+    // Most CB ops operate on 'val' then write back
+    // BIT (x=1) does not write back.
+    // Logic is similar to standard CB but on (IX+d).
+    // Note: Z80 undocumented behavior: result is ALSO copied to register
+    // specified by 'z' (if not 6). But official behavior only updates (IX+d).
+    // We'll stick to official for now.
+
+    int cycles = 23; // Usually 23 for indexed bit ops
+
+    if (x == 0) { // Rotate/Shift
+      switch (y) {
+      case 0:
+        rlc(val);
+        break;
+      case 1:
+        rrc(val);
+        break;
+      case 2:
+        rl(val);
+        break;
+      case 3:
+        rr(val);
+        break;
+      case 4:
+        sla(val);
+        break;
+      case 5:
+        sra(val);
+        break;
+      case 6:
+        sll(val);
+        break;
+      case 7:
+        srl(val);
+        break;
+      }
+      writeMem(addr, val);
+    } else if (x == 1) { // BIT
+      bit(y, val);
+      cycles = 20;       // BIT is 20
+                         // No writeback
+    } else if (x == 2) { // RES
+      res(y, val);
+      writeMem(addr, val);
+    } else if (x == 3) { // SET
+      set(y, val);
+      writeMem(addr, val);
+    }
+
+    state.addFrameTStates(cycles);
+    this->state.tape.update(cycles);
+    audio.update(cycles, state.getSpeakerBit(), state.tape.getEarBit());
+    return;
+  }
+
+  // Standard Index Opcodes
+  // Helper for High/Low byte access (Little Endian host assumed)
+  byte *idxL = (byte *)&idx;
+  byte *idxH = (byte *)&idx + 1;
+
+  int cycles = 0;
+
+  switch (opcode) {
+  // 09, 19, 29, 39: ADD IX, rr
+  case 0x09:
+    add16(idx, state.registers.BC);
+    cycles = 15;
+    break;
+  case 0x19:
+    add16(idx, state.registers.DE);
+    cycles = 15;
+    break;
+  case 0x29:
+    add16(idx, idx);
+    cycles = 15;
+    break;
+  case 0x39:
+    add16(idx, state.registers.SP);
+    cycles = 15;
+    break;
+
+  // 21 nn: LD IX, nn
+  case 0x21: {
+    idx = state.getNextWordFromPC();
+    state.registers.PC += 2;
+    cycles = 14;
+    break;
+  }
+
+  // 22 nn: LD (nn), IX
+  case 0x22: {
+    word addr = state.getNextWordFromPC();
+    state.registers.PC += 2;
+    writeMem(addr, *idxL);     // Low byte
+    writeMem(addr + 1, *idxH); // High byte
+    cycles = 20;
+    break;
+  }
+
+  // 2A nn: LD IX, (nn)
+  case 0x2A: {
+    word addr = state.getNextWordFromPC();
+    state.registers.PC += 2;
+    *idxL = state.memory[addr];
+    *idxH = state.memory[addr + 1];
+    cycles = 20;
+    break;
+  }
+
+  // 23: INC IX
+  case 0x23:
+    idx++;
+    cycles = 10;
+    break;
+
+  // 2B: DEC IX
+  case 0x2B:
+    idx--;
+    cycles = 10;
+    break;
+
+  // 24: INC IXH
+  case 0x24: {
+    ALUHelpers::inc8(state, *idxH);
+    cycles = 8;
+    break;
+  }
+  // 25: DEC IXH
+  case 0x25: {
+    ALUHelpers::dec8(state, *idxH);
+    cycles = 8;
+    break;
+  }
+  // 2C: INC IXL
+  case 0x2C: {
+    ALUHelpers::inc8(state, *idxL);
+    cycles = 8;
+    break;
+  }
+  // 2D: DEC IXL
+  case 0x2D: {
+    ALUHelpers::dec8(state, *idxL);
+    cycles = 8;
+    break;
+  }
+
+  // 34: INC (IX+d)
+  case 0x34: {
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    word addr = idx + (int8_t)d;
+    byte val = state.memory[addr];
+    // Use helper for correct flags (H, P/V)
+    ALUHelpers::inc8(state, val);
+    writeMem(addr, val);
+    cycles = 23;
+    break;
+  }
+
+  // 35: DEC (IX+d)
+  case 0x35: {
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    word addr = idx + (int8_t)d;
+    byte val = state.memory[addr];
+    // Use helper for correct flags (H, P/V)
+    ALUHelpers::dec8(state, val);
+    writeMem(addr, val);
+    cycles = 23;
+    break;
+  }
+
+  // 36: LD (IX+d), n
+  case 0x36: {
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    byte n = state.getNextByteFromPC();
+    state.registers.PC++;
+    writeMem(idx + (int8_t)d, n);
+    cycles = 19;
+    break;
+  }
+
+  // UNDOCUMENTED / REQUESTED OPCODES
+  // 44: LD B, IXH/IYH
+  case 0x44:
+    state.registers.B = *idxH;
+    cycles = 8;
+    break;
+  // 45: LD B, IXL/IYL -- standard mapping LD B,L -> LD B, IXL
+  case 0x45:
+    state.registers.B = *idxL;
+    cycles = 8;
+    break;
+
+  // 4C: LD C, IXH
+  case 0x4C:
+    state.registers.C = *idxH;
+    cycles = 8;
+    break;
+  // 4D: LD C, IXL (Requested)
+  case 0x4D:
+    state.registers.C = *idxL;
+    cycles = 8;
+    break;
+
+  // 54: LD D, IXH
+  case 0x54:
+    state.registers.D = *idxH;
+    cycles = 8;
+    break;
+  // 55: LD D, IXL
+  case 0x55:
+    state.registers.D = *idxL;
+    cycles = 8;
+    break;
+
+  // 5C: LD E, IXH
+  case 0x5C:
+    state.registers.E = *idxH;
+    cycles = 8;
+    break;
+  // 5D: LD E, IXL
+  case 0x5D:
+    state.registers.E = *idxL;
+    cycles = 8;
+    break;
+
+  // 60: LD IXH, B
+  case 0x60:
+    *idxH = state.registers.B;
+    cycles = 8;
+    break;
+  // 61: LD IXH, C
+  case 0x61:
+    *idxH = state.registers.C;
+    cycles = 8;
+    break;
+  // 62: LD IXH, D
+  case 0x62:
+    *idxH = state.registers.D;
+    cycles = 8;
+    break;
+  // 63: LD IXH, E
+  case 0x63:
+    *idxH = state.registers.E;
+    cycles = 8;
+    break;
+  // 64: LD IXH, IXH (NOP)
+  case 0x64:
+    cycles = 8;
+    break;
+  // 65: LD IXH, IXL
+  case 0x65:
+    *idxH = *idxL;
+    cycles = 8;
+    break;
+
+  // 67: LD IXH, A (Undocumented)
+  case 0x67:
+    *idxH = state.registers.A;
+    cycles = 8;
+    break;
+
+  // 68: LD IXL, B
+  case 0x68:
+    *idxL = state.registers.B;
+    cycles = 8;
+    break;
+  // 69: LD IXL, C
+  case 0x69:
+    *idxL = state.registers.C;
+    cycles = 8;
+    break;
+  // 6A: LD IXL, D (Undocumented)
+  case 0x6A:
+    *idxL = state.registers.D;
+    cycles = 8;
+    break;
+  // 6B: LD IXL, E (Undocumented)
+  case 0x6B:
+    *idxL = state.registers.E;
+    cycles = 8;
+    break;
+
+  // 6C: LD IXL, H -> LD IXL, IXH
+  case 0x6C:
+    *idxL = *idxH;
+    cycles = 8;
+    break;
+  // 6D: LD IXL, L -> LD IXL, IXL
+  case 0x6D:
+    cycles = 8;
+    break;
+
+  // 6F: LD IXL, A (Undocumented)
+  case 0x6F:
+    *idxL = state.registers.A;
+    cycles = 8;
+    break;
+
+  // 70-75, 77: LD (IX+d), r
+  case 0x70: { // LD (IX+d), B
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    writeMem(idx + (int8_t)d, state.registers.B);
+    cycles = 19;
+    break;
+  }
+  case 0x71: { // LD (IX+d), C
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    writeMem(idx + (int8_t)d, state.registers.C);
+    cycles = 19;
+    break;
+  }
+  case 0x72: { // LD (IX+d), D
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    writeMem(idx + (int8_t)d, state.registers.D);
+    cycles = 19;
+    break;
+  }
+  case 0x73: { // LD (IX+d), E
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    writeMem(idx + (int8_t)d, state.registers.E);
+    cycles = 19;
+    break;
+  }
+  case 0x74: { // LD (IX+d), H
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    writeMem(idx + (int8_t)d, state.registers.H);
+    cycles = 19;
+    break;
+  }
+  case 0x75: { // LD (IX+d), L
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    writeMem(idx + (int8_t)d, state.registers.L);
+    cycles = 19;
+    break;
+  }
+  case 0x77: { // LD (IX+d), A
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    writeMem(idx + (int8_t)d, state.registers.A);
+    cycles = 19;
+    break;
+  }
+
+  // 7C: LD A, IXH
+  case 0x7C:
+    state.registers.A = *idxH;
+    cycles = 8;
+    break;
+  // 7D: LD A, IXL
+  case 0x7D:
+    state.registers.A = *idxL;
+    cycles = 8;
+    break;
+
+  // 7E: LD A, (IX+d)
+  case 0x7E: {
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    state.registers.A = state.memory[idx + (int8_t)d];
+    cycles = 19;
+    break;
+  }
+
+  // ALU (IX+d)
+  case 0x86: { // ADD A, (IX+d)
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    ALUHelpers::add8(state, state.memory[idx + (int8_t)d]);
+    cycles = 19;
+    break;
+  }
+  case 0x8E: { // ADC A, (IX+d)
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    ALUHelpers::adc8(state, state.memory[idx + (int8_t)d]);
+    cycles = 19;
+    break;
+  }
+  case 0x96: { // SUB (IX+d)
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    ALUHelpers::sub8(state, state.memory[idx + (int8_t)d]);
+    cycles = 19;
+    break;
+  }
+  case 0x9E: { // SBC A, (IX+d)
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    ALUHelpers::sbc8(state, state.memory[idx + (int8_t)d]);
+    cycles = 19;
+    break;
+  }
+  case 0xA6: { // AND (IX+d)
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    ALUHelpers::and8(state, state.memory[idx + (int8_t)d]);
+    cycles = 19;
+    break;
+  }
+  case 0xAE: { // XOR (IX+d)
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    ALUHelpers::xor8(state, state.memory[idx + (int8_t)d]);
+    cycles = 19;
+    break;
+  }
+  case 0xB6: { // OR (IX+d)
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    ALUHelpers::or8(state, state.memory[idx + (int8_t)d]);
+    cycles = 19;
+    break;
+  }
+  case 0xBE: { // CP (IX+d)
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    ALUHelpers::cp8(state, state.memory[idx + (int8_t)d]);
+    cycles = 19;
+    break;
+  }
+  // 46: LD B, (IX+d)
+  case 0x46: {
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    state.registers.B = state.memory[idx + (int8_t)d];
+    cycles = 19;
+    break;
+  }
+  // 4E, 56, 5E, 66, 6E
+  case 0x4E: {
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    state.registers.C = state.memory[idx + (int8_t)d];
+    cycles = 19;
+    break;
+  }
+  case 0x56: {
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    state.registers.D = state.memory[idx + (int8_t)d];
+    cycles = 19;
+    break;
+  }
+  case 0x5E: {
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    state.registers.E = state.memory[idx + (int8_t)d];
+    cycles = 19;
+    break;
+  }
+  case 0x66: {
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    state.registers.H = state.memory[idx + (int8_t)d];
+    cycles = 19;
+    break;
+  }
+  case 0x6E: {
+    byte d = state.getNextByteFromPC();
+    state.registers.PC++;
+    state.registers.L = state.memory[idx + (int8_t)d];
+    cycles = 19;
+    break;
+  }
+
+  // B4: OR IXH (Requested)
+  case 0xB4: {
+    ALUHelpers::or8(state, *idxH);
+    cycles = 8;
+    break;
+  }
+  // B5: OR IXL (Requested)
+  case 0xB5: {
+    ALUHelpers::or8(state, *idxL);
+    cycles = 8;
+    break;
+  }
+
+  // E1: POP IX
+  case 0xE1: {
+    idx = pop16();
+    cycles = 14;
+    break;
+  }
+  // E5: PUSH IX
+  case 0xE5: {
+    push16(idx);
+    cycles = 15;
+    break;
+  }
+
+  // E3: EX (SP), IX
+  case 0xE3: {
+    byte low = state.memory[state.registers.SP];
+    byte high = state.memory[state.registers.SP + 1];
+    writeMem(state.registers.SP, idx & 0xFF);
+    writeMem(state.registers.SP + 1, (idx >> 8) & 0xFF);
+    idx = (high << 8) | low;
+    cycles = 23;
+    break;
+  }
+
+  // E9: JP (IX)
+  case 0xE9: {
+    state.registers.PC = idx;
+    cycles = 8;
+    break;
+  }
+
+  // F9: LD SP, IX
+  case 0xF9: {
+    state.registers.SP = idx;
+    cycles = 10;
+    break;
+  }
+
+  default:
+
+    // Handle unhandled index ops as standard opcodes with no displacement?
+    // Or if standard op uses HL, use IX?
+    // Z80 Rule: If opcode not index-aware, execute as standard.
+    // If it accessed (HL), it accesses (IX+d).
+    // BUT my switch handles (IX+d) cases explicitly (7E, 46, etc).
+    // What if it's ADD A, (IX+d) (86)?
+    // I need to implement ALU ops!
+    // 86: ADD A, (IX+d)
+    // 96: SUB (IX+d)
+    // A6: AND (IX+d)
+    // B6: OR (IX+d)
+    // BE: CP (IX+d)
+    // These are ESSENTIAL.
+    state.registers
+        .PC--; // Rewind? No, standard dispatch in executeFrame is separated.
+    // Debugging loop:
+    printf("Unknown Index Opcode %02X %02X\n", prefix, opcode);
+    cycles = 4;
+    break;
+  }
+
+  state.addFrameTStates(cycles);
+  this->state.tape.update(cycles);
+  audio.update(cycles, state.getSpeakerBit(), state.tape.getEarBit());
 }
 
 // 16-bit Stubs
@@ -2751,6 +3344,16 @@ void Processor::op_ed_sbc16(word &dest, word src) {
   else
     CLEAR_FLAG(S_FLAG, state.registers);
 
+  // Overflow (P/V) for SUB/SBC
+  short op1 = (short)dest;
+  short op2 = (short)src;
+  short r = (short)val;
+  if (((op1 > 0 && op2 < 0) && r < 0) || ((op1 < 0 && op2 > 0) && r > 0)) {
+    SET_FLAG(P_FLAG, state.registers);
+  } else {
+    CLEAR_FLAG(P_FLAG, state.registers);
+  }
+
   dest = (word)val;
 }
 
@@ -2778,6 +3381,16 @@ void Processor::op_ed_adc16(word &dest, word src) {
     SET_FLAG(S_FLAG, state.registers);
   else
     CLEAR_FLAG(S_FLAG, state.registers);
+
+  // Overflow (P/V)
+  short op1 = (short)dest;
+  short op2 = (short)src;
+  short r = (short)val;
+  if (((op1 > 0 && op2 > 0) && r < 0) || ((op1 < 0 && op2 < 0) && r > 0)) {
+    SET_FLAG(P_FLAG, state.registers);
+  } else {
+    CLEAR_FLAG(P_FLAG, state.registers);
+  }
 
   dest = (word)val;
 }
