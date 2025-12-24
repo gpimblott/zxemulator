@@ -55,6 +55,9 @@ private:
 
   // Write with ROM protection
   void writeMem(word address, byte value);
+  // Stack helpers with safe memory access
+  void push16(word value);
+  word pop16();
 
   // Helper methods for instruction groups
   void op_load(byte opcode);

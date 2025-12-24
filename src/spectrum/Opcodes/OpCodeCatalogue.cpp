@@ -29,8 +29,6 @@
 #include "instructions/BitOpcodes.h"
 #include "instructions/IOOpcodes.h"
 
-#include "instructions/JumpOpcodes.h"
-
 #include "instructions/RotateOpcodes.h"
 
 /**
@@ -38,7 +36,6 @@
  */
 OpCodeCatalogue::OpCodeCatalogue() {
 
-  add(new JumpOpcodes());
   add(new IOOpcodes());
   add(new ExtendedOpcodes());
   add(new IndexOpcodes());

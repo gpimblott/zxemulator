@@ -85,12 +85,6 @@
 },
 {
   "directory": "/Users/gpimblott/projects/zxemulator/src",
-  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/JumpOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/JumpOpcodes.cpp",
-  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/JumpOpcodes.cpp",
-  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/JumpOpcodes.cpp.o"
-},
-{
-  "directory": "/Users/gpimblott/projects/zxemulator/src",
   "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/ProcessorState.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/ProcessorState.cpp",
   "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/ProcessorState.cpp",
   "output": "CMakeFiles/ZXEmulator.dir/spectrum/ProcessorState.cpp.o"

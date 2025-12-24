@@ -534,30 +534,6 @@ spectrum/Opcodes/instructions/IOOpcodes.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/IOOpcodes.cpp.s
 .PHONY : spectrum/Opcodes/instructions/IOOpcodes.cpp.s
 
-spectrum/Opcodes/instructions/JumpOpcodes.o: spectrum/Opcodes/instructions/JumpOpcodes.cpp.o
-.PHONY : spectrum/Opcodes/instructions/JumpOpcodes.o
-
-# target to build an object file
-spectrum/Opcodes/instructions/JumpOpcodes.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/JumpOpcodes.cpp.o
-.PHONY : spectrum/Opcodes/instructions/JumpOpcodes.cpp.o
-
-spectrum/Opcodes/instructions/JumpOpcodes.i: spectrum/Opcodes/instructions/JumpOpcodes.cpp.i
-.PHONY : spectrum/Opcodes/instructions/JumpOpcodes.i
-
-# target to preprocess a source file
-spectrum/Opcodes/instructions/JumpOpcodes.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/JumpOpcodes.cpp.i
-.PHONY : spectrum/Opcodes/instructions/JumpOpcodes.cpp.i
-
-spectrum/Opcodes/instructions/JumpOpcodes.s: spectrum/Opcodes/instructions/JumpOpcodes.cpp.s
-.PHONY : spectrum/Opcodes/instructions/JumpOpcodes.s
-
-# target to generate assembly for a file
-spectrum/Opcodes/instructions/JumpOpcodes.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/JumpOpcodes.cpp.s
-.PHONY : spectrum/Opcodes/instructions/JumpOpcodes.cpp.s
-
 spectrum/Opcodes/instructions/RotateOpcodes.o: spectrum/Opcodes/instructions/RotateOpcodes.cpp.o
 .PHONY : spectrum/Opcodes/instructions/RotateOpcodes.o
 
@@ -973,9 +949,6 @@ help:
 	@echo "... spectrum/Opcodes/instructions/IOOpcodes.o"
 	@echo "... spectrum/Opcodes/instructions/IOOpcodes.i"
 	@echo "... spectrum/Opcodes/instructions/IOOpcodes.s"
-	@echo "... spectrum/Opcodes/instructions/JumpOpcodes.o"
-	@echo "... spectrum/Opcodes/instructions/JumpOpcodes.i"
-	@echo "... spectrum/Opcodes/instructions/JumpOpcodes.s"
 	@echo "... spectrum/Opcodes/instructions/RotateOpcodes.o"
 	@echo "... spectrum/Opcodes/instructions/RotateOpcodes.i"
 	@echo "... spectrum/Opcodes/instructions/RotateOpcodes.s"

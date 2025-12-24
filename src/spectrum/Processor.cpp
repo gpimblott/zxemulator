@@ -218,6 +218,131 @@ void Processor::executeFrame() {
       break;
     }
 
+    case 0x10: // DJNZ e
+    {
+      int8_t offset = (int8_t)m_memory[state.registers.PC];
+      state.registers.PC++;
+      state.registers.B--;
+      if (state.registers.B != 0) {
+        state.registers.PC += offset;
+        cycles = 13;
+      } else {
+        cycles = 8;
+      }
+      break;
+    }
+
+    // RST instructions
+    case 0xC7: // RST 00
+      push16(state.registers.PC);
+      state.registers.PC = 0x0000;
+      cycles = 11;
+      break;
+
+    case 0xCF: // RST 08
+      push16(state.registers.PC);
+      state.registers.PC = 0x0008;
+      cycles = 11;
+      break;
+
+    case 0xD7: // RST 10
+      push16(state.registers.PC);
+      state.registers.PC = 0x0010;
+      cycles = 11;
+      break;
+
+    case 0xDF: // RST 18
+      push16(state.registers.PC);
+      state.registers.PC = 0x0018;
+      cycles = 11;
+      break;
+
+    case 0xE7: // RST 20
+      push16(state.registers.PC);
+      state.registers.PC = 0x0020;
+      cycles = 11;
+      break;
+
+    case 0xEF: // RST 28
+      push16(state.registers.PC);
+      state.registers.PC = 0x0028;
+      cycles = 11;
+      break;
+
+    case 0xF7: // RST 30
+      push16(state.registers.PC);
+      state.registers.PC = 0x0030;
+      cycles = 11;
+      break;
+
+    case 0xFF: // RST 38
+      push16(state.registers.PC);
+      state.registers.PC = 0x0038;
+      cycles = 11;
+      break;
+
+    case 0x18: // JR e
+    {
+      int8_t offset = (int8_t)m_memory[state.registers.PC];
+      state.registers.PC++;
+      state.registers.PC += offset;
+      cycles = 12;
+      break;
+    }
+
+    case 0x20: // JR NZ, e
+    {
+      int8_t offset = (int8_t)m_memory[state.registers.PC];
+      state.registers.PC++;
+      if (!GET_FLAG(Z_FLAG, state.registers)) {
+        state.registers.PC += offset;
+        cycles = 12;
+      } else {
+        cycles = 7;
+      }
+      break;
+    }
+
+    case 0x28: // JR Z, e
+    {
+      int8_t offset = (int8_t)m_memory[state.registers.PC];
+      state.registers.PC++;
+      if (GET_FLAG(Z_FLAG, state.registers)) {
+        state.registers.PC += offset;
+        cycles = 12;
+      } else {
+        cycles = 7;
+      }
+      break;
+    }
+
+    case 0x30: // JR NC, e
+    {
+      int8_t offset = (int8_t)m_memory[state.registers.PC];
+      state.registers.PC++;
+      if (!GET_FLAG(C_FLAG, state.registers)) {
+        state.registers.PC += offset;
+        cycles = 12;
+      } else {
+        cycles = 7;
+      }
+      break;
+    }
+
+    case 0x38: // JR C, e
+    {
+      int8_t offset = (int8_t)m_memory[state.registers.PC];
+      state.registers.PC++;
+
+      if (GET_FLAG(C_FLAG, state.registers)) {
+        state.registers.PC += offset;
+        cycles = 12;
+      } else {
+        cycles = 7;
+      }
+      break;
+    }
+
     case 0x76: // HALT
       state.setHalted(true);
       cycles = 4;
@@ -272,14 +397,6 @@ void Processor::executeFrame() {
       break;
     }
 
-    case 0xC3: { // JP nn
-      word address = m_memory[state.registers.PC] |
-                     (m_memory[state.registers.PC + 1] << 8);
-      state.registers.PC = address;
-      cycles = 10;
-      break;
-    }
-
     // ------------------------------------------------------------------------
     // 16-bit Arithmetic
     // ------------------------------------------------------------------------
@@ -298,6 +415,173 @@ void Processor::executeFrame() {
     case 0x39: // ADD HL, SP
       add16(state.registers.HL, state.registers.SP);
       cycles = 11;
+      break;
+
+    case 0xC3: // JP nn
+    {
+      word address = state.getNextWordFromPC();
+      state.registers.PC = address;
+      cycles = 10;
+      break;
+    }
+
+    case 0xE9: // JP (HL)
+      state.registers.PC = state.registers.HL;
+      cycles = 4;
+      break;
+
+    // Conditional Jumps
+    case 0xC2: // JP NZ, nn
+      if (!GET_FLAG(Z_FLAG, state.registers)) {
+        state.registers.PC = state.getNextWordFromPC();
+        cycles = 10;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    case 0xCA: // JP Z, nn
+      if (GET_FLAG(Z_FLAG, state.registers)) {
+        state.registers.PC = state.getNextWordFromPC();
+        cycles = 10;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    case 0xD2: // JP NC, nn
+      if (!GET_FLAG(C_FLAG, state.registers)) {
+        state.registers.PC = state.getNextWordFromPC();
+        cycles = 10;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    case 0xDA: // JP C, nn
+      if (GET_FLAG(C_FLAG, state.registers)) {
+        state.registers.PC = state.getNextWordFromPC();
+        cycles = 10;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    case 0xE2: // JP PO, nn
+      if (!GET_FLAG(P_FLAG, state.registers)) {
+        state.registers.PC = state.getNextWordFromPC();
+        cycles = 10;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    case 0xEA: // JP PE, nn
+      if (GET_FLAG(P_FLAG, state.registers)) {
+        state.registers.PC = state.getNextWordFromPC();
+        cycles = 10;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    case 0xF2: // JP P, nn
+      if (!GET_FLAG(S_FLAG, state.registers)) {
+        state.registers.PC = state.getNextWordFromPC();
+        cycles = 10;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    case 0xFA: // JP M, nn
+      if (GET_FLAG(S_FLAG, state.registers)) {
+        state.registers.PC = state.getNextWordFromPC();
+        cycles = 10;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    // Conditional Returns
+    case 0xC0: // RET NZ
+      if (!GET_FLAG(Z_FLAG, state.registers)) {
+        state.registers.PC = pop16();
+        cycles = 11;
+      } else {
+        cycles = 5;
+      }
+      break;
+
+    case 0xC8: // RET Z
+      if (GET_FLAG(Z_FLAG, state.registers)) {
+        state.registers.PC = pop16();
+        cycles = 11;
+      } else {
+        cycles = 5;
+      }
+      break;
+
+    case 0xD0: // RET NC
+      if (!GET_FLAG(C_FLAG, state.registers)) {
+        state.registers.PC = pop16();
+        cycles = 11;
+      } else {
+        cycles = 5;
+      }
+      break;
+
+    case 0xD8: // RET C
+      if (GET_FLAG(C_FLAG, state.registers)) {
+        state.registers.PC = pop16();
+        cycles = 11;
+      } else {
+        cycles = 5;
+      }
+      break;
+
+    case 0xE0: // RET PO
+      if (!GET_FLAG(P_FLAG, state.registers)) {
+        state.registers.PC = pop16();
+        cycles = 11;
+      } else {
+        cycles = 5;
+      }
+      break;
+
+    case 0xE8: // RET PE
+      if (GET_FLAG(P_FLAG, state.registers)) {
+        state.registers.PC = pop16();
+        cycles = 11;
+      } else {
+        cycles = 5;
+      }
+      break;
+
+    case 0xF0: // RET P
+      if (!GET_FLAG(S_FLAG, state.registers)) {
+        state.registers.PC = pop16();
+        cycles = 11;
+      } else {
+        cycles = 5;
+      }
+      break;
+
+    case 0xF8: // RET M
+      if (GET_FLAG(S_FLAG, state.registers)) {
+        state.registers.PC = pop16();
+        cycles = 11;
+      } else {
+        cycles = 5;
+      }
       break;
 
     case 0xC9: { // RET
@@ -322,6 +606,111 @@ void Processor::executeFrame() {
       cycles = 17;
       break;
     }
+
+    // Conditional CALLs
+    case 0xC4: // CALL NZ, nn
+      if (!GET_FLAG(Z_FLAG, state.registers)) {
+        word address = state.getNextWordFromPC();
+        state.registers.PC += 2;
+        push16(state.registers.PC);
+        state.registers.PC = address;
+        cycles = 17;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    case 0xCC: // CALL Z, nn
+      if (GET_FLAG(Z_FLAG, state.registers)) {
+        word address = state.getNextWordFromPC();
+        state.registers.PC += 2;
+        push16(state.registers.PC);
+        state.registers.PC = address;
+        cycles = 17;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    case 0xD4: // CALL NC, nn
+      if (!GET_FLAG(C_FLAG, state.registers)) {
+        word address = state.getNextWordFromPC();
+        state.registers.PC += 2;
+        push16(state.registers.PC);
+        state.registers.PC = address;
+        cycles = 17;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    case 0xDC: // CALL C, nn
+      if (GET_FLAG(C_FLAG, state.registers)) {
+        word address = state.getNextWordFromPC();
+        state.registers.PC += 2;
+        push16(state.registers.PC);
+        state.registers.PC = address;
+        cycles = 17;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    case 0xE4: // CALL PO, nn
+      if (!GET_FLAG(P_FLAG, state.registers)) {
+        word address = state.getNextWordFromPC();
+        state.registers.PC += 2;
+        push16(state.registers.PC);
+        state.registers.PC = address;
+        cycles = 17;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    case 0xEC: // CALL PE, nn
+      if (GET_FLAG(P_FLAG, state.registers)) {
+        word address = state.getNextWordFromPC();
+        state.registers.PC += 2;
+        push16(state.registers.PC);
+        state.registers.PC = address;
+        cycles = 17;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    case 0xF4: // CALL P, nn
+      if (!GET_FLAG(S_FLAG, state.registers)) {
+        word address = state.getNextWordFromPC();
+        state.registers.PC += 2;
+        push16(state.registers.PC);
+        state.registers.PC = address;
+        cycles = 17;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
+
+    case 0xFC: // CALL M, nn
+      if (GET_FLAG(S_FLAG, state.registers)) {
+        word address = state.getNextWordFromPC();
+        state.registers.PC += 2;
+        push16(state.registers.PC);
+        state.registers.PC = address;
+        cycles = 17;
+      } else {
+        state.registers.PC += 2;
+        cycles = 10;
+      }
+      break;
 
     case 0xE3: { // EX (SP), HL
       byte l = m_memory[state.registers.SP];
@@ -1479,6 +1868,23 @@ void Processor::reset() {
 
 void Processor::writeMem(word address, byte value) {
   state.memory.fastWrite(address, value);
+}
+
+void Processor::push16(word value) {
+  state.registers.SP -= 2;
+  // Use SAFE write for stack operations usually, but standard Z80 might allow
+  // stack in ROM? No, stack must be in RAM. We use writeMem to ensure we
+  // respect memory protections (if any) or just fastWrite. writeMem wraps
+  // fastWrite.
+  writeMem(state.registers.SP + 1, (value >> 8) & 0xFF);
+  writeMem(state.registers.SP, value & 0xFF);
+}
+
+word Processor::pop16() {
+  byte low = state.memory[state.registers.SP];
+  byte high = state.memory[state.registers.SP + 1];
+  state.registers.SP += 2;
+  return (high << 8) | low;
 }
 
 /**
