@@ -5,4 +5,5 @@
 /build_test/
 /.cache/
 roms/*.tzx
+roms/*.z80
 /src/.cache/

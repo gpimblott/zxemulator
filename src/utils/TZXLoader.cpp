@@ -92,6 +92,21 @@ void TZXLoader::parse() {
       Logger::write(msg);
 
       offset += length;
+    } else if (blockId == 0x20) {
+      // Pause (Silence) or Stop Tape command
+      // 0x00-0x01: Pause duration in ms (0 = stop tape)
+      if (offset + 2 > this->size)
+        break;
+
+      word pauseDuration = this->data[offset] | (this->data[offset + 1] << 8);
+      offset += 2;
+
+      // We can ignore pause blocks for now as they're just timing hints
+      // between blocks. A pause of 0 means "stop the tape" but for emulation
+      // we can just continue to the next block.
+      char msg[100];
+      snprintf(msg, sizeof(msg), "Block 0x20: Pause %d ms", pauseDuration);
+      Logger::write(msg);
     } else if (blockId == 0x30) {
       // Text Description Block
       // 0x00: Length (N)
