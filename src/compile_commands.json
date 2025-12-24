@@ -67,12 +67,6 @@
 },
 {
   "directory": "/Users/gpimblott/projects/zxemulator/src",
-  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/LogicOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/LogicOpcodes.cpp",
-  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/LogicOpcodes.cpp",
-  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/LogicOpcodes.cpp.o"
-},
-{
-  "directory": "/Users/gpimblott/projects/zxemulator/src",
   "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/OpCodeProvider.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/OpCodeProvider.cpp",
   "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/OpCodeProvider.cpp",
   "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/OpCodeProvider.cpp.o"
@@ -139,12 +133,6 @@
 },
 {
   "directory": "/Users/gpimblott/projects/zxemulator/src",
-  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/StackOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/StackOpcodes.cpp",
-  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/StackOpcodes.cpp",
-  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/StackOpcodes.cpp.o"
-},
-{
-  "directory": "/Users/gpimblott/projects/zxemulator/src",
   "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Tape.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Tape.cpp",
   "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Tape.cpp",
   "output": "CMakeFiles/ZXEmulator.dir/spectrum/Tape.cpp.o"
@@ -166,12 +154,6 @@
   "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/BitOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/BitOpcodes.cpp",
   "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/BitOpcodes.cpp",
   "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/BitOpcodes.cpp.o"
-},
-{
-  "directory": "/Users/gpimblott/projects/zxemulator/src",
-  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp",
-  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp",
-  "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.o"
 },
 {
   "directory": "/Users/gpimblott/projects/zxemulator/src",

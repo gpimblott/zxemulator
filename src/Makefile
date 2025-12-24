@@ -486,30 +486,6 @@ spectrum/Opcodes/OpCodeProvider.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/OpCodeProvider.cpp.s
 .PHONY : spectrum/Opcodes/OpCodeProvider.cpp.s
 
-spectrum/Opcodes/instructions/ArithmeticOpcodes.o: spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.o
-.PHONY : spectrum/Opcodes/instructions/ArithmeticOpcodes.o
-
-# target to build an object file
-spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.o
-.PHONY : spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.o
-
-spectrum/Opcodes/instructions/ArithmeticOpcodes.i: spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.i
-.PHONY : spectrum/Opcodes/instructions/ArithmeticOpcodes.i
-
-# target to preprocess a source file
-spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.i
-.PHONY : spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.i
-
-spectrum/Opcodes/instructions/ArithmeticOpcodes.s: spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.s
-.PHONY : spectrum/Opcodes/instructions/ArithmeticOpcodes.s
-
-# target to generate assembly for a file
-spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.s
-.PHONY : spectrum/Opcodes/instructions/ArithmeticOpcodes.cpp.s
-
 spectrum/Opcodes/instructions/BitOpcodes.o: spectrum/Opcodes/instructions/BitOpcodes.cpp.o
 .PHONY : spectrum/Opcodes/instructions/BitOpcodes.o
 
@@ -630,30 +606,6 @@ spectrum/Opcodes/instructions/LoadOpcodes.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/LoadOpcodes.cpp.s
 .PHONY : spectrum/Opcodes/instructions/LoadOpcodes.cpp.s
 
-spectrum/Opcodes/instructions/LogicOpcodes.o: spectrum/Opcodes/instructions/LogicOpcodes.cpp.o
-.PHONY : spectrum/Opcodes/instructions/LogicOpcodes.o
-
-# target to build an object file
-spectrum/Opcodes/instructions/LogicOpcodes.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/LogicOpcodes.cpp.o
-.PHONY : spectrum/Opcodes/instructions/LogicOpcodes.cpp.o
-
-spectrum/Opcodes/instructions/LogicOpcodes.i: spectrum/Opcodes/instructions/LogicOpcodes.cpp.i
-.PHONY : spectrum/Opcodes/instructions/LogicOpcodes.i
-
-# target to preprocess a source file
-spectrum/Opcodes/instructions/LogicOpcodes.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/LogicOpcodes.cpp.i
-.PHONY : spectrum/Opcodes/instructions/LogicOpcodes.cpp.i
-
-spectrum/Opcodes/instructions/LogicOpcodes.s: spectrum/Opcodes/instructions/LogicOpcodes.cpp.s
-.PHONY : spectrum/Opcodes/instructions/LogicOpcodes.s
-
-# target to generate assembly for a file
-spectrum/Opcodes/instructions/LogicOpcodes.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/LogicOpcodes.cpp.s
-.PHONY : spectrum/Opcodes/instructions/LogicOpcodes.cpp.s
-
 spectrum/Opcodes/instructions/RotateOpcodes.o: spectrum/Opcodes/instructions/RotateOpcodes.cpp.o
 .PHONY : spectrum/Opcodes/instructions/RotateOpcodes.o
 
@@ -677,30 +629,6 @@ spectrum/Opcodes/instructions/RotateOpcodes.s: spectrum/Opcodes/instructions/Rot
 spectrum/Opcodes/instructions/RotateOpcodes.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/RotateOpcodes.cpp.s
 .PHONY : spectrum/Opcodes/instructions/RotateOpcodes.cpp.s
-
-spectrum/Opcodes/instructions/StackOpcodes.o: spectrum/Opcodes/instructions/StackOpcodes.cpp.o
-.PHONY : spectrum/Opcodes/instructions/StackOpcodes.o
-
-# target to build an object file
-spectrum/Opcodes/instructions/StackOpcodes.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/StackOpcodes.cpp.o
-.PHONY : spectrum/Opcodes/instructions/StackOpcodes.cpp.o
-
-spectrum/Opcodes/instructions/StackOpcodes.i: spectrum/Opcodes/instructions/StackOpcodes.cpp.i
-.PHONY : spectrum/Opcodes/instructions/StackOpcodes.i
-
-# target to preprocess a source file
-spectrum/Opcodes/instructions/StackOpcodes.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/StackOpcodes.cpp.i
-.PHONY : spectrum/Opcodes/instructions/StackOpcodes.cpp.i
-
-spectrum/Opcodes/instructions/StackOpcodes.s: spectrum/Opcodes/instructions/StackOpcodes.cpp.s
-.PHONY : spectrum/Opcodes/instructions/StackOpcodes.s
-
-# target to generate assembly for a file
-spectrum/Opcodes/instructions/StackOpcodes.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/StackOpcodes.cpp.s
-.PHONY : spectrum/Opcodes/instructions/StackOpcodes.cpp.s
 
 spectrum/Processor.o: spectrum/Processor.cpp.o
 .PHONY : spectrum/Processor.o
@@ -1087,9 +1015,6 @@ help:
 	@echo "... spectrum/Opcodes/OpCodeProvider.o"
 	@echo "... spectrum/Opcodes/OpCodeProvider.i"
 	@echo "... spectrum/Opcodes/OpCodeProvider.s"
-	@echo "... spectrum/Opcodes/instructions/ArithmeticOpcodes.o"
-	@echo "... spectrum/Opcodes/instructions/ArithmeticOpcodes.i"
-	@echo "... spectrum/Opcodes/instructions/ArithmeticOpcodes.s"
 	@echo "... spectrum/Opcodes/instructions/BitOpcodes.o"
 	@echo "... spectrum/Opcodes/instructions/BitOpcodes.i"
 	@echo "... spectrum/Opcodes/instructions/BitOpcodes.s"
@@ -1105,15 +1030,9 @@ help:
 	@echo "... spectrum/Opcodes/instructions/LoadOpcodes.o"
 	@echo "... spectrum/Opcodes/instructions/LoadOpcodes.i"
 	@echo "... spectrum/Opcodes/instructions/LoadOpcodes.s"
-	@echo "... spectrum/Opcodes/instructions/LogicOpcodes.o"
-	@echo "... spectrum/Opcodes/instructions/LogicOpcodes.i"
-	@echo "... spectrum/Opcodes/instructions/LogicOpcodes.s"
 	@echo "... spectrum/Opcodes/instructions/RotateOpcodes.o"
 	@echo "... spectrum/Opcodes/instructions/RotateOpcodes.i"
 	@echo "... spectrum/Opcodes/instructions/RotateOpcodes.s"
-	@echo "... spectrum/Opcodes/instructions/StackOpcodes.o"
-	@echo "... spectrum/Opcodes/instructions/StackOpcodes.i"
-	@echo "... spectrum/Opcodes/instructions/StackOpcodes.s"
 	@echo "... spectrum/Processor.o"
 	@echo "... spectrum/Processor.i"
 	@echo "... spectrum/Processor.s"

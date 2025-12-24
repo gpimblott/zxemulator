@@ -25,15 +25,14 @@
 #include "OpCodeCatalogue.h"
 #include "ExtendedOpcodes.h"
 #include "IndexOpcodes.h"
-#include "instructions/ArithmeticOpcodes.h"
+
 #include "instructions/BitOpcodes.h"
 #include "instructions/IOOpcodes.h"
 #include "instructions/InterruptOpcodes.h"
 #include "instructions/JumpOpcodes.h"
 #include "instructions/LoadOpcodes.h"
-#include "instructions/LogicOpcodes.h"
+
 #include "instructions/RotateOpcodes.h"
-#include "instructions/StackOpcodes.h"
 
 /**
  * Constructor to build all the opcode instances and add to the catalogue
@@ -41,14 +40,14 @@
 OpCodeCatalogue::OpCodeCatalogue() {
   add(new LoadOpcodes());
   add(new InterruptOpcodes());
-  add(new LogicOpcodes());
+
   add(new JumpOpcodes());
   add(new IOOpcodes());
   add(new ExtendedOpcodes());
   add(new IndexOpcodes());
-  add(new StackOpcodes());
+
   add(new BitOpcodes());
-  add(new ArithmeticOpcodes());
+
   add(new RotateOpcodes());
 
   // Build the O(1) lookup table
