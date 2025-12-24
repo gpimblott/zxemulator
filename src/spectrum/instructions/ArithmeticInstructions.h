@@ -37,7 +37,8 @@ inline void add8(ProcessorState &state, emulator_types::byte val) {
   int op1 = (int8_t)state.registers.A;
   int op2 = (int8_t)val;
   int r = (int8_t)(res & 0xFF);
-  if (((op1 > 0 && op2 > 0) && r < 0) || ((op1 < 0 && op2 < 0) && r > 0)) {
+  // Overflow (P/V) for ADD: same-sign operands, different-sign result
+  if ((~(op1 ^ op2) & (op1 ^ r) & 0x80) != 0) {
     SET_FLAG(P_FLAG, state.registers);
   } else {
     CLEAR_FLAG(P_FLAG, state.registers);
@@ -75,7 +76,8 @@ inline void adc8(ProcessorState &state, emulator_types::byte val) {
   int op1 = (int8_t)state.registers.A;
   int op2 = (int8_t)val;
   int r = (int8_t)(res & 0xFF);
-  if (((op1 > 0 && op2 > 0) && r < 0) || ((op1 < 0 && op2 < 0) && r > 0)) {
+  // Overflow for ADC: same-sign operands, different-sign result
+  if ((~(op1 ^ op2) & (op1 ^ r) & 0x80) != 0) {
     SET_FLAG(P_FLAG, state.registers);
   } else {
     CLEAR_FLAG(P_FLAG, state.registers);
@@ -108,11 +110,12 @@ inline void sub8(ProcessorState &state, emulator_types::byte val) {
   else
     CLEAR_FLAG(H_FLAG, state.registers);
 
-  // Overflow
+  // Overflow for subtraction: same-sign operands, different-sign result
   int op1 = (int8_t)state.registers.A;
   int op2 = (int8_t)val;
   int r = (int8_t)(res & 0xFF);
-  if (((op1 > 0 && op2 < 0) && r < 0) || ((op1 < 0 && op2 > 0) && r > 0)) {
+  // Overflow for SUB: different-sign operands, different-sign result
+  if (((op1 ^ op2) & (op1 ^ r) & 0x80) != 0) {
     SET_FLAG(P_FLAG, state.registers);
   } else {
     CLEAR_FLAG(P_FLAG, state.registers);
@@ -146,11 +149,12 @@ inline void sbc8(ProcessorState &state, emulator_types::byte val) {
   else
     CLEAR_FLAG(H_FLAG, state.registers);
 
-  // Overflow
+  // Overflow for subtraction: same-sign operands, different-sign result
   int op1 = (int8_t)state.registers.A;
   int op2 = (int8_t)val;
   int r = (int8_t)(res & 0xFF);
-  if (((op1 > 0 && op2 < 0) && r < 0) || ((op1 < 0 && op2 > 0) && r > 0)) {
+  // Overflow for SBC: different-sign operands, different-sign result
+  if (((op1 ^ op2) & (op1 ^ r) & 0x80) != 0) {
     SET_FLAG(P_FLAG, state.registers);
   } else {
     CLEAR_FLAG(P_FLAG, state.registers);
@@ -183,11 +187,13 @@ inline void cp8(ProcessorState &state, emulator_types::byte val) {
   else
     CLEAR_FLAG(H_FLAG, state.registers);
 
-  // Overflow
+  // Overflow for subtraction: result  sign differs from operands with SAME sign
+  // overflow if: (pos - pos = neg) OR (neg - neg = pos)
   int op1 = (int8_t)state.registers.A;
   int op2 = (int8_t)val;
   int r = (int8_t)(res & 0xFF);
-  if (((op1 > 0 && op2 < 0) && r < 0) || ((op1 < 0 && op2 > 0) && r > 0)) {
+  // Overflow for CP: different-sign operands, different-sign result
+  if (((op1 ^ op2) & (op1 ^ r) & 0x80) != 0) {
     SET_FLAG(P_FLAG, state.registers);
   } else {
     CLEAR_FLAG(P_FLAG, state.registers);
@@ -311,7 +317,7 @@ inline void adc16(ProcessorState &state, emulator_types::word &dest,
   short op1 = (short)dest;
   short op2 = (short)src;
   short r = (short)val;
-  if (((op1 > 0 && op2 > 0) && r < 0) || ((op1 < 0 && op2 < 0) && r > 0)) {
+  if ((~(op1 ^ op2) & (op1 ^ r) & 0x8000) != 0) {
     SET_FLAG(P_FLAG, state.registers);
   } else {
     CLEAR_FLAG(P_FLAG, state.registers);
@@ -352,7 +358,7 @@ inline void sbc16(ProcessorState &state, emulator_types::word &dest,
   short op1 = (short)dest;
   short op2 = (short)src;
   short r = (short)val;
-  if (((op1 > 0 && op2 < 0) && r < 0) || ((op1 < 0 && op2 > 0) && r > 0)) {
+  if (((op1 ^ op2) & (op1 ^ r) & 0x8000) != 0) {
     SET_FLAG(P_FLAG, state.registers);
   } else {
     CLEAR_FLAG(P_FLAG, state.registers);

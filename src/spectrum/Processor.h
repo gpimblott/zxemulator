@@ -76,7 +76,7 @@ private:
   // Extended instruction handlers
   int exec_ed_opcode();
   int exec_cb_opcode();
-  void exec_index_opcode(byte prefix); // DD or FD
+  int exec_index_opcode(emulator_types::byte prefix); // DD or FD
 
   // ALU Helpers
   // ALU Helpers moved to instructions/ArithmeticInstructions.h and

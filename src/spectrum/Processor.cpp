@@ -244,24 +244,11 @@ void Processor::executeFrame() {
     }
 
     case 0xDD: // IX
-      exec_index_opcode(0xDD);
-      // exec_index_opcode does its own T-State updates because of complexity
-      // so we set cycles=0 here to avoid double counting?
-      // My impl logic: "state.addFrameTStates(cycles);" at end of
-      // exec_index_opcode. executeFrame loop adds 'tStates += cycles'. If I
-      // return void and add internally, executeFrame's 'cycles' local var is 0.
-      // lines 1832: "if (handled) { tStates += cycles;
-      // state.addFrameTStates(cycles); ... }" If I set handled=true (default),
-      // and cycles=0, then `addFrameTStates(0)` adds nothing. But `tStates +=
-      // 0` adds nothing. AND my function added usage. BUT `executeFrame` also
-      // calls tapes/audio updates. My function calls them. So I should ensure
-      // `executeFrame` does NOT duplicate.
-      cycles = 0;
+      cycles = exec_index_opcode(0xDD);
       break;
 
     case 0xFD: // IY
-      exec_index_opcode(0xFD);
-      cycles = 0;
+      cycles = exec_index_opcode(0xFD);
       break;
 
     case 0x0F: // RRCA
@@ -1487,7 +1474,7 @@ void Processor::executeFrame() {
       if (!n) {
         if (h || (a & 0x0F) > 9)
           res += 0x06;
-        if (c || (a > 0x9F))
+        if (c || (a > 0x99))
           res += 0x60;
       } else {
         if (h || (a & 0x0F) > 9)
@@ -2121,7 +2108,7 @@ int Processor::exec_cb_opcode() {
 
   return cycles;
 }
-void Processor::exec_index_opcode(byte prefix) {
+int Processor::exec_index_opcode(byte prefix) {
   // Determine Index Register
   word &idx = (prefix == 0xDD) ? state.registers.IX : state.registers.IY;
 
@@ -2147,10 +2134,37 @@ void Processor::exec_index_opcode(byte prefix) {
     // BIT (x=1) does not write back.
     // Logic is similar to standard CB but on (IX+d).
     // Note: Z80 undocumented behavior: result is ALSO copied to register
-    // specified by 'z' (if not 6). But official behavior only updates (IX+d).
-    // We'll stick to official for now.
+    // specified by 'z' (if not 6).
+    // We MUST implement this for game compatibility (e.g. Jetpac).
 
     int cycles = 23; // Usually 23 for indexed bit ops
+
+    // Lambda for undocumented writeback
+    auto setUndocReg = [&](int r, byte v) {
+      switch (r) {
+      case 0:
+        state.registers.B = v;
+        break;
+      case 1:
+        state.registers.C = v;
+        break;
+      case 2:
+        state.registers.D = v;
+        break;
+      case 3:
+        state.registers.E = v;
+        break;
+      case 4:
+        state.registers.H = v;
+        break;
+      case 5:
+        state.registers.L = v;
+        break;
+      case 7:
+        state.registers.A = v;
+        break;
+      }
+    };
 
     if (x == 0) { // Rotate/Shift
       switch (y) {
@@ -2180,22 +2194,28 @@ void Processor::exec_index_opcode(byte prefix) {
         break;
       }
       writeMem(addr, val);
+      // Undocumented register writeback
+      if (z != 6)
+        setUndocReg(z, val);
     } else if (x == 1) { // BIT
       Bit::bit(state, y, val);
       cycles = 20;       // BIT is 20
-                         // No writeback
+                         // No writeback to memory OR register
     } else if (x == 2) { // RES
       Bit::res(state, y, val);
       writeMem(addr, val);
+      // Undocumented register writeback
+      if (z != 6)
+        setUndocReg(z, val);
     } else if (x == 3) { // SET
       Bit::set(state, y, val);
       writeMem(addr, val);
+      // Undocumented register writeback
+      if (z != 6)
+        setUndocReg(z, val);
     }
 
-    state.addFrameTStates(cycles);
-    this->state.tape.update(cycles);
-    audio.update(cycles, state.getSpeakerBit(), state.tape.getEarBit());
-    return;
+    return cycles;
   }
 
   // Standard Index Opcodes
@@ -2531,6 +2551,65 @@ void Processor::exec_index_opcode(byte prefix) {
     break;
   }
 
+  // Undocumented: Arithmetic with IXH/IXL
+  case 0x84: // ADD A, IXH
+    Arithmetic::add8(state, *idxH);
+    cycles = 8;
+    break;
+  case 0x85: // ADD A, IXL
+    Arithmetic::add8(state, *idxL);
+    cycles = 8;
+    break;
+  case 0x8C: // ADC A, IXH
+    Arithmetic::adc8(state, *idxH);
+    cycles = 8;
+    break;
+  case 0x8D: // ADC A, IXL
+    Arithmetic::adc8(state, *idxL);
+    cycles = 8;
+    break;
+  case 0x94: // SUB IXH
+    Arithmetic::sub8(state, *idxH);
+    cycles = 8;
+    break;
+  case 0x95: // SUB IXL
+    Arithmetic::sub8(state, *idxL);
+    cycles = 8;
+    break;
+  case 0x9C: // SBC A, IXH
+    Arithmetic::sbc8(state, *idxH);
+    cycles = 8;
+    break;
+  case 0x9D: // SBC A, IXL
+    Arithmetic::sbc8(state, *idxL);
+    cycles = 8;
+    break;
+  case 0xA4: // AND IXH
+    Logic::and8(state, *idxH);
+    cycles = 8;
+    break;
+  case 0xA5: // AND IXL
+    Logic::and8(state, *idxL);
+    cycles = 8;
+    break;
+  case 0xAC: // XOR IXH
+    Logic::xor8(state, *idxH);
+    cycles = 8;
+    break;
+  case 0xAD: // XOR IXL
+    Logic::xor8(state, *idxL);
+    cycles = 8;
+    break;
+  // B4, B5: OR - already implemented above
+  case 0xBC: // CP IXH
+    Arithmetic::cp8(state, *idxH);
+    cycles = 8;
+    break;
+  case 0xBD: // CP IXL
+    Arithmetic::cp8(state, *idxL);
+    cycles = 8;
+    break;
+
   // ALU (IX+d)
   case 0x86: { // ADD A, (IX+d)
     byte d = state.getNextByteFromPC();
@@ -2684,6 +2763,20 @@ void Processor::exec_index_opcode(byte prefix) {
     break;
   }
 
+  // I/O Instructions - IX/IY prefix is ignored
+  case 0xD3: { // OUT (n), A
+    byte port = state.getNextByteFromPC();
+    state.registers.PC++;
+    cycles = IO::out_n_a(state, port);
+    break;
+  }
+  case 0xDB: { // IN A, (n)
+    byte port = state.getNextByteFromPC();
+    state.registers.PC++;
+    cycles = IO::in_a_n(state, port);
+    break;
+  }
+
   default:
 
     // Handle unhandled index ops as standard opcodes with no displacement?
@@ -2707,7 +2800,5 @@ void Processor::exec_index_opcode(byte prefix) {
     break;
   }
 
-  state.addFrameTStates(cycles);
-  this->state.tape.update(cycles);
-  audio.update(cycles, state.getSpeakerBit(), state.tape.getEarBit());
+  return cycles;
 }

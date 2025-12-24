@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <iostream>
 #include <sys/stat.h>
 
 #include "BinaryFileLoader.h"
@@ -60,9 +59,21 @@ BinaryFileLoader::BinaryFileLoader(const char *filename, byte *buffer)
 void BinaryFileLoader::readFileToBuffer(const char *filename, byte *buffer,
                                         int size) {
   if (buffer) {
-    FILE *file_p = fopen(filename, "rb");
+    // Expand ~ to home directory if needed
+    std::string expandedPath = filename;
+    if (expandedPath.length() > 0 && expandedPath[0] == '~') {
+      const char *home = getenv("HOME");
+      if (home) {
+        expandedPath = std::string(home) + expandedPath.substr(1);
+      }
+    }
+
+    FILE *file_p = fopen(expandedPath.c_str(), "rb");
     int bytes_read = fread(buffer, sizeof(byte), size, file_p);
     printf("Read file %s - read %d of %d bytes\n", filename, size, bytes_read);
+    if (file_p) {
+      fclose(file_p);
+    }
   }
 }
 
@@ -71,8 +82,17 @@ void BinaryFileLoader::readFileToBuffer(const char *filename, byte *buffer,
  * @return the size of the file or -1
  */
 long BinaryFileLoader::getFileSize(const char *filename) {
+  // Expand ~ to home directory if needed
+  std::string expandedPath = filename;
+  if (expandedPath.length() > 0 && expandedPath[0] == '~') {
+    const char *home = getenv("HOME");
+    if (home) {
+      expandedPath = std::string(home) + expandedPath.substr(1);
+    }
+  }
+
   struct stat file_status;
-  if (stat(filename, &file_status) >= 0) {
+  if (stat(expandedPath.c_str(), &file_status) >= 0) {
     return file_status.st_size;
   }
   return -1;

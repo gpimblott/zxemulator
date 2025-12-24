@@ -4,6 +4,7 @@
 /build/
 /build_test/
 /.cache/
-roms/*.tzx
-roms/*.z80
+/roms/*.tzx
+/roms/*.z80
+/roms/*.rom
 /src/.cache/

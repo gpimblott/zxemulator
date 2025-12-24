@@ -218,7 +218,8 @@ bool Tape::fastLoadBlock(byte expectedFlag, word length, word startAddress,
   size_t scanIndex = currentBlockIndex;
 
   while (scanIndex < blocks.size()) {
-    if (blocks[scanIndex].id == 0x10) { // Standard Block
+    // Accept both standard (0x10) and turbo (0x11) speed blocks
+    if (blocks[scanIndex].id == 0x10 || blocks[scanIndex].id == 0x11) {
       // Check Flag
       if (blocks[scanIndex].data.size() > 0 &&
           blocks[scanIndex].data[0] == expectedFlag) {

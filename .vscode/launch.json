@@ -34,18 +34,6 @@
             "preLaunchTask": "build"
         },
         {
-            "name": "ZXEmulator Snapshot",
-            "type": "lldb",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/ZXEmulator",
-            "args": [
-                "-s",
-                "${workspaceFolder}/roms/pacman.z80"
-            ],
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "build"
-        },
-        {
             "name": "ZXEmulator TZX",
             "type": "lldb",
             "request": "launch",
@@ -58,6 +46,18 @@
             "preLaunchTask": "build"
         },
         {
+            "name": "ZXEmulator Snapshot",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/ZXEmulator",
+            "args": [
+                "-s",
+                "${workspaceFolder}/roms/jetpac.z80"
+            ],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build"
+        },
+        {
             "name": "ZXEmulator TZX Fastload",
             "type": "lldb",
             "request": "launch",
@@ -65,6 +65,18 @@
             "args": [
                 "-f",
                 "${workspaceFolder}/roms/manicminer.tzx"
+            ],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build"
+        },
+        {
+            "name": "ZXEmulator TZX Fastload 2",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/ZXEmulator",
+            "args": [
+                "-f",
+                "~/Downloads/everyonesawally.tzx"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build"

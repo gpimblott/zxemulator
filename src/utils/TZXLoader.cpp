@@ -92,6 +92,65 @@ void TZXLoader::parse() {
       Logger::write(msg);
 
       offset += length;
+    } else if (blockId == 0x11) {
+      // Turbo Speed Data Block (like 0x10 but with custom timing)
+      // Header: 13 bytes timing + 2 bytes pause + 3 bytes length = 18 bytes
+      if (offset + 18 > this->size)
+        break;
+
+      // Skip pilot pulse length (2), sync1(2), sync2(2), bit0(2), bit1(2)
+      // pilot tone (2), last byte bits (1) = 13 bytes
+      offset += 13;
+
+      // Pause after block (2 bytes)
+      int pause = this->data[offset] | (this->data[offset + 1] << 8);
+      offset += 2;
+
+      // Data length (3 bytes, but we'll use 2 for simplicity - files >64KB
+      // rare)
+      int length = this->data[offset] | (this->data[offset + 1] << 8);
+      offset += 3; // Skip all 3 bytes
+
+      if (offset + length > this->size) {
+        Logger::write("Block length exceeds file size");
+        break;
+      }
+
+      TapeBlock block;
+      block.id = 0x11;
+      block.pauseAfter = pause;
+      block.data.assign(this->data + offset, this->data + offset + length);
+      blocks.push_back(block);
+
+      char msg[100];
+      snprintf(msg, sizeof(msg), "Block 0x11: Found %d bytes (turbo)", length);
+      Logger::write(msg);
+
+      offset += length;
+    } else if (blockId == 0x12) {
+      // Pure Tone - same pulse repeated N times
+      // 0x00-0x01: Pulse length
+      // 0x02-0x03: Number of pulses
+      if (offset + 4 > this->size)
+        break;
+
+      offset += 4;
+      Logger::write("Block 0x12: Pure Tone (skipped)");
+    } else if (blockId == 0x13) {
+      // Pulse Sequence - direct pulse lengths
+      // 0x00: Number of pulses (N)
+      // 0x01-...: N * 2 bytes of pulse lengths
+      if (offset + 1 > this->size)
+        break;
+
+      byte numPulses = this->data[offset++];
+      int pulseDataSize = numPulses * 2;
+
+      if (offset + pulseDataSize > this->size)
+        break;
+
+      offset += pulseDataSize;
+      Logger::write("Block 0x13: Pulse Sequence (skipped)");
     } else if (blockId == 0x20) {
       // Pause (Silence) or Stop Tape command
       // 0x00-0x01: Pause duration in ms (0 = stop tape)
@@ -107,6 +166,21 @@ void TZXLoader::parse() {
       char msg[100];
       snprintf(msg, sizeof(msg), "Block 0x20: Pause %d ms", pauseDuration);
       Logger::write(msg);
+    } else if (blockId == 0x21) {
+      // Group Start - 1 byte length + N bytes name
+      if (offset + 1 > this->size)
+        break;
+
+      byte nameLength = this->data[offset++];
+
+      if (offset + nameLength > this->size)
+        break;
+
+      offset += nameLength;
+      Logger::write("Block 0x21: Group Start (skipped)");
+    } else if (blockId == 0x22) {
+      // Group End - no data
+      Logger::write("Block 0x22: Group End (skipped)");
     } else if (blockId == 0x30) {
       // Text Description Block
       // 0x00: Length (N)
@@ -122,6 +196,33 @@ void TZXLoader::parse() {
       Logger::write(("TZX Info: " + text).c_str());
 
       offset += length;
+    } else if (blockId == 0x32) {
+      // Archive Info Block
+      // 0x00-0x01: Block length (N)
+      // 0x02: Number of text strings
+      // Then N-1 bytes of text data
+      if (offset + 2 > this->size)
+        break;
+
+      word blockLength = this->data[offset] | (this->data[offset + 1] << 8);
+      offset += 2;
+
+      if (offset + blockLength > this->size)
+        break;
+
+      // Skip the archive info data - we don't need to parse it for emulation
+      offset += blockLength;
+
+      Logger::write("Block 0x32: Archive Info (skipped)");
+    } else if (blockId == 0x24) {
+      // Loop Start - 2 bytes: repeat count
+      if (offset + 2 > this->size)
+        break;
+      offset += 2;
+      Logger::write("Block 0x24: Loop Start (skipped)");
+    } else if (blockId == 0x25) {
+      // Loop End - no data
+      Logger::write("Block 0x25: Loop End (skipped)");
     } else {
       // Unknown block, abort for safety or skip if length known?
       // TZX structure is complex, for MVP we abort on unknown to verify 0x10
