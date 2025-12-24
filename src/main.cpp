@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    Logger::write("Starting ZX Spectrum Emulator v0.1");
+    Logger::write("Starting ZX Spectrum Emulator v0.2");
 
     // Create a processor and load the basic ROM
     Processor processor;
