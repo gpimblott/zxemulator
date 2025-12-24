@@ -25,7 +25,9 @@
 #ifndef ZXEMULATOR_PROCESSOR_H
 #define ZXEMULATOR_PROCESSOR_H
 
-#include "Opcodes/OpCodeCatalogue.h"
+// #include "Opcodes/OpCodeCatalogue.h" // Removed
+#include "../utils/BaseTypes.h"
+#include "ProcessorState.h"
 
 #include "Audio.h"
 
@@ -36,7 +38,7 @@ private:
   // State variables
   ProcessorState state;
   Audio audio;
-  OpCodeCatalogue catalogue = OpCodeCatalogue();
+  // OpCodeCatalogue catalogue = OpCodeCatalogue(); // Removed
 
   bool running = false;
   bool paused = false;
@@ -49,7 +51,7 @@ private:
   int keyHoldFrames = 0;
 
   // Internal methods
-  OpCode *getNextInstruction();
+  // OpCode *getNextInstruction(); // Removed
 
   // Fast direct memory access
   byte *m_memory = nullptr;
@@ -98,7 +100,7 @@ private:
 public:
   explicit Processor();
 
-  OpCode *getOpCode(byte b) { return catalogue.lookupOpcode(b); }
+  // OpCode *getOpCode(byte b) { return catalogue.lookupOpcode(b); } // Removed
 
   void init(const char *romFile);
   void loadTape(Tape tape);

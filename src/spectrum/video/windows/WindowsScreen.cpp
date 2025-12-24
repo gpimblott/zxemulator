@@ -302,30 +302,7 @@ void WindowsScreen::drawDebugWindow() {
     debugWindow.draw(errorText);
   }
 
-  // Disassembly output
-  int pc = state.registers.PC;
-  sf::Text asmText(debugFont);
-  asmText.setCharacterSize(12);
-  asmText.setFillColor(sf::Color::Yellow);
-  asmText.setPosition({200, 10});
-
-  std::string asmStr = "Disassembly:\n";
-  for (int i = 0; i < 10; i++) {
-    byte op = state.memory[pc + i];
-    char hex[16];
-    snprintf(hex, sizeof(hex), "%04X: %02X ", pc + i, op);
-    asmStr += hex;
-
-    OpCode *opcode = processor->getOpCode(op);
-    if (opcode) {
-      asmStr += opcode->getName();
-    } else {
-      asmStr += "???";
-    }
-    asmStr += "\n";
-  }
-  asmText.setString(asmStr);
-  debugWindow.draw(asmText);
+  /* Disassembly view removed (Legacy OpCode classes removed) */
 
   // Buttons (Simple text buttons for now)
   sf::Text btnText(debugFont);
@@ -583,13 +560,6 @@ void WindowsScreen::handleKey(sf::Keyboard::Key key, bool pressed) {
     mapSymbol(pressed, 7, 2, 2, 4); // M (.), T (>)
   if (key == sf::Keyboard::Key::Slash)
     mapSymbol(pressed, 0, 4, 0, 3); // V (/), C (?)
-
-  // F9: Toggle Fast Load
-  if (key == sf::Keyboard::Key::F9 && pressed) {
-    bool current = processor->getState().isFastLoad();
-    processor->getState().setFastLoad(!current);
-    printf("Fast Load Toggled: %s\n", !current ? "ON" : "OFF");
-  }
 }
 
 void WindowsScreen::mapSymbol(bool pressed, int unshiftedLine, int unshiftedBit,

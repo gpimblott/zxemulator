@@ -1857,33 +1857,26 @@ void Processor::executeFrame() {
       this->state.tape.update(cycles);
       audio.update(cycles, state.getSpeakerBit(), state.tape.getEarBit());
     } else {
-      // Fallback to old catalogue system
+      // Fallback removed (Legacy OpCode classes removed)
+      // Any unhandled opcode acts as NOP or Error
+      /*
       state.registers.PC--; // Rewind PC for catalogue lookup
       OpCode *opCode = getNextInstruction();
-      if (opCode != nullptr) {
-        // increment past the opcode
-        this->state.registers.PC++;
+      if (opCode != nullptr) { ... }
+      */
 
-        int cycles = opCode->execute(this->state);
-        tStates += cycles;
-        state.addFrameTStates(cycles);
-        this->state.tape.update(cycles);
-        audio.update(cycles, state.getSpeakerBit(), state.tape.getEarBit());
+      byte unknownOpcode = state.memory[state.registers.PC];
+      char errorMsg[100];
+      snprintf(errorMsg, sizeof(errorMsg), "Unknown opcode %02X at address %d",
+               unknownOpcode, this->state.registers.PC);
+      lastError = std::string(errorMsg);
 
-      } else {
-        byte unknownOpcode = state.memory[state.registers.PC];
-        char errorMsg[100];
-        snprintf(errorMsg, sizeof(errorMsg),
-                 "Unknown opcode %02X at address %d", unknownOpcode,
-                 this->state.registers.PC);
-        lastError = std::string(errorMsg);
-
-        debug("Unknown opcode %02X at address %d\n", unknownOpcode,
-              this->state.registers.PC);
-        running = false;
-      }
+      debug("Unknown opcode %02X at address %d\n", unknownOpcode,
+            this->state.registers.PC);
+      running = false;
     }
   }
+  // } // Extraneous brace removed
   audio.flush();
 
   // Audio Sync: Throttle execution to match audio consumption rate
@@ -2040,12 +2033,7 @@ word Processor::pop16() {
  * Read the next instruction and process it
  * @return
  */
-OpCode *Processor::getNextInstruction() {
-
-  byte opcode = state.memory[state.registers.PC];
-  return catalogue.lookupOpcode(opcode);
-}
-
+// OpCode *Processor::getNextInstruction() { ... } // Removed
 // ============================================================================
 // Opcode Helper Methods
 // ============================================================================

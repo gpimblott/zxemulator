@@ -17,12 +17,9 @@ set(ZX_SOURCES
     utils/RegisterUtils.cpp utils/RegisterUtils.h
     spectrum/Rom.cpp spectrum/Rom.h
     spectrum/Memory.cpp spectrum/Memory.h
-    spectrum/Opcodes/OpCode.cpp spectrum/Opcodes/OpCode.h
+    spectrum/Memory.cpp spectrum/Memory.h
     exceptions/MemoryException.h
-    spectrum/Processor.cpp    spectrum/Opcodes/OpCode.h
-    spectrum/Opcodes/OpCodeCatalogue.cpp
-    spectrum/Opcodes/OpCodeCatalogue.h
-    spectrum/Opcodes/OpCodeProvider.cpp spectrum/Opcodes/OpCodeProvider.h
+    spectrum/Processor.cpp
     spectrum/video/Screen.cpp spectrum/video/Screen.h
     spectrum/video/windows/WindowsScreen.cpp spectrum/video/windows/WindowsScreen.h
     spectrum/video/VideoBuffer.cpp spectrum/video/VideoBuffer.h
@@ -30,7 +27,6 @@ set(ZX_SOURCES
     utils/debug.h
     spectrum/ProcessorMacros.h
     spectrum/ProcessorState.cpp spectrum/ProcessorState.h
-    spectrum/Opcodes/IndexOpcodes.cpp
     spectrum/ALUHelpers.cpp
     spectrum/Tape.cpp spectrum/Tape.h
     utils/TZXLoader.cpp utils/TZXLoader.h
