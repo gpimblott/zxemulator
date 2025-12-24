@@ -27,7 +27,6 @@ set(ZX_SOURCES
     utils/debug.h
     spectrum/ProcessorMacros.h
     spectrum/ProcessorState.cpp spectrum/ProcessorState.h
-    spectrum/ALUHelpers.cpp
     spectrum/Tape.cpp spectrum/Tape.h
     utils/TZXLoader.cpp utils/TZXLoader.h
     spectrum/Keyboard.cpp spectrum/Keyboard.h

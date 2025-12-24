@@ -43,6 +43,7 @@ private:
   bool running = false;
   bool paused = false;
   bool stepRequest = false;
+  bool turbo = false; // Bypass audio sync for benchmarking
 
   // Auto-Load
   bool autoLoadTape = false;
@@ -59,8 +60,7 @@ private:
   // Write with ROM protection
   void writeMem(word address, byte value);
   // Stack helpers with safe memory access
-  void push16(word value);
-  word pop16();
+  // Stack helpers moved to instructions/LoadInstructions.h
 
   // Helper methods for instruction groups
   void op_load(byte opcode);
@@ -79,23 +79,8 @@ private:
   void exec_index_opcode(byte prefix); // DD or FD
 
   // ALU Helpers
-  void add8(byte val); // ADD A, val
-  void adc8(byte val); // ADC A, val
-  void sub8(byte val); // SUB val
-  void sbc8(byte val); // SBC A, val
-  void and8(byte val); // AND val
-  void xor8(byte val); // XOR val
-  void or8(byte val);  // OR val
-  void cp8(byte val);  // CP val
-  void inc8(byte &reg);
-  void dec8(byte &reg);
-
-  // 16-bit ALU Helpers for convenience (optional, but good for consistency)
-  void add16(word &dest, word src);
-  void adc16(word &dest, word src);
-  void sbc16(word &dest, word src);
-  void inc16(word &reg);
-  void dec16(word &reg);
+  // ALU Helpers moved to instructions/ArithmeticInstructions.h and
+  // LogicInstructions.h
 
 public:
   explicit Processor();
@@ -113,46 +98,17 @@ public:
 
   std::vector<byte> fetchOperands(int count);
 
-  // Bit Manipulation Helpers
-  void rlc(byte &val);
-  void rrc(byte &val);
-  void rl(byte &val);
-  void rr(byte &val);
-  void sla(byte &val);
-  void sra(byte &val);
-  void sll(byte &val);
-  void srl(byte &val);
-  void bit(int bit, byte val);
-  void set(int bit, byte &val);
-  void res(int bit, byte &val);
+  // Bit Helpers moved to instructions/BitInstructions.h
 
   // Extended (ED) Helpers
-  void op_ed_ld_nn_rr(word nn, word rr);  // LD (nn), rr
-  void op_ed_ld_rr_nn(word &rr, word nn); // LD rr, (nn)
-  void op_ed_in_r_C(byte &r);             // IN r, (C)
-  void op_ed_out_C_r(byte r);             // OUT (C), r
-  void op_ed_sbc16(word &dest, word src);
-  void op_ed_adc16(word &dest, word src);
-
-  // RRD/RLD
-  void op_ed_rrd();
-  void op_ed_rld();
+  // Extended Load helpers moved to instructions/LoadInstructions.h
+  // IO helpers moved to instructions/IOInstructions.h
+  // Extended Arithmetic helpers moved to instructions/ArithmeticInstructions.h
+  // RRD/RLD moved to instructions/BitInstructions.h
 
   // Block Instructions
-  int op_ed_ldir();
-  int op_ed_lddr();
-  int op_ed_cpir();
-  int op_ed_cpdr();
-  int op_ed_ini();
-  int op_ed_ind();
-  int op_ed_outi();
-  int op_ed_outd();
-
-  // Repeat Block I/O
-  int op_ed_inir();
-  int op_ed_indr();
-  int op_ed_otir();
-  int op_ed_otdr();
+  // Block Load helpers moved to instructions/LoadInstructions.h
+  // Search helpers moved to instructions/ControlInstructions.h
 
   VideoBuffer *getVideoBuffer();
   ProcessorState &getState() { return state; } // Expose for debugger
@@ -170,6 +126,7 @@ public:
       stepRequest = true;
   }
   bool isPaused() const { return paused; }
+  void setTurbo(bool t) { turbo = t; }
 };
 
 #endif // ZXEMULATOR_PROCESSOR_H

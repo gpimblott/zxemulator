@@ -33,5 +33,5 @@ endforeach()
 add_executable(Google_Tests_run ProcessorTest.cpp)
 target_link_libraries(Google_Tests_run gtest gtest_main)
 
-add_executable(Instruction_Tests_run InstructionTest.cpp ${ZX_TEST_SOURCES})
+add_executable(Instruction_Tests_run InstructionTest.cpp BenchmarkTest.cpp ${ZX_TEST_SOURCES})
 target_link_libraries(Instruction_Tests_run gtest gtest_main SFML::Graphics SFML::Window SFML::System SFML::Network SFML::Audio)

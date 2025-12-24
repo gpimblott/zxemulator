@@ -25,9 +25,15 @@
 #include "Processor.h"
 #include "../utils/Logger.h"
 #include "../utils/debug.h"
-#include "ALUHelpers.h"
+// #include "ALUHelpers.h" // Removed
 #include "ProcessorMacros.h"
 #include "SnapshotLoader.h"
+#include "instructions/ArithmeticInstructions.h"
+#include "instructions/BitInstructions.h"
+#include "instructions/ControlInstructions.h"
+#include "instructions/IOInstructions.h"
+#include "instructions/LoadInstructions.h"
+#include "instructions/LogicInstructions.h"
 #include <chrono>
 #include <thread>
 
@@ -277,66 +283,40 @@ void Processor::executeFrame() {
     }
 
     case 0x10: // DJNZ e
-    {
-      int8_t offset = (int8_t)m_memory[state.registers.PC];
-      state.registers.PC++;
-      state.registers.B--;
-      if (state.registers.B != 0) {
-        state.registers.PC += offset;
-        cycles = 13;
-      } else {
-        cycles = 8;
-      }
+      cycles = Control::djnz(state, (int8_t)state.getNextByteFromPC());
       break;
-    }
 
     // RST instructions
     case 0xC7: // RST 00
-      push16(state.registers.PC);
-      state.registers.PC = 0x0000;
-      cycles = 11;
+      cycles = Control::rst(state, 0x0000);
       break;
 
     case 0xCF: // RST 08
-      push16(state.registers.PC);
-      state.registers.PC = 0x0008;
-      cycles = 11;
+      cycles = Control::rst(state, 0x0008);
       break;
 
     case 0xD7: // RST 10
-      push16(state.registers.PC);
-      state.registers.PC = 0x0010;
-      cycles = 11;
+      cycles = Control::rst(state, 0x0010);
       break;
 
     case 0xDF: // RST 18
-      push16(state.registers.PC);
-      state.registers.PC = 0x0018;
-      cycles = 11;
+      cycles = Control::rst(state, 0x0018);
       break;
 
     case 0xE7: // RST 20
-      push16(state.registers.PC);
-      state.registers.PC = 0x0020;
-      cycles = 11;
+      cycles = Control::rst(state, 0x0020);
       break;
 
     case 0xEF: // RST 28
-      push16(state.registers.PC);
-      state.registers.PC = 0x0028;
-      cycles = 11;
+      cycles = Control::rst(state, 0x0028);
       break;
 
     case 0xF7: // RST 30
-      push16(state.registers.PC);
-      state.registers.PC = 0x0030;
-      cycles = 11;
+      cycles = Control::rst(state, 0x0030);
       break;
 
     case 0xFF: // RST 38
-      push16(state.registers.PC);
-      state.registers.PC = 0x0038;
-      cycles = 11;
+      cycles = Control::rst(state, 0x0038);
       break;
 
     case 0x17: // RLA
@@ -359,13 +339,8 @@ void Processor::executeFrame() {
     }
 
     case 0x18: // JR e
-    {
-      int8_t offset = (int8_t)m_memory[state.registers.PC];
-      state.registers.PC++;
-      state.registers.PC += offset;
-      cycles = 12;
+      cycles = Control::jr(state, (int8_t)state.getNextByteFromPC());
       break;
-    }
 
     case 0x1F: // RRA
     {
@@ -387,57 +362,24 @@ void Processor::executeFrame() {
     }
 
     case 0x20: // JR NZ, e
-    {
-      int8_t offset = (int8_t)m_memory[state.registers.PC];
-      state.registers.PC++;
-      if (!GET_FLAG(Z_FLAG, state.registers)) {
-        state.registers.PC += offset;
-        cycles = 12;
-      } else {
-        cycles = 7;
-      }
+      cycles = Control::jr_cond(state, !GET_FLAG(Z_FLAG, state.registers),
+                                (int8_t)state.getNextByteFromPC());
       break;
-    }
 
     case 0x28: // JR Z, e
-    {
-      int8_t offset = (int8_t)m_memory[state.registers.PC];
-      state.registers.PC++;
-      if (GET_FLAG(Z_FLAG, state.registers)) {
-        state.registers.PC += offset;
-        cycles = 12;
-      } else {
-        cycles = 7;
-      }
+      cycles = Control::jr_cond(state, GET_FLAG(Z_FLAG, state.registers),
+                                (int8_t)state.getNextByteFromPC());
       break;
-    }
 
     case 0x30: // JR NC, e
-    {
-      int8_t offset = (int8_t)m_memory[state.registers.PC];
-      state.registers.PC++;
-      if (!GET_FLAG(C_FLAG, state.registers)) {
-        state.registers.PC += offset;
-        cycles = 12;
-      } else {
-        cycles = 7;
-      }
+      cycles = Control::jr_cond(state, !GET_FLAG(C_FLAG, state.registers),
+                                (int8_t)state.getNextByteFromPC());
       break;
-    }
 
     case 0x38: // JR C, e
-    {
-      int8_t offset = (int8_t)m_memory[state.registers.PC];
-      state.registers.PC++;
-
-      if (GET_FLAG(C_FLAG, state.registers)) {
-        state.registers.PC += offset;
-        cycles = 12;
-      } else {
-        cycles = 7;
-      }
+      cycles = Control::jr_cond(state, GET_FLAG(C_FLAG, state.registers),
+                                (int8_t)state.getNextByteFromPC());
       break;
-    }
 
     case 0x76: // HALT
       state.setHalted(true);
@@ -497,247 +439,123 @@ void Processor::executeFrame() {
     // 16-bit Arithmetic
     // ------------------------------------------------------------------------
     case 0x09: // ADD HL, BC
-      add16(state.registers.HL, state.registers.BC);
+      Arithmetic::add16(state, state.registers.HL, state.registers.BC);
       cycles = 11;
       break;
     case 0x19: // ADD HL, DE
-      add16(state.registers.HL, state.registers.DE);
+      Arithmetic::add16(state, state.registers.HL, state.registers.DE);
       cycles = 11;
       break;
     case 0x29: // ADD HL, HL
-      add16(state.registers.HL, state.registers.HL);
+      Arithmetic::add16(state, state.registers.HL, state.registers.HL);
       cycles = 11;
       break;
     case 0x39: // ADD HL, SP
-      add16(state.registers.HL, state.registers.SP);
+      Arithmetic::add16(state, state.registers.HL, state.registers.SP);
       cycles = 11;
       break;
 
     case 0xC3: // JP nn
-    {
-      word address = state.getNextWordFromPC();
-      state.registers.PC = address;
-      cycles = 10;
+      cycles = Control::jp(state, state.getNextWordFromPC());
       break;
-    }
 
     case 0xE9: // JP (HL)
-      state.registers.PC = state.registers.HL;
-      cycles = 4;
+      cycles = Control::jp_hl(state);
       break;
 
     // Conditional Jumps
     case 0xC2: // JP NZ, nn
-      if (!GET_FLAG(Z_FLAG, state.registers)) {
-        state.registers.PC = state.getNextWordFromPC();
-        cycles = 10;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::jp_cond(state, !GET_FLAG(Z_FLAG, state.registers),
+                                state.getNextWordFromPC());
       break;
 
     case 0xCA: // JP Z, nn
-      if (GET_FLAG(Z_FLAG, state.registers)) {
-        state.registers.PC = state.getNextWordFromPC();
-        cycles = 10;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::jp_cond(state, GET_FLAG(Z_FLAG, state.registers),
+                                state.getNextWordFromPC());
       break;
 
     case 0xD2: // JP NC, nn
-      if (!GET_FLAG(C_FLAG, state.registers)) {
-        state.registers.PC = state.getNextWordFromPC();
-        cycles = 10;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::jp_cond(state, !GET_FLAG(C_FLAG, state.registers),
+                                state.getNextWordFromPC());
       break;
 
-    case 0xD3: // OUT (n), A
-    {
+    case 0xD3: { // OUT (n), A
       byte port = state.getNextByteFromPC();
       state.registers.PC++;
-
-      byte value = state.registers.A;
-
-      // Port FE (or any even port on 48K) controls border color and speaker
-      if ((port & 0x01) == 0) {
-        byte borderColor = state.registers.A & 0x07;
-        if (state.memory.getVideoBuffer()) {
-          state.memory.getVideoBuffer()->setBorderColor(
-              borderColor, state.getFrameTStates());
-        }
-
-        state.setSpeakerBit((value & 0x10) != 0);
-        state.setMicBit((value & 0x08) != 0);
-      }
-
-      cycles = 11;
+      cycles = IO::out_n_a(state, port);
       break;
     }
 
     case 0xDA: // JP C, nn
-      if (GET_FLAG(C_FLAG, state.registers)) {
-        state.registers.PC = state.getNextWordFromPC();
-        cycles = 10;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::jp_cond(state, GET_FLAG(C_FLAG, state.registers),
+                                state.getNextWordFromPC());
       break;
 
     case 0xE2: // JP PO, nn
-      if (!GET_FLAG(P_FLAG, state.registers)) {
-        state.registers.PC = state.getNextWordFromPC();
-        cycles = 10;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::jp_cond(state, !GET_FLAG(P_FLAG, state.registers),
+                                state.getNextWordFromPC());
       break;
 
     case 0xEA: // JP PE, nn
-      if (GET_FLAG(P_FLAG, state.registers)) {
-        state.registers.PC = state.getNextWordFromPC();
-        cycles = 10;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::jp_cond(state, GET_FLAG(P_FLAG, state.registers),
+                                state.getNextWordFromPC());
       break;
 
     case 0xF2: // JP P, nn
-      if (!GET_FLAG(S_FLAG, state.registers)) {
-        state.registers.PC = state.getNextWordFromPC();
-        cycles = 10;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::jp_cond(state, !GET_FLAG(S_FLAG, state.registers),
+                                state.getNextWordFromPC());
       break;
 
     case 0xFA: // JP M, nn
-      if (GET_FLAG(S_FLAG, state.registers)) {
-        state.registers.PC = state.getNextWordFromPC();
-        cycles = 10;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::jp_cond(state, GET_FLAG(S_FLAG, state.registers),
+                                state.getNextWordFromPC());
       break;
 
     // Conditional Returns
     case 0xC0: // RET NZ
-      if (!GET_FLAG(Z_FLAG, state.registers)) {
-        state.registers.PC = pop16();
-        cycles = 11;
-      } else {
-        cycles = 5;
-      }
+      cycles = Control::ret_cond(state, !GET_FLAG(Z_FLAG, state.registers));
       break;
 
     case 0xC8: // RET Z
-      if (GET_FLAG(Z_FLAG, state.registers)) {
-        state.registers.PC = pop16();
-        cycles = 11;
-      } else {
-        cycles = 5;
-      }
+      cycles = Control::ret_cond(state, GET_FLAG(Z_FLAG, state.registers));
       break;
 
     case 0xD0: // RET NC
-      if (!GET_FLAG(C_FLAG, state.registers)) {
-        state.registers.PC = pop16();
-        cycles = 11;
-      } else {
-        cycles = 5;
-      }
+      cycles = Control::ret_cond(state, !GET_FLAG(C_FLAG, state.registers));
       break;
 
     case 0xD8: // RET C
-      if (GET_FLAG(C_FLAG, state.registers)) {
-        state.registers.PC = pop16();
-        cycles = 11;
-      } else {
-        cycles = 5;
-      }
+      cycles = Control::ret_cond(state, GET_FLAG(C_FLAG, state.registers));
       break;
 
     case 0xE0: // RET PO
-      if (!GET_FLAG(P_FLAG, state.registers)) {
-        state.registers.PC = pop16();
-        cycles = 11;
-      } else {
-        cycles = 5;
-      }
+      cycles = Control::ret_cond(state, !GET_FLAG(P_FLAG, state.registers));
       break;
 
     case 0xE8: // RET PE
-      if (GET_FLAG(P_FLAG, state.registers)) {
-        state.registers.PC = pop16();
-        cycles = 11;
-      } else {
-        cycles = 5;
-      }
+      cycles = Control::ret_cond(state, GET_FLAG(P_FLAG, state.registers));
       break;
 
     case 0xF0: // RET P
-      if (!GET_FLAG(S_FLAG, state.registers)) {
-        state.registers.PC = pop16();
-        cycles = 11;
-      } else {
-        cycles = 5;
-      }
+      cycles = Control::ret_cond(state, !GET_FLAG(S_FLAG, state.registers));
       break;
 
     case 0xF8: // RET M
-      if (GET_FLAG(S_FLAG, state.registers)) {
-        state.registers.PC = pop16();
-        cycles = 11;
-      } else {
-        cycles = 5;
-      }
+      cycles = Control::ret_cond(state, GET_FLAG(S_FLAG, state.registers));
       break;
 
-    case 0xC9: { // RET
-      byte low = m_memory[state.registers.SP];
-      byte high = m_memory[state.registers.SP + 1];
-      state.registers.PC = (high << 8) | low;
-      state.registers.SP += 2;
-      cycles = 10;
+    case 0xC9: // RET
+      cycles = Control::ret(state);
       break;
-    }
 
-    case 0xCD: { // CALL nn
-      word address = m_memory[state.registers.PC] |
-                     (m_memory[state.registers.PC + 1] << 8);
-      state.registers.PC += 2;
-      // Push PC
-      state.registers.SP -= 2;
-      word pc = state.registers.PC;
-      writeMem(state.registers.SP, (byte)(pc & 0xFF));
-      writeMem(state.registers.SP + 1, (byte)((pc >> 8) & 0xFF));
-      state.registers.PC = address;
-      cycles = 17;
+    case 0xCD: // CALL nn
+      cycles = Control::call(state, state.getNextWordFromPC());
       break;
-    }
 
     // Conditional CALLs
     case 0xC4: // CALL NZ, nn
-      if (!GET_FLAG(Z_FLAG, state.registers)) {
-        word address = state.getNextWordFromPC();
-        state.registers.PC += 2;
-        push16(state.registers.PC);
-        state.registers.PC = address;
-        cycles = 17;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::call_cond(state, !GET_FLAG(Z_FLAG, state.registers),
+                                  state.getNextWordFromPC());
       break;
 
     case 0xCB: // Prefix CB
@@ -749,116 +567,45 @@ void Processor::executeFrame() {
       break;
 
     case 0xCC: // CALL Z, nn
-      if (GET_FLAG(Z_FLAG, state.registers)) {
-        word address = state.getNextWordFromPC();
-        state.registers.PC += 2;
-        push16(state.registers.PC);
-        state.registers.PC = address;
-        cycles = 17;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::call_cond(state, GET_FLAG(Z_FLAG, state.registers),
+                                  state.getNextWordFromPC());
       break;
 
     case 0xD4: // CALL NC, nn
-      if (!GET_FLAG(C_FLAG, state.registers)) {
-        word address = state.getNextWordFromPC();
-        state.registers.PC += 2;
-        push16(state.registers.PC);
-        state.registers.PC = address;
-        cycles = 17;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::call_cond(state, !GET_FLAG(C_FLAG, state.registers),
+                                  state.getNextWordFromPC());
       break;
 
-    case 0xDB: // IN A, (n)
-    {
+    case 0xDB: { // IN A, (n)
       byte port = state.getNextByteFromPC();
       state.registers.PC++;
-
-      byte highByte = state.registers.A;
-
-      if ((port & 0x01) == 0) {
-        byte ear = state.tape.getEarBit() ? 0x40 : 0x00;
-        state.registers.A = state.keyboard.readPort(highByte) | ear;
-      } else if ((port & 0x1F) == 0x1F) {
-        // Kempston Joystick (Port 31)
-        state.registers.A = state.keyboard.readKempstonPort();
-      } else {
-        // Floating bus
-        state.registers.A = 0xFF;
-      }
-
-      cycles = 11;
+      cycles = IO::in_a_n(state, port);
       break;
     }
 
     case 0xDC: // CALL C, nn
-      if (GET_FLAG(C_FLAG, state.registers)) {
-        word address = state.getNextWordFromPC();
-        state.registers.PC += 2;
-        push16(state.registers.PC);
-        state.registers.PC = address;
-        cycles = 17;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::call_cond(state, GET_FLAG(C_FLAG, state.registers),
+                                  state.getNextWordFromPC());
       break;
 
     case 0xE4: // CALL PO, nn
-      if (!GET_FLAG(P_FLAG, state.registers)) {
-        word address = state.getNextWordFromPC();
-        state.registers.PC += 2;
-        push16(state.registers.PC);
-        state.registers.PC = address;
-        cycles = 17;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::call_cond(state, !GET_FLAG(P_FLAG, state.registers),
+                                  state.getNextWordFromPC());
       break;
 
     case 0xEC: // CALL PE, nn
-      if (GET_FLAG(P_FLAG, state.registers)) {
-        word address = state.getNextWordFromPC();
-        state.registers.PC += 2;
-        push16(state.registers.PC);
-        state.registers.PC = address;
-        cycles = 17;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::call_cond(state, GET_FLAG(P_FLAG, state.registers),
+                                  state.getNextWordFromPC());
       break;
 
     case 0xF4: // CALL P, nn
-      if (!GET_FLAG(S_FLAG, state.registers)) {
-        word address = state.getNextWordFromPC();
-        state.registers.PC += 2;
-        push16(state.registers.PC);
-        state.registers.PC = address;
-        cycles = 17;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::call_cond(state, !GET_FLAG(S_FLAG, state.registers),
+                                  state.getNextWordFromPC());
       break;
 
     case 0xFC: // CALL M, nn
-      if (GET_FLAG(S_FLAG, state.registers)) {
-        word address = state.getNextWordFromPC();
-        state.registers.PC += 2;
-        push16(state.registers.PC);
-        state.registers.PC = address;
-        cycles = 17;
-      } else {
-        state.registers.PC += 2;
-        cycles = 10;
-      }
+      cycles = Control::call_cond(state, GET_FLAG(S_FLAG, state.registers),
+                                  state.getNextWordFromPC());
       break;
 
     case 0xE3: { // EX (SP), HL
@@ -1309,273 +1056,273 @@ void Processor::executeFrame() {
 
     // ADD A, r (0x80-0x87)
     case 0x80:
-      add8(state.registers.B);
+      Arithmetic::add8(state, state.registers.B);
       cycles = 4;
       break;
     case 0x81:
-      add8(state.registers.C);
+      Arithmetic::add8(state, state.registers.C);
       cycles = 4;
       break;
     case 0x82:
-      add8(state.registers.D);
+      Arithmetic::add8(state, state.registers.D);
       cycles = 4;
       break;
     case 0x83:
-      add8(state.registers.E);
+      Arithmetic::add8(state, state.registers.E);
       cycles = 4;
       break;
     case 0x84:
-      add8(state.registers.H);
+      Arithmetic::add8(state, state.registers.H);
       cycles = 4;
       break;
     case 0x85:
-      add8(state.registers.L);
+      Arithmetic::add8(state, state.registers.L);
       cycles = 4;
       break;
     case 0x86:
-      add8(m_memory[state.registers.HL]);
+      Arithmetic::add8(state, m_memory[state.registers.HL]);
       cycles = 7;
       break;
     case 0x87:
-      add8(state.registers.A);
+      Arithmetic::add8(state, state.registers.A);
       cycles = 4;
       break;
 
     // ADC A, r (0x88-0x8F)
     case 0x88:
-      adc8(state.registers.B);
+      Arithmetic::adc8(state, state.registers.B);
       cycles = 4;
       break;
     case 0x89:
-      adc8(state.registers.C);
+      Arithmetic::adc8(state, state.registers.C);
       cycles = 4;
       break;
     case 0x8A:
-      adc8(state.registers.D);
+      Arithmetic::adc8(state, state.registers.D);
       cycles = 4;
       break;
     case 0x8B:
-      adc8(state.registers.E);
+      Arithmetic::adc8(state, state.registers.E);
       cycles = 4;
       break;
     case 0x8C:
-      adc8(state.registers.H);
+      Arithmetic::adc8(state, state.registers.H);
       cycles = 4;
       break;
     case 0x8D:
-      adc8(state.registers.L);
+      Arithmetic::adc8(state, state.registers.L);
       cycles = 4;
       break;
     case 0x8E:
-      adc8(m_memory[state.registers.HL]);
+      Arithmetic::adc8(state, m_memory[state.registers.HL]);
       cycles = 7;
       break;
     case 0x8F:
-      adc8(state.registers.A);
+      Arithmetic::adc8(state, state.registers.A);
       cycles = 4;
       break;
 
     // SUB r (0x90-0x97)
     case 0x90:
-      sub8(state.registers.B);
+      Arithmetic::sub8(state, state.registers.B);
       cycles = 4;
       break;
     case 0x91:
-      sub8(state.registers.C);
+      Arithmetic::sub8(state, state.registers.C);
       cycles = 4;
       break;
     case 0x92:
-      sub8(state.registers.D);
+      Arithmetic::sub8(state, state.registers.D);
       cycles = 4;
       break;
     case 0x93:
-      sub8(state.registers.E);
+      Arithmetic::sub8(state, state.registers.E);
       cycles = 4;
       break;
     case 0x94:
-      sub8(state.registers.H);
+      Arithmetic::sub8(state, state.registers.H);
       cycles = 4;
       break;
     case 0x95:
-      sub8(state.registers.L);
+      Arithmetic::sub8(state, state.registers.L);
       cycles = 4;
       break;
     case 0x96:
-      sub8(m_memory[state.registers.HL]);
+      Arithmetic::sub8(state, m_memory[state.registers.HL]);
       cycles = 7;
       break;
     case 0x97:
-      sub8(state.registers.A);
+      Arithmetic::sub8(state, state.registers.A);
       cycles = 4;
       break;
 
     // SBC A, r (0x98-0x9F)
     case 0x98:
-      sbc8(state.registers.B);
+      Arithmetic::sbc8(state, state.registers.B);
       cycles = 4;
       break;
     case 0x99:
-      sbc8(state.registers.C);
+      Arithmetic::sbc8(state, state.registers.C);
       cycles = 4;
       break;
     case 0x9A:
-      sbc8(state.registers.D);
+      Arithmetic::sbc8(state, state.registers.D);
       cycles = 4;
       break;
     case 0x9B:
-      sbc8(state.registers.E);
+      Arithmetic::sbc8(state, state.registers.E);
       cycles = 4;
       break;
     case 0x9C:
-      sbc8(state.registers.H);
+      Arithmetic::sbc8(state, state.registers.H);
       cycles = 4;
       break;
     case 0x9D:
-      sbc8(state.registers.L);
+      Arithmetic::sbc8(state, state.registers.L);
       cycles = 4;
       break;
     case 0x9E:
-      sbc8(m_memory[state.registers.HL]);
+      Arithmetic::sbc8(state, m_memory[state.registers.HL]);
       cycles = 7;
       break;
     case 0x9F:
-      sbc8(state.registers.A);
+      Arithmetic::sbc8(state, state.registers.A);
       cycles = 4;
       break;
 
     // AND r (0xA0-0xA7)
     case 0xA0:
-      and8(state.registers.B);
+      Logic::and8(state, state.registers.B);
       cycles = 4;
       break;
     case 0xA1:
-      and8(state.registers.C);
+      Logic::and8(state, state.registers.C);
       cycles = 4;
       break;
     case 0xA2:
-      and8(state.registers.D);
+      Logic::and8(state, state.registers.D);
       cycles = 4;
       break;
     case 0xA3:
-      and8(state.registers.E);
+      Logic::and8(state, state.registers.E);
       cycles = 4;
       break;
     case 0xA4:
-      and8(state.registers.H);
+      Logic::and8(state, state.registers.H);
       cycles = 4;
       break;
     case 0xA5:
-      and8(state.registers.L);
+      Logic::and8(state, state.registers.L);
       cycles = 4;
       break;
     case 0xA6:
-      and8(m_memory[state.registers.HL]);
+      Logic::and8(state, m_memory[state.registers.HL]);
       cycles = 7;
       break;
     case 0xA7:
-      and8(state.registers.A);
+      Logic::and8(state, state.registers.A);
       cycles = 4;
       break;
 
     // XOR r (0xA8-0xAF)
     case 0xA8:
-      xor8(state.registers.B);
+      Logic::xor8(state, state.registers.B);
       cycles = 4;
       break;
     case 0xA9:
-      xor8(state.registers.C);
+      Logic::xor8(state, state.registers.C);
       cycles = 4;
       break;
     case 0xAA:
-      xor8(state.registers.D);
+      Logic::xor8(state, state.registers.D);
       cycles = 4;
       break;
     case 0xAB:
-      xor8(state.registers.E);
+      Logic::xor8(state, state.registers.E);
       cycles = 4;
       break;
     case 0xAC:
-      xor8(state.registers.H);
+      Logic::xor8(state, state.registers.H);
       cycles = 4;
       break;
     case 0xAD:
-      xor8(state.registers.L);
+      Logic::xor8(state, state.registers.L);
       cycles = 4;
       break;
     case 0xAE:
-      xor8(m_memory[state.registers.HL]);
+      Logic::xor8(state, m_memory[state.registers.HL]);
       cycles = 7;
       break;
     case 0xAF:
-      xor8(state.registers.A);
+      Logic::xor8(state, state.registers.A);
       cycles = 4;
       break;
 
     // OR r (0xB0-0xB7)
     case 0xB0:
-      or8(state.registers.B);
+      Logic::or8(state, state.registers.B);
       cycles = 4;
       break;
     case 0xB1:
-      or8(state.registers.C);
+      Logic::or8(state, state.registers.C);
       cycles = 4;
       break;
     case 0xB2:
-      or8(state.registers.D);
+      Logic::or8(state, state.registers.D);
       cycles = 4;
       break;
     case 0xB3:
-      or8(state.registers.E);
+      Logic::or8(state, state.registers.E);
       cycles = 4;
       break;
     case 0xB4:
-      or8(state.registers.H);
+      Logic::or8(state, state.registers.H);
       cycles = 4;
       break;
     case 0xB5:
-      or8(state.registers.L);
+      Logic::or8(state, state.registers.L);
       cycles = 4;
       break;
     case 0xB6:
-      or8(m_memory[state.registers.HL]);
+      Logic::or8(state, m_memory[state.registers.HL]);
       cycles = 7;
       break;
     case 0xB7:
-      or8(state.registers.A);
+      Logic::or8(state, state.registers.A);
       cycles = 4;
       break;
 
     // CP r (0xB8-0xBF)
     case 0xB8:
-      cp8(state.registers.B);
+      Arithmetic::cp8(state, state.registers.B);
       cycles = 4;
       break;
     case 0xB9:
-      cp8(state.registers.C);
+      Arithmetic::cp8(state, state.registers.C);
       cycles = 4;
       break;
     case 0xBA:
-      cp8(state.registers.D);
+      Arithmetic::cp8(state, state.registers.D);
       cycles = 4;
       break;
     case 0xBB:
-      cp8(state.registers.E);
+      Arithmetic::cp8(state, state.registers.E);
       cycles = 4;
       break;
     case 0xBC:
-      cp8(state.registers.H);
+      Arithmetic::cp8(state, state.registers.H);
       cycles = 4;
       break;
     case 0xBD:
-      cp8(state.registers.L);
+      Arithmetic::cp8(state, state.registers.L);
       cycles = 4;
       break;
     case 0xBE:
-      cp8(m_memory[state.registers.HL]);
+      Arithmetic::cp8(state, m_memory[state.registers.HL]);
       cycles = 7;
       break;
     case 0xBF:
-      cp8(state.registers.A);
+      Arithmetic::cp8(state, state.registers.A);
       cycles = 4;
       break;
 
@@ -1584,49 +1331,49 @@ void Processor::executeFrame() {
     // ------------------------------------------------------------------------
     case 0xC6: { // ADD A, n
       byte n = m_memory[state.registers.PC++];
-      add8(n);
+      Arithmetic::add8(state, n);
       cycles = 7;
       break;
     }
     case 0xCE: { // ADC A, n
       byte n = m_memory[state.registers.PC++];
-      adc8(n);
+      Arithmetic::adc8(state, n);
       cycles = 7;
       break;
     }
     case 0xD6: { // SUB n
       byte n = m_memory[state.registers.PC++];
-      sub8(n);
+      Arithmetic::sub8(state, n);
       cycles = 7;
       break;
     }
     case 0xDE: { // SBC A, n
       byte n = m_memory[state.registers.PC++];
-      sbc8(n);
+      Arithmetic::sbc8(state, n);
       cycles = 7;
       break;
     }
     case 0xE6: { // AND n
       byte n = m_memory[state.registers.PC++];
-      and8(n);
+      Logic::and8(state, n);
       cycles = 7;
       break;
     }
     case 0xEE: { // XOR n
       byte n = m_memory[state.registers.PC++];
-      xor8(n);
+      Logic::xor8(state, n);
       cycles = 7;
       break;
     }
     case 0xF6: { // OR n
       byte n = m_memory[state.registers.PC++];
-      or8(n);
+      Logic::or8(state, n);
       cycles = 7;
       break;
     }
     case 0xFE: { // CP n
       byte n = m_memory[state.registers.PC++];
-      cp8(n);
+      Arithmetic::cp8(state, n);
       cycles = 7;
       break;
     }
@@ -1635,73 +1382,73 @@ void Processor::executeFrame() {
     // INC/DEC 8-bit
     // ------------------------------------------------------------------------
     case 0x04:
-      inc8(state.registers.B);
+      Arithmetic::inc8(state, state.registers.B);
       cycles = 4;
       break;
     case 0x05:
-      dec8(state.registers.B);
+      Arithmetic::dec8(state, state.registers.B);
       cycles = 4;
       break;
     case 0x0C:
-      inc8(state.registers.C);
+      Arithmetic::inc8(state, state.registers.C);
       cycles = 4;
       break;
     case 0x0D:
-      dec8(state.registers.C);
+      Arithmetic::dec8(state, state.registers.C);
       cycles = 4;
       break;
     case 0x14:
-      inc8(state.registers.D);
+      Arithmetic::inc8(state, state.registers.D);
       cycles = 4;
       break;
     case 0x15:
-      dec8(state.registers.D);
+      Arithmetic::dec8(state, state.registers.D);
       cycles = 4;
       break;
     case 0x1C:
-      inc8(state.registers.E);
+      Arithmetic::inc8(state, state.registers.E);
       cycles = 4;
       break;
     case 0x1D:
-      dec8(state.registers.E);
+      Arithmetic::dec8(state, state.registers.E);
       cycles = 4;
       break;
     case 0x24:
-      inc8(state.registers.H);
+      Arithmetic::inc8(state, state.registers.H);
       cycles = 4;
       break;
     case 0x25:
-      dec8(state.registers.H);
+      Arithmetic::dec8(state, state.registers.H);
       cycles = 4;
       break;
     case 0x2C:
-      inc8(state.registers.L);
+      Arithmetic::inc8(state, state.registers.L);
       cycles = 4;
       break;
     case 0x2D:
-      dec8(state.registers.L);
+      Arithmetic::dec8(state, state.registers.L);
       cycles = 4;
       break;
 
     case 0x3C:
-      inc8(state.registers.A);
+      Arithmetic::inc8(state, state.registers.A);
       cycles = 4;
       break;
     case 0x3D:
-      dec8(state.registers.A);
+      Arithmetic::dec8(state, state.registers.A);
       cycles = 4;
       break;
 
     case 0x34: { // INC (HL)
       byte val = m_memory[state.registers.HL];
-      inc8(val);
+      Arithmetic::inc8(state, val);
       writeMem(state.registers.HL, val);
       cycles = 11;
       break;
     }
     case 0x35: { // DEC (HL)
       byte val = m_memory[state.registers.HL];
-      dec8(val);
+      Arithmetic::dec8(state, val);
       writeMem(state.registers.HL, val);
       cycles = 11;
       break;
@@ -1813,35 +1560,35 @@ void Processor::executeFrame() {
     // INC/DEC 16-bit (BC, DE, HL, SP)
     // ------------------------------------------------------------------------
     case 0x03:
-      inc16(state.registers.BC);
+      Arithmetic::inc16(state, state.registers.BC);
       cycles = 6;
       break;
     case 0x0B:
-      dec16(state.registers.BC);
+      Arithmetic::dec16(state, state.registers.BC);
       cycles = 6;
       break;
     case 0x13:
-      inc16(state.registers.DE);
+      Arithmetic::inc16(state, state.registers.DE);
       cycles = 6;
       break;
     case 0x1B:
-      dec16(state.registers.DE);
+      Arithmetic::dec16(state, state.registers.DE);
       cycles = 6;
       break;
     case 0x23:
-      inc16(state.registers.HL);
+      Arithmetic::inc16(state, state.registers.HL);
       cycles = 6;
       break;
     case 0x2B:
-      dec16(state.registers.HL);
+      Arithmetic::dec16(state, state.registers.HL);
       cycles = 6;
       break;
     case 0x33:
-      inc16(state.registers.SP);
+      Arithmetic::inc16(state, state.registers.SP);
       cycles = 6;
       break;
     case 0x3B:
-      dec16(state.registers.SP);
+      Arithmetic::dec16(state, state.registers.SP);
       cycles = 6;
       break;
 
@@ -1882,8 +1629,10 @@ void Processor::executeFrame() {
   // Audio Sync: Throttle execution to match audio consumption rate
   // If buffer has > 3 frames of audio (approx 60ms), slow down.
   // This locks emulation speed to the audio card clock (44.1kHz).
-  while (audio.getBufferSize() > 2646) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  if (!turbo) {
+    while (audio.getBufferSize() > 2646) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
   }
 
   // Auto-Type Logic (Frame based)
@@ -2012,22 +1761,7 @@ void Processor::writeMem(word address, byte value) {
   state.memory.fastWrite(address, value);
 }
 
-void Processor::push16(word value) {
-  state.registers.SP -= 2;
-  // Use SAFE write for stack operations usually, but standard Z80 might allow
-  // stack in ROM? No, stack must be in RAM. We use writeMem to ensure we
-  // respect memory protections (if any) or just fastWrite. writeMem wraps
-  // fastWrite.
-  writeMem(state.registers.SP + 1, (value >> 8) & 0xFF);
-  writeMem(state.registers.SP, value & 0xFF);
-}
-
-word Processor::pop16() {
-  byte low = state.memory[state.registers.SP];
-  byte high = state.memory[state.registers.SP + 1];
-  state.registers.SP += 2;
-  return (high << 8) | low;
-}
+// Stack helpers removed (moved to LoadInstructions.h)
 
 /**
  * Read the next instruction and process it
@@ -2038,92 +1772,7 @@ word Processor::pop16() {
 // Opcode Helper Methods
 // ============================================================================
 
-void Processor::add8(byte val) { ALUHelpers::add8(state, val); }
-
-void Processor::adc8(byte val) { ALUHelpers::adc8(state, val); }
-
-void Processor::sub8(byte val) { ALUHelpers::sub8(state, val); }
-
-void Processor::sbc8(byte val) { ALUHelpers::sbc8(state, val); }
-
-void Processor::and8(byte val) { ALUHelpers::and8(state, val); }
-
-void Processor::xor8(byte val) {
-  state.registers.A ^= val;
-  CLEAR_FLAG(C_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-
-  if (state.registers.A == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  if (state.registers.A & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-}
-
-void Processor::or8(byte val) {
-  state.registers.A |= val;
-  CLEAR_FLAG(C_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-
-  if (state.registers.A == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  if (state.registers.A & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-}
-
-void Processor::cp8(byte val) {
-  int result = state.registers.A - val;
-
-  if ((result & 0xFF) == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  if (state.registers.A < val)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-
-  // S Flag
-  if (result & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-
-  // N Flag
-  SET_FLAG(N_FLAG, state.registers);
-
-  // H Flag
-  if ((state.registers.A & 0x0F) < (val & 0x0F))
-    SET_FLAG(H_FLAG, state.registers);
-  else
-    CLEAR_FLAG(H_FLAG, state.registers);
-
-  // P/V (Overflow) for CP is same as SUB
-  int op1 = (int8_t)state.registers.A;
-  int op2 = (int8_t)val;
-  int r = (int8_t)(result & 0xFF);
-  if (((op1 > 0 && op2 < 0) && r < 0) || ((op1 < 0 && op2 > 0) && r > 0)) {
-    SET_FLAG(P_FLAG, state.registers);
-  } else {
-    CLEAR_FLAG(P_FLAG, state.registers);
-  }
-}
-
-void Processor::inc8(byte &reg) { ALUHelpers::inc8(state, reg); }
-
-void Processor::dec8(byte &reg) { ALUHelpers::dec8(state, reg); }
+// Helper methods removed (moved to Arithmetic/LogicInstructions.h)
 
 // Stubs for extended instructions
 int Processor::exec_ed_opcode() {
@@ -2186,139 +1835,129 @@ int Processor::exec_ed_opcode() {
 
   // RRD / RLD
   case 0x67:
-    op_ed_rrd();
+    Bit::rrd(state);
     cycles = 18;
     break;
   case 0x6F:
-    op_ed_rld();
+    Bit::rld(state);
     cycles = 18;
     break;
 
   // RETI
-  case 0x4D: {
-    word pc = state.memory[state.registers.SP];
-    pc |= (state.memory[state.registers.SP + 1] << 8);
-    state.registers.SP += 2;
-    state.registers.PC = pc;
-    cycles = 14;
-  } break;
+  case 0x4D:
+    cycles = Control::reti(state);
+    break;
 
   // RETN
-  case 0x45: {
-    word pc = state.memory[state.registers.SP];
-    pc |= (state.memory[state.registers.SP + 1] << 8);
-    state.registers.SP += 2;
-    state.registers.PC = pc;
-    state.registers.IFF1 = state.registers.IFF2;
-    state.setInterrupts(state.registers.IFF1);
-    cycles = 14;
-  } break;
+  case 0x45:
+    cycles = Control::retn(state);
+    break;
   // IN r, (C)
   case 0x40:
-    op_ed_in_r_C(state.registers.B);
+    IO::in_r_c(state, state.registers.B);
     cycles = 12;
     break;
   case 0x48:
-    op_ed_in_r_C(state.registers.C);
+    IO::in_r_c(state, state.registers.C);
     cycles = 12;
     break;
   case 0x50:
-    op_ed_in_r_C(state.registers.D);
+    IO::in_r_c(state, state.registers.D);
     cycles = 12;
     break;
   case 0x58:
-    op_ed_in_r_C(state.registers.E);
+    IO::in_r_c(state, state.registers.E);
     cycles = 12;
     break;
   case 0x60:
-    op_ed_in_r_C(state.registers.H);
+    IO::in_r_c(state, state.registers.H);
     cycles = 12;
     break;
   case 0x68:
-    op_ed_in_r_C(state.registers.L);
+    IO::in_r_c(state, state.registers.L);
     cycles = 12;
     break;
   case 0x78:
-    op_ed_in_r_C(state.registers.A);
+    IO::in_r_c(state, state.registers.A);
     cycles = 12;
     break;
 
   // SBC HL, rr
   case 0x42:
-    op_ed_sbc16(state.registers.HL, state.registers.BC);
+    Arithmetic::sbc16(state, state.registers.HL, state.registers.BC);
     cycles = 15;
     break;
   case 0x52:
-    op_ed_sbc16(state.registers.HL, state.registers.DE);
+    Arithmetic::sbc16(state, state.registers.HL, state.registers.DE);
     cycles = 15;
     break;
   case 0x62:
-    op_ed_sbc16(state.registers.HL, state.registers.HL);
+    Arithmetic::sbc16(state, state.registers.HL, state.registers.HL);
     cycles = 15;
     break;
   case 0x72:
-    op_ed_sbc16(state.registers.HL, state.registers.SP);
+    Arithmetic::sbc16(state, state.registers.HL, state.registers.SP);
     cycles = 15;
     break;
 
   // ADC HL, rr
   case 0x4A:
-    op_ed_adc16(state.registers.HL, state.registers.BC);
+    Arithmetic::adc16(state, state.registers.HL, state.registers.BC);
     cycles = 15;
     break;
   case 0x5A:
-    op_ed_adc16(state.registers.HL, state.registers.DE);
+    Arithmetic::adc16(state, state.registers.HL, state.registers.DE);
     cycles = 15;
     break;
   case 0x6A:
-    op_ed_adc16(state.registers.HL, state.registers.HL);
+    Arithmetic::adc16(state, state.registers.HL, state.registers.HL);
     cycles = 15;
     break;
   case 0x7A:
-    op_ed_adc16(state.registers.HL, state.registers.SP);
+    Arithmetic::adc16(state, state.registers.HL, state.registers.SP);
     cycles = 15;
     break;
 
   // LD (nn), rr - Consumes 2 byte operand (nn)
   case 0x43:
-    op_ed_ld_nn_rr(state.getNextWordFromPC(), state.registers.BC);
+    Load::ld_nn_rr(state, state.getNextWordFromPC(), state.registers.BC);
     state.registers.PC += 2;
     cycles = 20;
     break;
   case 0x53:
-    op_ed_ld_nn_rr(state.getNextWordFromPC(), state.registers.DE);
+    Load::ld_nn_rr(state, state.getNextWordFromPC(), state.registers.DE);
     state.registers.PC += 2;
     cycles = 20;
     break;
   case 0x63:
-    op_ed_ld_nn_rr(state.getNextWordFromPC(), state.registers.HL);
+    Load::ld_nn_rr(state, state.getNextWordFromPC(), state.registers.HL);
     state.registers.PC += 2;
     cycles = 20;
     break;
   case 0x73:
-    op_ed_ld_nn_rr(state.getNextWordFromPC(), state.registers.SP);
+    Load::ld_nn_rr(state, state.getNextWordFromPC(), state.registers.SP);
     state.registers.PC += 2;
     cycles = 20;
     break;
 
   // LD rr, (nn) - Consumes 2 byte operand (nn)
   case 0x4B:
-    op_ed_ld_rr_nn(state.registers.BC, state.getNextWordFromPC());
+    Load::ld_rr_nn(state, state.registers.BC, state.getNextWordFromPC());
     state.registers.PC += 2;
     cycles = 20;
     break;
   case 0x5B:
-    op_ed_ld_rr_nn(state.registers.DE, state.getNextWordFromPC());
+    Load::ld_rr_nn(state, state.registers.DE, state.getNextWordFromPC());
     state.registers.PC += 2;
     cycles = 20;
     break;
   case 0x6B:
-    op_ed_ld_rr_nn(state.registers.HL, state.getNextWordFromPC());
+    Load::ld_rr_nn(state, state.registers.HL, state.getNextWordFromPC());
     state.registers.PC += 2;
     cycles = 20;
     break;
   case 0x7B:
-    op_ed_ld_rr_nn(state.registers.SP, state.getNextWordFromPC());
+    Load::ld_rr_nn(state, state.registers.SP, state.getNextWordFromPC());
     state.registers.PC += 2;
     cycles = 20;
     break;
@@ -2339,42 +1978,42 @@ int Processor::exec_ed_opcode() {
 
   // Block Ops
   case 0xB0:
-    cycles = op_ed_ldir();
+    cycles = Load::ldir(state);
     break;
   case 0xB8:
-    cycles = op_ed_lddr();
+    cycles = Load::lddr(state);
     break;
   case 0xB1:
-    cycles = op_ed_cpir();
+    cycles = Control::cpir(state);
     break;
   case 0xB9:
-    cycles = op_ed_cpdr();
+    cycles = Control::cpdr(state);
     break;
 
   // Block I/O
   case 0xA2:
-    cycles = op_ed_ini();
+    cycles = cycles = IO::ini(state);
     break;
   case 0xB2:
-    cycles = op_ed_inir();
+    cycles = cycles = IO::inir(state);
     break;
   case 0xAA:
-    cycles = op_ed_ind();
+    cycles = cycles = IO::ind(state);
     break;
   case 0xBA:
-    cycles = op_ed_indr();
+    cycles = cycles = IO::indr(state);
     break;
   case 0xA3:
-    cycles = op_ed_outi();
+    cycles = cycles = IO::outi(state);
     break;
   case 0xB3:
-    cycles = op_ed_otir();
+    cycles = cycles = IO::otir(state);
     break;
   case 0xAB:
-    cycles = op_ed_outd();
+    cycles = cycles = IO::outd(state);
     break;
   case 0xBB:
-    cycles = op_ed_otdr();
+    cycles = cycles = IO::otdr(state);
     break;
 
   default:
@@ -2435,40 +2074,40 @@ int Processor::exec_cb_opcode() {
   if (x == 0) { // Rotate/Shift
     switch (y) {
     case 0:
-      rlc(*regPtr);
+      Bit::rlc(state, *regPtr);
       break;
     case 1:
-      rrc(*regPtr);
+      Bit::rrc(state, *regPtr);
       break;
     case 2:
-      rl(*regPtr);
+      Bit::rl(state, *regPtr);
       break;
     case 3:
-      rr(*regPtr);
+      Bit::rr(state, *regPtr);
       break;
     case 4:
-      sla(*regPtr);
+      Bit::sla(state, *regPtr);
       break;
     case 5:
-      sra(*regPtr);
+      Bit::sra(state, *regPtr);
       break;
     case 6:
-      sll(*regPtr);
+      Bit::sll(state, *regPtr);
       break; // SLL (undocumented)
     case 7:
-      srl(*regPtr);
+      Bit::srl(state, *regPtr);
       break;
     }
   } else if (x == 1) { // BIT
-    bit(y, *regPtr);
+    Bit::bit(state, y, *regPtr);
     // BIT doesn't write back
     if (isMem) {
       return cycles;
     }
   } else if (x == 2) { // RES
-    res(y, *regPtr);
+    Bit::res(state, y, *regPtr);
   } else if (x == 3) { // SET
-    set(y, *regPtr);
+    Bit::set(state, y, *regPtr);
   }
 
   // Write back if memory and NOT BIT (BIT doesn't modify)
@@ -2512,40 +2151,40 @@ void Processor::exec_index_opcode(byte prefix) {
     if (x == 0) { // Rotate/Shift
       switch (y) {
       case 0:
-        rlc(val);
+        Bit::rlc(state, val);
         break;
       case 1:
-        rrc(val);
+        Bit::rrc(state, val);
         break;
       case 2:
-        rl(val);
+        Bit::rl(state, val);
         break;
       case 3:
-        rr(val);
+        Bit::rr(state, val);
         break;
       case 4:
-        sla(val);
+        Bit::sla(state, val);
         break;
       case 5:
-        sra(val);
+        Bit::sra(state, val);
         break;
       case 6:
-        sll(val);
+        Bit::sll(state, val);
         break;
       case 7:
-        srl(val);
+        Bit::srl(state, val);
         break;
       }
       writeMem(addr, val);
     } else if (x == 1) { // BIT
-      bit(y, val);
+      Bit::bit(state, y, val);
       cycles = 20;       // BIT is 20
                          // No writeback
     } else if (x == 2) { // RES
-      res(y, val);
+      Bit::res(state, y, val);
       writeMem(addr, val);
     } else if (x == 3) { // SET
-      set(y, val);
+      Bit::set(state, y, val);
       writeMem(addr, val);
     }
 
@@ -2565,19 +2204,19 @@ void Processor::exec_index_opcode(byte prefix) {
   switch (opcode) {
   // 09, 19, 29, 39: ADD IX, rr
   case 0x09:
-    add16(idx, state.registers.BC);
+    Arithmetic::add16(state, idx, state.registers.BC);
     cycles = 15;
     break;
   case 0x19:
-    add16(idx, state.registers.DE);
+    Arithmetic::add16(state, idx, state.registers.DE);
     cycles = 15;
     break;
   case 0x29:
-    add16(idx, idx);
+    Arithmetic::add16(state, idx, idx);
     cycles = 15;
     break;
   case 0x39:
-    add16(idx, state.registers.SP);
+    Arithmetic::add16(state, idx, state.registers.SP);
     cycles = 15;
     break;
 
@@ -2623,25 +2262,25 @@ void Processor::exec_index_opcode(byte prefix) {
 
   // 24: INC IXH
   case 0x24: {
-    ALUHelpers::inc8(state, *idxH);
+    Arithmetic::inc8(state, *idxH);
     cycles = 8;
     break;
   }
   // 25: DEC IXH
   case 0x25: {
-    ALUHelpers::dec8(state, *idxH);
+    Arithmetic::dec8(state, *idxH);
     cycles = 8;
     break;
   }
   // 2C: INC IXL
   case 0x2C: {
-    ALUHelpers::inc8(state, *idxL);
+    Arithmetic::inc8(state, *idxL);
     cycles = 8;
     break;
   }
   // 2D: DEC IXL
   case 0x2D: {
-    ALUHelpers::dec8(state, *idxL);
+    Arithmetic::dec8(state, *idxL);
     cycles = 8;
     break;
   }
@@ -2653,7 +2292,7 @@ void Processor::exec_index_opcode(byte prefix) {
     word addr = idx + (int8_t)d;
     byte val = state.memory[addr];
     // Use helper for correct flags (H, P/V)
-    ALUHelpers::inc8(state, val);
+    Arithmetic::inc8(state, val);
     writeMem(addr, val);
     cycles = 23;
     break;
@@ -2666,7 +2305,7 @@ void Processor::exec_index_opcode(byte prefix) {
     word addr = idx + (int8_t)d;
     byte val = state.memory[addr];
     // Use helper for correct flags (H, P/V)
-    ALUHelpers::dec8(state, val);
+    Arithmetic::dec8(state, val);
     writeMem(addr, val);
     cycles = 23;
     break;
@@ -2876,56 +2515,56 @@ void Processor::exec_index_opcode(byte prefix) {
   case 0x86: { // ADD A, (IX+d)
     byte d = state.getNextByteFromPC();
     state.registers.PC++;
-    ALUHelpers::add8(state, state.memory[idx + (int8_t)d]);
+    Arithmetic::add8(state, state.memory[idx + (int8_t)d]);
     cycles = 19;
     break;
   }
   case 0x8E: { // ADC A, (IX+d)
     byte d = state.getNextByteFromPC();
     state.registers.PC++;
-    ALUHelpers::adc8(state, state.memory[idx + (int8_t)d]);
+    Arithmetic::adc8(state, state.memory[idx + (int8_t)d]);
     cycles = 19;
     break;
   }
   case 0x96: { // SUB (IX+d)
     byte d = state.getNextByteFromPC();
     state.registers.PC++;
-    ALUHelpers::sub8(state, state.memory[idx + (int8_t)d]);
+    Arithmetic::sub8(state, state.memory[idx + (int8_t)d]);
     cycles = 19;
     break;
   }
   case 0x9E: { // SBC A, (IX+d)
     byte d = state.getNextByteFromPC();
     state.registers.PC++;
-    ALUHelpers::sbc8(state, state.memory[idx + (int8_t)d]);
+    Arithmetic::sbc8(state, state.memory[idx + (int8_t)d]);
     cycles = 19;
     break;
   }
   case 0xA6: { // AND (IX+d)
     byte d = state.getNextByteFromPC();
     state.registers.PC++;
-    ALUHelpers::and8(state, state.memory[idx + (int8_t)d]);
+    Logic::and8(state, state.memory[idx + (int8_t)d]);
     cycles = 19;
     break;
   }
   case 0xAE: { // XOR (IX+d)
     byte d = state.getNextByteFromPC();
     state.registers.PC++;
-    ALUHelpers::xor8(state, state.memory[idx + (int8_t)d]);
+    Logic::xor8(state, state.memory[idx + (int8_t)d]);
     cycles = 19;
     break;
   }
   case 0xB6: { // OR (IX+d)
     byte d = state.getNextByteFromPC();
     state.registers.PC++;
-    ALUHelpers::or8(state, state.memory[idx + (int8_t)d]);
+    Logic::or8(state, state.memory[idx + (int8_t)d]);
     cycles = 19;
     break;
   }
   case 0xBE: { // CP (IX+d)
     byte d = state.getNextByteFromPC();
     state.registers.PC++;
-    ALUHelpers::cp8(state, state.memory[idx + (int8_t)d]);
+    Arithmetic::cp8(state, state.memory[idx + (int8_t)d]);
     cycles = 19;
     break;
   }
@@ -2976,26 +2615,26 @@ void Processor::exec_index_opcode(byte prefix) {
 
   // B4: OR IXH (Requested)
   case 0xB4: {
-    ALUHelpers::or8(state, *idxH);
+    Logic::or8(state, *idxH);
     cycles = 8;
     break;
   }
   // B5: OR IXL (Requested)
   case 0xB5: {
-    ALUHelpers::or8(state, *idxL);
+    Logic::or8(state, *idxL);
     cycles = 8;
     break;
   }
 
   // E1: POP IX
   case 0xE1: {
-    idx = pop16();
+    idx = Load::pop16(state);
     cycles = 14;
     break;
   }
   // E5: PUSH IX
   case 0xE5: {
-    push16(idx);
+    Load::push16(state, idx);
     cycles = 15;
     break;
   }
@@ -3051,742 +2690,4 @@ void Processor::exec_index_opcode(byte prefix) {
   state.addFrameTStates(cycles);
   this->state.tape.update(cycles);
   audio.update(cycles, state.getSpeakerBit(), state.tape.getEarBit());
-}
-
-// 16-bit Stubs
-void Processor::add16(word &dest, word src) {
-  ALUHelpers::add16(state, dest, src);
-}
-void Processor::inc16(word &reg) { ALUHelpers::inc16(state, reg); }
-void Processor::dec16(word &reg) { ALUHelpers::dec16(state, reg); }
-
-// Bit Manipulation Helpers
-void Processor::rlc(byte &val) {
-  int carry = (val & 0x80) ? 1 : 0;
-  val = (val << 1) | carry;
-  // state.registers.F = (carry ? C_FLAG : 0) | (val & S_FLAG) | (val == 0 ?
-  // Z_FLAG : 0) | (state.registers.F & ~(C_FLAG | S_FLAG | Z_FLAG | H_FLAG |
-  // N_FLAG));
-
-  if (carry)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  if (val == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  if (val & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-}
-
-void Processor::rrc(byte &val) {
-  int carry = (val & 0x01) ? 1 : 0;
-  val = (val >> 1) | (carry << 7);
-
-  if (carry)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  if (val == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  if (val & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-}
-
-void Processor::rl(byte &val) {
-  int oldCarry = GET_FLAG(C_FLAG, state.registers) ? 1 : 0;
-  int newCarry = (val & 0x80) ? 1 : 0;
-  val = (val << 1) | oldCarry;
-
-  if (newCarry)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  if (val == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  if (val & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-}
-
-void Processor::rr(byte &val) {
-  int oldCarry = GET_FLAG(C_FLAG, state.registers) ? 1 : 0;
-  int newCarry = (val & 0x01) ? 1 : 0;
-  val = (val >> 1) | (oldCarry << 7);
-
-  if (newCarry)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  if (val == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  if (val & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-}
-
-void Processor::sla(byte &val) {
-  int carry = (val & 0x80) ? 1 : 0;
-  val = val << 1;
-
-  if (carry)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  if (val == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  if (val & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-}
-
-void Processor::sra(byte &val) {
-  int carry = (val & 0x01) ? 1 : 0;
-  int msb = val & 0x80;
-  val = (val >> 1) | msb;
-
-  if (carry)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  if (val == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  if (val & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-}
-
-void Processor::sll(byte &val) {
-  // SLL (Undocumented): Shift Left Logical, inserts 1 into bit 0
-  int carry = (val & 0x80) ? 1 : 0;
-  val = (val << 1) | 0x01;
-
-  if (carry)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  if (val == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  if (val & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-}
-
-void Processor::srl(byte &val) {
-  int carry = (val & 0x01) ? 1 : 0;
-  val = val >> 1;
-
-  if (carry)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  if (val == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  if (val & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-}
-
-void Processor::bit(int bit, byte val) {
-  bool z = !((val >> bit) & 1);
-  if (z)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  SET_FLAG(H_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-}
-
-void Processor::set(int bit, byte &val) { val |= (1 << bit); }
-void Processor::res(int bit, byte &val) { val &= ~(1 << bit); }
-
-// Extended Helpers
-void Processor::op_ed_ld_nn_rr(word nn, word rr) {
-  // LD (nn), rr. Z80 writes Low byte to nn, High byte to nn+1.
-  writeMem(nn, (byte)(rr & 0xFF));
-  writeMem(nn + 1, (byte)((rr >> 8) & 0xFF));
-}
-
-void Processor::op_ed_ld_rr_nn(word &rr, word nn) {
-  // LD rr, (nn)
-  byte low = state.memory[nn];
-  byte high = state.memory[nn + 1];
-  rr = (word)(high << 8) | low;
-}
-
-void Processor::op_ed_in_r_C(byte &r) {
-  // IN r, (C)
-  // Results often placed in r. Flags affected.
-  // Port address is BC. High byte (B) selects the keyboard row.
-
-  // We must pass the High Byte to readPort to select the correct row.
-  byte val = state.keyboard.readPort(state.registers.B);
-
-  // If scanning the ULA (Port FE etc, usually Bit 0 is 0), we need to add EAR
-  // bit? The ULA responds to any even port number. Port address low byte is C.
-  if ((state.registers.C & 1) == 0) {
-    byte ear = state.tape.getEarBit() ? 0x40 : 0x00;
-    val |= ear;
-  }
-
-  // Note: real Z80 IN r, (C) behaviour puts data on bus
-  r = val;
-
-  // Flags: S, Z, H=0, P/V (parity), N=0
-  if (val & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-  if (val == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  // P/V for IN is Parity
-  int p = 0;
-  for (int i = 0; i < 8; i++) {
-    if (val & (1 << i))
-      p++;
-  }
-  if ((p % 2) == 0)
-    SET_FLAG(P_FLAG, state.registers);
-  else
-    CLEAR_FLAG(P_FLAG, state.registers);
-}
-
-void Processor::op_ed_out_C_r(byte r) {
-  // OUT (C), r
-  // state.registers.B is high byte of port, C is low
-  word port = (state.registers.B << 8) | state.registers.C;
-  // Perform IO
-  // Note: Existing IO logic handles port specific checks
-  if ((port & 0xFF) == 0xFE) {
-    // ULA
-    // Border etc
-  }
-}
-
-void Processor::op_ed_sbc16(word &dest, word src) {
-  // SBC HL, rr
-  long val = dest - src - (GET_FLAG(C_FLAG, state.registers) ? 1 : 0);
-  int H_carry = (((dest & 0x0FFF) - (src & 0x0FFF) -
-                  (GET_FLAG(C_FLAG, state.registers) ? 1 : 0)) < 0);
-
-  if ((val & 0xFFFF0000) != 0)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-  SET_FLAG(N_FLAG, state.registers);
-  if (val == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  if (H_carry)
-    SET_FLAG(H_FLAG, state.registers);
-  else
-    CLEAR_FLAG(H_FLAG, state.registers);
-  if (val & 0x8000)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-
-  // Overflow (P/V) for SUB/SBC
-  short op1 = (short)dest;
-  short op2 = (short)src;
-  short r = (short)val;
-  if (((op1 > 0 && op2 < 0) && r < 0) || ((op1 < 0 && op2 > 0) && r > 0)) {
-    SET_FLAG(P_FLAG, state.registers);
-  } else {
-    CLEAR_FLAG(P_FLAG, state.registers);
-  }
-
-  dest = (word)val;
-}
-
-void Processor::op_ed_adc16(word &dest, word src) {
-  // ADC HL, rr
-  long val = dest + src + (GET_FLAG(C_FLAG, state.registers) ? 1 : 0);
-  // H flag (from bit 11 to 12)
-  int H_carry = (((dest & 0x0FFF) + (src & 0x0FFF) +
-                  (GET_FLAG(C_FLAG, state.registers) ? 1 : 0)) > 0x0FFF);
-
-  if (val > 0xFFFF)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  if ((val & 0xFFFF) == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  if (H_carry)
-    SET_FLAG(H_FLAG, state.registers);
-  else
-    CLEAR_FLAG(H_FLAG, state.registers);
-  if (val & 0x8000)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-
-  // Overflow (P/V)
-  short op1 = (short)dest;
-  short op2 = (short)src;
-  short r = (short)val;
-  if (((op1 > 0 && op2 > 0) && r < 0) || ((op1 < 0 && op2 < 0) && r > 0)) {
-    SET_FLAG(P_FLAG, state.registers);
-  } else {
-    CLEAR_FLAG(P_FLAG, state.registers);
-  }
-
-  dest = (word)val;
-}
-
-// Block Ops - return cycle count
-int Processor::op_ed_ldir() {
-  byte value = state.memory[state.registers.HL];
-  writeMem(state.registers.DE, value);
-  state.registers.DE++;
-  state.registers.HL++;
-  state.registers.BC--;
-
-  // Flags
-  CLEAR_FLAG(H_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  CLEAR_FLAG(P_FLAG, state.registers);
-
-  if (state.registers.BC != 0) {
-    state.registers.PC -= 2;
-    return 21;
-  } else {
-    return 16;
-  }
-}
-
-int Processor::op_ed_lddr() {
-  byte value = state.memory[state.registers.HL];
-  writeMem(state.registers.DE, value);
-  state.registers.DE--;
-  state.registers.HL--;
-  state.registers.BC--;
-
-  CLEAR_FLAG(H_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  CLEAR_FLAG(P_FLAG, state.registers);
-
-  if (state.registers.BC != 0) {
-    state.registers.PC -= 2;
-    return 21;
-  } else {
-    return 16;
-  }
-}
-
-int Processor::op_ed_cpir() {
-  // Compare A with (HL), HL++, BC--
-  byte value = state.memory[state.registers.HL];
-  int result = state.registers.A - value;
-
-  bool z = (result == 0);
-  if (z)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  SET_FLAG(N_FLAG, state.registers); // CP sets N
-
-  // S Flag
-  if (result & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-
-  // H Flag
-  if ((state.registers.A & 0x0F) < (value & 0x0F))
-    SET_FLAG(H_FLAG, state.registers);
-  else
-    CLEAR_FLAG(H_FLAG, state.registers);
-
-  state.registers.HL++;
-  state.registers.BC--;
-
-  bool bcNonZero = (state.registers.BC != 0);
-  if (bcNonZero)
-    SET_FLAG(P_FLAG, state.registers);
-  else
-    CLEAR_FLAG(P_FLAG, state.registers); // P/V indicates BC!=0
-
-  // If BC!=0 AND !Z, repeat
-  if (bcNonZero && !z) {
-    state.registers.PC -= 2;
-    return 21;
-  } else {
-    return 16;
-  }
-}
-
-int Processor::op_ed_cpdr() {
-  // Compare A with (HL), HL--, BC--
-  byte value = state.memory[state.registers.HL];
-  int result = state.registers.A - value;
-
-  bool z = (result == 0);
-  if (z)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  SET_FLAG(N_FLAG, state.registers); // CP sets N
-
-  // S Flag
-  if (result & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-
-  // H Flag
-  if ((state.registers.A & 0x0F) < (value & 0x0F))
-    SET_FLAG(H_FLAG, state.registers);
-  else
-    CLEAR_FLAG(H_FLAG, state.registers);
-
-  state.registers.HL--;
-  state.registers.BC--;
-
-  bool bcNonZero = (state.registers.BC != 0);
-  if (bcNonZero)
-    SET_FLAG(P_FLAG, state.registers);
-  else
-    CLEAR_FLAG(P_FLAG, state.registers); // P/V indicates BC!=0
-
-  // If BC!=0 AND !Z, repeat
-  if (bcNonZero && !z) {
-    state.registers.PC -= 2;
-    return 21;
-  } else {
-    return 16;
-  }
-}
-// INI
-int Processor::op_ed_ini() {
-  byte b = state.registers.B;
-  byte val = state.keyboard.readPort(b); // Or generic readPort?
-  // Processor::op_ed_in_r_C uses keyboard.readPort logic but generalized
-  // For Block I/O, it's generic port read using BC?
-  // Actually INI uses generic IO port read.
-  // My op_ed_in_r_C had specific keyboard/EAR logic.
-  // I should use a generic readIO(port) helper?
-  // For now, I'll copy the logic from in_r_C but adapt.
-  // Wait, op_ed_in_r_C uses state.keyboard.readPort(state.registers.B)
-  // because keyboard scan uses high byte.
-  // Generic IO uses BC.
-  // Let's implement minimal IO here.
-
-  // INI logic:
-  // (HL) <- IN(BC)
-  // Note: B is decremented AFTER read or before?
-  // Z80 manual: "The contents of C are placed on address bus A0...A7, contents
-  // of B on A8...A15. I/O read." THEN B is decremented.
-
-  writeMem(state.registers.HL, val);
-
-  state.registers.HL++;
-  state.registers.B--;
-
-  SET_FLAG(N_FLAG, state.registers);
-  if (state.registers.B == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  return 16;
-}
-
-// INIR
-int Processor::op_ed_inir() {
-  op_ed_ini();
-  if (state.registers.B != 0) {
-    state.registers.PC -= 2;
-    return 21;
-  }
-  return 16;
-}
-
-// IND
-int Processor::op_ed_ind() {
-  byte b = state.registers.B;
-  byte val = state.keyboard.readPort(b);
-  writeMem(state.registers.HL, val);
-
-  state.registers.HL--;
-  state.registers.B--;
-
-  SET_FLAG(N_FLAG, state.registers);
-  if (state.registers.B == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  return 16;
-}
-
-// INDR
-int Processor::op_ed_indr() {
-  op_ed_ind();
-  if (state.registers.B != 0) {
-    state.registers.PC -= 2;
-    return 21;
-  }
-  return 16;
-}
-
-// OUTI
-int Processor::op_ed_outi() {
-  byte val = state.memory[state.registers.HL];
-  state.registers.B--; // Pre-dec B?
-  // Z80 manual: "The contents of HL are placed on the data bus... The contents
-  // of C are placed on lower address bus... B is decremented... contents of B
-  // placed on upper address bus... Output." So B is decremented BEFORE output
-  // address is formed? "B is decremented". "The byte from (HL) is written to
-  // port (C)". Wait, "IO write". Port address is BC? "The contents of the B
-  // register are placed on the top half of the address bus". AFTER decrement.
-  // So OUTI: B--; OUT(BC), val; HL++;
-
-  // Wait, INI decrements B AFTER read.
-  // OUTI decrements B BEFORE write?
-  // Implementation in other emulators:
-  // INI: (HL)=IN(BC); Dec B, Inc HL.
-  // OUTI: B--; OUT(BC)=(HL); Inc HL.
-
-  // Let's assume standard behavior:
-  // INI: Read, WriteMem, Dec B, Inc HL.
-  // OUTI: ReadMem, Dec B, Output, Inc HL.
-
-  // Check INI again: Z80 manual says "The contents of Register B are placed on
-  // the top half... Then B is decremented". So INI uses OLD B.
-
-  // OUTI: "The contents of Register B are decremented... Then the contents of B
-  // are placed on the top half..." So OUTI uses NEW B.
-
-  // OUTI implementation:
-  // Read (HL)
-  state.registers.B--;
-  // Output to Port BC (New B)
-  // For now, minimal output logic (stubbed IO)
-  // Emulate port contention/logic if needed, but here just cycle count matters
-  // often.
-
-  state.registers.HL++;
-
-  SET_FLAG(N_FLAG, state.registers);
-  if (state.registers.B == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  return 16;
-}
-
-// OTIR
-int Processor::op_ed_otir() {
-  op_ed_outi();
-  if (state.registers.B != 0) {
-    state.registers.PC -= 2;
-    return 21;
-  }
-  return 16;
-}
-
-// OUTD
-int Processor::op_ed_outd() {
-  byte val = state.memory[state.registers.HL];
-  state.registers.B--;
-  // Output val to BC
-  state.registers.HL--;
-
-  SET_FLAG(N_FLAG, state.registers);
-  if (state.registers.B == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  return 16;
-}
-
-// OTDR
-int Processor::op_ed_otdr() {
-  op_ed_outd();
-  if (state.registers.B != 0) {
-    state.registers.PC -= 2;
-    return 21;
-  }
-  return 16;
-}
-
-void Processor::op_ed_rrd() {
-  byte hlVal = state.memory[state.registers.HL];
-  byte a = state.registers.A;
-
-  // A input: . . . . 3 2 1 0
-  // HL input: 7 6 5 4 3 2 1 0
-
-  // RRD:
-  // A(0-3) -> HL(0-3)
-  // HL(0-3) -> HL(4-7)
-  // HL(4-7) -> A(0-3)
-
-  byte newA = (a & 0xF0) | (hlVal & 0x0F);
-  byte newHL = ((hlVal >> 4) & 0x0F) | ((a & 0x0F) << 4);
-
-  /* Wait, RRD definition:
-     Rotate Right Decimal.
-     The 4 bits 0-3 of (HL) are shifted to 0-3 of A.
-     The 4 bits 0-3 of A are shifted to 4-7 of (HL).
-     The 4 bits 4-7 of (HL) are shifted to 0-3 of (HL).
-
-     Let's trace:
-     A:  [Ahi Alo]
-     HL: [Hhi Hlo]
-
-     Result:
-     A:  [Ahi Hlo]
-     HL: [Alo Hhi]
-
-     Documentation says:
-     "The contents of the low order four bits of the memory location (HL) are
-     copied into the low order four bits of the Accumulator. The previous
-     contents of the low order four bits of the Accumulator are copied into the
-     high order four bits of (HL). The previous contents of the high order four
-     bits of (HL) are copied into the low order four bits of (HL)."
-
-     So:
-     A(0-3) = old HL(0-3)
-     HL(4-7) = old A(0-3)
-     HL(0-3) = old HL(4-7)
-  */
-
-  byte oldA = state.registers.A;
-  byte oldHL = state.memory[state.registers.HL];
-
-  byte finalA = (oldA & 0xF0) | (oldHL & 0x0F);
-  byte finalHL = ((oldA & 0x0F) << 4) | ((oldHL >> 4) & 0x0F);
-
-  state.registers.A = finalA;
-  writeMem(state.registers.HL, finalHL);
-
-  // Flags
-  // S, Z, P/V set by A output
-  // H, N = 0
-  if (finalA & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-  if (finalA == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-
-  // P/V Parity of A
-  int p = 0;
-  for (int i = 0; i < 8; i++)
-    if (finalA & (1 << i))
-      p++;
-  if ((p % 2) == 0)
-    SET_FLAG(P_FLAG, state.registers);
-  else
-    CLEAR_FLAG(P_FLAG, state.registers);
-}
-
-void Processor::op_ed_rld() {
-  /* RLD:
-     Rotate Left Decimal.
-     A(0-3) -> HL(4-7) -> HL(0-3) -> A(0-3) is wrong direction.
-
-     Doc:
-     "The contents of the low order four bits of the Accumulator are copied into
-     the low order four bits of (HL). The previous contents of the low order
-     four bits of (HL) are copied into the high order four bits of (HL). The
-     previous contents of the high order four bits of (HL) are copied into the
-     low order four bits of the Accumulator."
-
-     A:  [Ahi Alo]
-     HL: [Hhi Hlo]
-
-     A(0-3) = old HL(4-7)
-     HL(4-7) = old HL(0-3)
-     HL(0-3) = old A(0-3)
-  */
-
-  byte oldA = state.registers.A;
-  byte oldHL = state.memory[state.registers.HL];
-
-  byte finalA = (oldA & 0xF0) | ((oldHL >> 4) & 0x0F);
-  byte finalHL = ((oldHL & 0x0F) << 4) | (oldA & 0x0F);
-
-  state.registers.A = finalA;
-  writeMem(state.registers.HL, finalHL);
-
-  // Flags same as RRD
-  if (finalA & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-  if (finalA == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  CLEAR_FLAG(H_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-
-  int p = 0;
-  for (int i = 0; i < 8; i++)
-    if (finalA & (1 << i))
-      p++;
-  if ((p % 2) == 0)
-    SET_FLAG(P_FLAG, state.registers);
-  else
-    CLEAR_FLAG(P_FLAG, state.registers);
 }
