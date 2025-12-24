@@ -25,6 +25,7 @@
 #include "Processor.h"
 #include "../utils/Logger.h"
 #include "../utils/debug.h"
+#include "ALUHelpers.h"
 #include "ProcessorMacros.h"
 #include "SnapshotLoader.h"
 #include <chrono>
@@ -1470,175 +1471,15 @@ OpCode *Processor::getNextInstruction() {
 // Opcode Helper Methods
 // ============================================================================
 
-void Processor::add8(byte val) {
-  int res = state.registers.A + val;
+void Processor::add8(byte val) { ALUHelpers::add8(state, val); }
 
-  // Flags
-  if ((res & 0xFF) == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-  if (res & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-  if (res > 0xFF)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-  if (((state.registers.A & 0x0F) + (val & 0x0F)) > 0x0F)
-    SET_FLAG(H_FLAG, state.registers);
-  else
-    CLEAR_FLAG(H_FLAG, state.registers);
+void Processor::adc8(byte val) { ALUHelpers::adc8(state, val); }
 
-  // Overflow (P/V)
-  int op1 = (int8_t)state.registers.A;
-  int op2 = (int8_t)val;
-  int r = (int8_t)(res & 0xFF);
-  if (((op1 > 0 && op2 > 0) && r < 0) || ((op1 < 0 && op2 < 0) && r > 0)) {
-    SET_FLAG(P_FLAG, state.registers);
-  } else {
-    CLEAR_FLAG(P_FLAG, state.registers);
-  }
+void Processor::sub8(byte val) { ALUHelpers::sub8(state, val); }
 
-  CLEAR_FLAG(N_FLAG, state.registers);
-  state.registers.A = (byte)res;
-}
+void Processor::sbc8(byte val) { ALUHelpers::sbc8(state, val); }
 
-void Processor::adc8(byte val) {
-  int carry = GET_FLAG(C_FLAG, state.registers) ? 1 : 0;
-  int res = state.registers.A + val + carry;
-
-  if ((res & 0xFF) == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  if (res & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-
-  if (res > 0xFF)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-
-  if (((state.registers.A & 0x0F) + (val & 0x0F) + carry) > 0x0F)
-    SET_FLAG(H_FLAG, state.registers);
-  else
-    CLEAR_FLAG(H_FLAG, state.registers);
-
-  // Overflow
-  int op1 = (int8_t)state.registers.A;
-  int op2 = (int8_t)val;
-  int r = (int8_t)(res & 0xFF);
-  if (((op1 > 0 && op2 > 0) && r < 0) || ((op1 < 0 && op2 < 0) && r > 0)) {
-    SET_FLAG(P_FLAG, state.registers);
-  } else {
-    CLEAR_FLAG(P_FLAG, state.registers);
-  }
-
-  CLEAR_FLAG(N_FLAG, state.registers);
-  state.registers.A = (byte)res;
-}
-
-void Processor::sub8(byte val) {
-  int res = state.registers.A - val;
-
-  if ((res & 0xFF) == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  if (res & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-
-  if (state.registers.A < val)
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-
-  if ((state.registers.A & 0x0F) < (val & 0x0F))
-    SET_FLAG(H_FLAG, state.registers);
-  else
-    CLEAR_FLAG(H_FLAG, state.registers);
-
-  // Overflow
-  int op1 = (int8_t)state.registers.A;
-  int op2 = (int8_t)val;
-  int r = (int8_t)(res & 0xFF);
-  if (((op1 > 0 && op2 < 0) && r < 0) || ((op1 < 0 && op2 > 0) && r > 0)) {
-    SET_FLAG(P_FLAG, state.registers);
-  } else {
-    CLEAR_FLAG(P_FLAG, state.registers);
-  }
-
-  SET_FLAG(N_FLAG, state.registers);
-  state.registers.A = (byte)res;
-}
-
-void Processor::sbc8(byte val) {
-  int carry = GET_FLAG(C_FLAG, state.registers) ? 1 : 0;
-  int res = state.registers.A - val - carry;
-
-  if ((res & 0xFF) == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  if (res & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-
-  if ((int)state.registers.A < ((int)val + carry))
-    SET_FLAG(C_FLAG, state.registers);
-  else
-    CLEAR_FLAG(C_FLAG, state.registers);
-
-  if (((state.registers.A & 0x0F) - (val & 0x0F) - carry) < 0)
-    SET_FLAG(H_FLAG, state.registers);
-  else
-    CLEAR_FLAG(H_FLAG, state.registers);
-
-  // Overflow
-  int op1 = (int8_t)state.registers.A;
-  int op2 = (int8_t)val;
-  int r = (int8_t)(res & 0xFF);
-  if (((op1 > 0 && op2 < 0) && r < 0) || ((op1 < 0 && op2 > 0) && r > 0)) {
-    SET_FLAG(P_FLAG, state.registers);
-  } else {
-    CLEAR_FLAG(P_FLAG, state.registers);
-  }
-
-  SET_FLAG(N_FLAG, state.registers);
-  state.registers.A = (byte)res;
-}
-
-void Processor::and8(byte val) {
-  state.registers.A &= val;
-  CLEAR_FLAG(C_FLAG, state.registers);
-  CLEAR_FLAG(N_FLAG, state.registers);
-  SET_FLAG(H_FLAG, state.registers);
-
-  if (state.registers.A == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  if (state.registers.A & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-
-  // Parity (P/V) calculation needed for logical ops
-  // For now we skip P/V for logical ops to save time or use utility?
-  // Existing LogicOpcodes didn't fully implement it either ("TODO")
-  // So we match that behavior.
-}
+void Processor::and8(byte val) { ALUHelpers::and8(state, val); }
 
 void Processor::xor8(byte val) {
   state.registers.A ^= val;
@@ -1713,55 +1554,9 @@ void Processor::cp8(byte val) {
   }
 }
 
-void Processor::inc8(byte &reg) {
-  reg++;
-  CLEAR_FLAG(N_FLAG, state.registers);
+void Processor::inc8(byte &reg) { ALUHelpers::inc8(state, reg); }
 
-  if (reg == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  if (reg & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-
-  if ((reg & 0x0F) == 0x00)
-    SET_FLAG(H_FLAG, state.registers);
-  else
-    CLEAR_FLAG(H_FLAG, state.registers);
-
-  if (reg == 0x80)
-    SET_FLAG(P_FLAG, state.registers);
-  else
-    CLEAR_FLAG(P_FLAG, state.registers);
-}
-
-void Processor::dec8(byte &reg) {
-  reg--;
-  SET_FLAG(N_FLAG, state.registers);
-
-  if (reg == 0)
-    SET_FLAG(Z_FLAG, state.registers);
-  else
-    CLEAR_FLAG(Z_FLAG, state.registers);
-
-  if (reg & 0x80)
-    SET_FLAG(S_FLAG, state.registers);
-  else
-    CLEAR_FLAG(S_FLAG, state.registers);
-
-  if ((reg & 0x0F) == 0x0F)
-    SET_FLAG(H_FLAG, state.registers);
-  else
-    CLEAR_FLAG(H_FLAG, state.registers);
-
-  if (reg == 0x7F)
-    SET_FLAG(P_FLAG, state.registers);
-  else
-    CLEAR_FLAG(P_FLAG, state.registers);
-}
+void Processor::dec8(byte &reg) { ALUHelpers::dec8(state, reg); }
 
 // Stubs for extended instructions
 void Processor::exec_ed_opcode() {
@@ -1776,34 +1571,14 @@ void Processor::exec_index_opcode(byte prefix) {
 
 // 16-bit Stubs
 void Processor::add16(word &dest, word src) {
-  long result = dest + src;
-
-  // H flag: Carry from bit 11
-  // If sum of lower 12 bits > 0x0FFF, then carry out of bit 11 occurred
-  if ((dest & 0x0FFF) + (src & 0x0FFF) > 0x0FFF) {
-    SET_FLAG(H_FLAG, state.registers);
-  } else {
-    CLEAR_FLAG(H_FLAG, state.registers);
-  }
-
-  // C flag: Carry from bit 15
-  if (result > 0xFFFF) {
-    SET_FLAG(C_FLAG, state.registers);
-  } else {
-    CLEAR_FLAG(C_FLAG, state.registers);
-  }
-
-  // N flag: Reset
-  CLEAR_FLAG(N_FLAG, state.registers);
-
-  dest = (word)result;
+  ALUHelpers::add16(state, dest, src);
 }
 void Processor::adc16(word &dest, word src) { /* TODO */ }
 void Processor::sbc16(word &dest, word src) { /* TODO */ }
 
-void Processor::inc16(word &reg) { reg++; }
+void Processor::inc16(word &reg) { ALUHelpers::inc16(state, reg); }
 
-void Processor::dec16(word &reg) { reg--; }
+void Processor::dec16(word &reg) { ALUHelpers::dec16(state, reg); }
 
 void Processor::op_load(byte opcode) {
   // To be implemented

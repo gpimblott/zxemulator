@@ -270,6 +270,30 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+spectrum/ALUHelpers.o: spectrum/ALUHelpers.cpp.o
+.PHONY : spectrum/ALUHelpers.o
+
+# target to build an object file
+spectrum/ALUHelpers.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/ALUHelpers.cpp.o
+.PHONY : spectrum/ALUHelpers.cpp.o
+
+spectrum/ALUHelpers.i: spectrum/ALUHelpers.cpp.i
+.PHONY : spectrum/ALUHelpers.i
+
+# target to preprocess a source file
+spectrum/ALUHelpers.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/ALUHelpers.cpp.i
+.PHONY : spectrum/ALUHelpers.cpp.i
+
+spectrum/ALUHelpers.s: spectrum/ALUHelpers.cpp.s
+.PHONY : spectrum/ALUHelpers.s
+
+# target to generate assembly for a file
+spectrum/ALUHelpers.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ZXEmulator.dir/build.make CMakeFiles/ZXEmulator.dir/spectrum/ALUHelpers.cpp.s
+.PHONY : spectrum/ALUHelpers.cpp.s
+
 spectrum/Audio.o: spectrum/Audio.cpp.o
 .PHONY : spectrum/Audio.o
 
@@ -1036,6 +1060,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... spectrum/ALUHelpers.o"
+	@echo "... spectrum/ALUHelpers.i"
+	@echo "... spectrum/ALUHelpers.s"
 	@echo "... spectrum/Audio.o"
 	@echo "... spectrum/Audio.i"
 	@echo "... spectrum/Audio.s"

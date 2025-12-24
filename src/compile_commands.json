@@ -133,6 +133,12 @@
 },
 {
   "directory": "/Users/gpimblott/projects/zxemulator/src",
+  "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/ALUHelpers.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/ALUHelpers.cpp",
+  "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/ALUHelpers.cpp",
+  "output": "CMakeFiles/ZXEmulator.dir/spectrum/ALUHelpers.cpp.o"
+},
+{
+  "directory": "/Users/gpimblott/projects/zxemulator/src",
   "command": "/usr/bin/c++  -isystem /opt/homebrew/include -std=gnu++17 -arch arm64 -o CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/StackOpcodes.cpp.o -c /Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/StackOpcodes.cpp",
   "file": "/Users/gpimblott/projects/zxemulator/src/spectrum/Opcodes/instructions/StackOpcodes.cpp",
   "output": "CMakeFiles/ZXEmulator.dir/spectrum/Opcodes/instructions/StackOpcodes.cpp.o"
