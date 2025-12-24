@@ -146,6 +146,12 @@ public:
   int op_ed_outi();
   int op_ed_outd();
 
+  // Repeat Block I/O
+  int op_ed_inir();
+  int op_ed_indr();
+  int op_ed_otir();
+  int op_ed_otdr();
+
   VideoBuffer *getVideoBuffer();
   ProcessorState &getState() { return state; } // Expose for debugger
   bool isRunning() const { return running; }
