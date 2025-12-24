@@ -30,6 +30,7 @@
 #include "Audio.h"
 
 class Processor {
+  friend class InstructionTest;
 
 private:
   // State variables

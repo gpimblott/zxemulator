@@ -68,6 +68,24 @@
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build"
+        },
+        {
+            "name": "Run Instruction Tests",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/tests/Instruction_Tests_run",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build"
+        },
+        {
+            "name": "Run Processor Tests",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/tests/Google_Tests_run",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build"
         }
     ]
 }
