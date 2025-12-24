@@ -61,13 +61,15 @@ The emulator maps standard ZX Spectrum keys to the PC keyboard.
 
 ## Compatibility
 
+* No Joystick support yet
+
 | Software | Format | Status | Notes |
 | :--- | :--- | :--- | :--- |
-| **Manic Miner** | Tape (.tzx) | **Working** | Loads correctly (fast/slow). Audio/video synced. Playable with Arrow Keys (Kempston). |
-| **Jet Set Willy** | Tape (.tzx) | **Working** | Loads correctly. Playable with Arrow Keys (Kempston). |
-| **Horace Goes Skiing** | Tape (.tzx) | **Working** | Loads correctly, runs perfectly. |
-| **Pacman** | Snapshot (.z80) | **Working** | Loads and runs. |
-| **ZX Diagnostics** | ROM | **Partial** | Passes initial diagnostic tests. Still some issues. |
+| **Manic Miner** | Tape (.tzx) | **Working** | OK |
+| **Jet Set Willy** | Tape (.tzx) | **Working** | OK |
+| **Horace Goes Skiing** | Tape (.tzx) | **Working** | OK |
+| **Pacman** | Snapshot (.z80) | **Working** | Not sure about keys - seems to work? |
+| **ZX Diagnostics** | ROM | **Working** | Passes all diagnostic tests. |
 
 ## Project Structure
 
