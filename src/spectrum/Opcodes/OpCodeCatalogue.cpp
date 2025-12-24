@@ -29,8 +29,6 @@
 #include "instructions/BitOpcodes.h"
 #include "instructions/IOOpcodes.h"
 
-#include "instructions/RotateOpcodes.h"
-
 /**
  * Constructor to build all the opcode instances and add to the catalogue
  */
@@ -41,8 +39,6 @@ OpCodeCatalogue::OpCodeCatalogue() {
   add(new IndexOpcodes());
 
   add(new BitOpcodes());
-
-  add(new RotateOpcodes());
 
   // Build the O(1) lookup table
   for (int i = 0; i < 256; i++) {

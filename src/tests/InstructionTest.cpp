@@ -148,3 +148,82 @@ TEST_F(InstructionTest, DJNZ) {
   EXPECT_EQ(state->registers.B, 0);
   EXPECT_EQ(state->registers.PC, 0x8002); // Not taken (Next instruction)
 }
+
+// Rotate Opcodes Generation Tests
+TEST_F(InstructionTest, RLCA) {
+  // 0x07: Rotate Left Circular Accumulator
+  // A = 0x80 (10000000). C = 0.
+  // Result: A = 0x01 (00000001). C = 1.
+
+  state->registers.A = 0x80;
+  state->registers.F = 0; // Clear flags
+
+  executeInstruction({0x07}, 0x8000);
+
+  EXPECT_EQ(state->registers.A, 0x01);
+  EXPECT_TRUE(checkFlag(C_FLAG));
+  EXPECT_FALSE(checkFlag(H_FLAG));
+  EXPECT_FALSE(checkFlag(N_FLAG));
+}
+
+TEST_F(InstructionTest, RRCA) {
+  // 0x0F: Rotate Right Circular Accumulator
+  // A = 0x01 (00000001). C = 0.
+  // Result: A = 0x80 (10000000). C = 1.
+
+  state->registers.A = 0x01;
+  state->registers.F = 0;
+
+  executeInstruction({0x0F}, 0x8000);
+
+  EXPECT_EQ(state->registers.A, 0x80);
+  EXPECT_TRUE(checkFlag(C_FLAG));
+  EXPECT_FALSE(checkFlag(H_FLAG));
+  EXPECT_FALSE(checkFlag(N_FLAG));
+}
+
+TEST_F(InstructionTest, RLA) {
+  // 0x17: Rotate Left Accumulator (through Carry)
+  // A = 0x80 (10000000). C = 1.
+  // Result: A = 0x01 (00000001). C = 1 (from old A7).
+  // Wait: A = (A << 1) | OldCarry
+  // 0x80 << 1 = 0x00. | 1 = 0x01.
+  // New Carry = Old A7 = 1.
+
+  state->registers.A = 0x80;
+  state->registers.F = C_FLAG; // Set C
+
+  executeInstruction({0x17}, 0x8000);
+
+  EXPECT_EQ(state->registers.A, 0x01);
+  EXPECT_TRUE(checkFlag(C_FLAG));
+  EXPECT_FALSE(checkFlag(H_FLAG));
+  EXPECT_FALSE(checkFlag(N_FLAG));
+
+  // Test with C=0
+  // A = 0x40 (01000000). C = 0.
+  // Result: A = 0x80. C = 0.
+  state->registers.A = 0x40;
+  state->registers.F = 0;
+  executeInstruction({0x17}, 0x8000);
+  EXPECT_EQ(state->registers.A, 0x80);
+  EXPECT_FALSE(checkFlag(C_FLAG));
+}
+
+TEST_F(InstructionTest, RRA) {
+  // 0x1F: Rotate Right Accumulator (through Carry)
+  // A = 0x01 (00000001). C = 1.
+  // Result: A = 0x80 (10000000). C = 1 (from old A0).
+  // A = (A >> 1) | (OldCarry << 7)
+  // 0x01 >> 1 = 0. | (1 << 7) = 0x80.
+
+  state->registers.A = 0x01;
+  state->registers.F = C_FLAG;
+
+  executeInstruction({0x1F}, 0x8000);
+
+  EXPECT_EQ(state->registers.A, 0x80);
+  EXPECT_TRUE(checkFlag(C_FLAG));
+  EXPECT_FALSE(checkFlag(H_FLAG));
+  EXPECT_FALSE(checkFlag(N_FLAG));
+}

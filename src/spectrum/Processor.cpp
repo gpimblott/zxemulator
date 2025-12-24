@@ -194,6 +194,24 @@ void Processor::executeFrame() {
       cycles = 4;
       break;
 
+    case 0x07: // RLCA
+    {
+      byte val = state.registers.A;
+      int carry = (val & 0x80) ? 1 : 0;
+      val = (val << 1) | carry;
+      state.registers.A = val;
+
+      if (carry)
+        SET_FLAG(C_FLAG, state.registers);
+      else
+        CLEAR_FLAG(C_FLAG, state.registers);
+
+      CLEAR_FLAG(H_FLAG, state.registers);
+      CLEAR_FLAG(N_FLAG, state.registers);
+      cycles = 4;
+      break;
+    }
+
     case 0x08: // EX AF, AF'
     {
       word temp = state.registers.AF;
@@ -214,6 +232,24 @@ void Processor::executeFrame() {
       state.registers.BC_ = tempBC;
       state.registers.DE_ = tempDE;
       state.registers.HL_ = tempHL;
+      cycles = 4;
+      break;
+    }
+
+    case 0x0F: // RRCA
+    {
+      byte val = state.registers.A;
+      int carry = (val & 0x01) ? 1 : 0;
+      val = (val >> 1) | (carry << 7);
+      state.registers.A = val;
+
+      if (carry)
+        SET_FLAG(C_FLAG, state.registers);
+      else
+        CLEAR_FLAG(C_FLAG, state.registers);
+
+      CLEAR_FLAG(H_FLAG, state.registers);
+      CLEAR_FLAG(N_FLAG, state.registers);
       cycles = 4;
       break;
     }
@@ -281,12 +317,50 @@ void Processor::executeFrame() {
       cycles = 11;
       break;
 
+    case 0x17: // RLA
+    {
+      byte val = state.registers.A;
+      int oldCarry = GET_FLAG(C_FLAG, state.registers) ? 1 : 0;
+      int newCarry = (val & 0x80) ? 1 : 0;
+      val = (val << 1) | oldCarry;
+      state.registers.A = val;
+
+      if (newCarry)
+        SET_FLAG(C_FLAG, state.registers);
+      else
+        CLEAR_FLAG(C_FLAG, state.registers);
+
+      CLEAR_FLAG(H_FLAG, state.registers);
+      CLEAR_FLAG(N_FLAG, state.registers);
+      cycles = 4;
+      break;
+    }
+
     case 0x18: // JR e
     {
       int8_t offset = (int8_t)m_memory[state.registers.PC];
       state.registers.PC++;
       state.registers.PC += offset;
       cycles = 12;
+      break;
+    }
+
+    case 0x1F: // RRA
+    {
+      byte val = state.registers.A;
+      int oldCarry = GET_FLAG(C_FLAG, state.registers) ? 1 : 0;
+      int newCarry = (val & 0x01) ? 1 : 0;
+      val = (val >> 1) | (oldCarry << 7);
+      state.registers.A = val;
+
+      if (newCarry)
+        SET_FLAG(C_FLAG, state.registers);
+      else
+        CLEAR_FLAG(C_FLAG, state.registers);
+
+      CLEAR_FLAG(H_FLAG, state.registers);
+      CLEAR_FLAG(N_FLAG, state.registers);
+      cycles = 4;
       break;
     }
 
