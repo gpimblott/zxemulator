@@ -72,8 +72,8 @@ private:
   void op_misc(byte opcode);
 
   // Extended instruction handlers
-  void exec_ed_opcode();
-  void exec_cb_opcode();
+  int exec_ed_opcode();
+  int exec_cb_opcode();
   void exec_index_opcode(byte prefix); // DD or FD
 
   // ALU Helpers
@@ -108,6 +108,43 @@ public:
   void executeFrame();
 
   std::string lastError = "";
+
+  std::vector<byte> fetchOperands(int count);
+
+  // Bit Manipulation Helpers
+  void rlc(byte &val);
+  void rrc(byte &val);
+  void rl(byte &val);
+  void rr(byte &val);
+  void sla(byte &val);
+  void sra(byte &val);
+  void sll(byte &val);
+  void srl(byte &val);
+  void bit(int bit, byte val);
+  void set(int bit, byte &val);
+  void res(int bit, byte &val);
+
+  // Extended (ED) Helpers
+  void op_ed_ld_nn_rr(word nn, word rr);  // LD (nn), rr
+  void op_ed_ld_rr_nn(word &rr, word nn); // LD rr, (nn)
+  void op_ed_in_r_C(byte &r);             // IN r, (C)
+  void op_ed_out_C_r(byte r);             // OUT (C), r
+  void op_ed_sbc16(word &dest, word src);
+  void op_ed_adc16(word &dest, word src);
+
+  // RRD/RLD
+  void op_ed_rrd();
+  void op_ed_rld();
+
+  // Block Instructions
+  int op_ed_ldir();
+  int op_ed_lddr();
+  int op_ed_cpir();
+  int op_ed_cpdr();
+  int op_ed_ini();
+  int op_ed_ind();
+  int op_ed_outi();
+  int op_ed_outd();
 
   VideoBuffer *getVideoBuffer();
   ProcessorState &getState() { return state; } // Expose for debugger

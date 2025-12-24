@@ -535,6 +535,29 @@ void Processor::executeFrame() {
       }
       break;
 
+    case 0xD3: // OUT (n), A
+    {
+      byte port = state.getNextByteFromPC();
+      state.registers.PC++;
+
+      byte value = state.registers.A;
+
+      // Port FE (or any even port on 48K) controls border color and speaker
+      if ((port & 0x01) == 0) {
+        byte borderColor = state.registers.A & 0x07;
+        if (state.memory.getVideoBuffer()) {
+          state.memory.getVideoBuffer()->setBorderColor(
+              borderColor, state.getFrameTStates());
+        }
+
+        state.setSpeakerBit((value & 0x10) != 0);
+        state.setMicBit((value & 0x08) != 0);
+      }
+
+      cycles = 11;
+      break;
+    }
+
     case 0xDA: // JP C, nn
       if (GET_FLAG(C_FLAG, state.registers)) {
         state.registers.PC = state.getNextWordFromPC();
@@ -695,6 +718,14 @@ void Processor::executeFrame() {
       }
       break;
 
+    case 0xCB: // Prefix CB
+      cycles = exec_cb_opcode();
+      break;
+
+    case 0xED: // Extended
+      cycles = exec_ed_opcode();
+      break;
+
     case 0xCC: // CALL Z, nn
       if (GET_FLAG(Z_FLAG, state.registers)) {
         word address = state.getNextWordFromPC();
@@ -720,6 +751,28 @@ void Processor::executeFrame() {
         cycles = 10;
       }
       break;
+
+    case 0xDB: // IN A, (n)
+    {
+      byte port = state.getNextByteFromPC();
+      state.registers.PC++;
+
+      byte highByte = state.registers.A;
+
+      if ((port & 0x01) == 0) {
+        byte ear = state.tape.getEarBit() ? 0x40 : 0x00;
+        state.registers.A = state.keyboard.readPort(highByte) | ear;
+      } else if ((port & 0x1F) == 0x1F) {
+        // Kempston Joystick (Port 31)
+        state.registers.A = state.keyboard.readKempstonPort();
+      } else {
+        // Floating bus
+        state.registers.A = 0xFF;
+      }
+
+      cycles = 11;
+      break;
+    }
 
     case 0xDC: // CALL C, nn
       if (GET_FLAG(C_FLAG, state.registers)) {
@@ -2063,11 +2116,331 @@ void Processor::inc8(byte &reg) { ALUHelpers::inc8(state, reg); }
 void Processor::dec8(byte &reg) { ALUHelpers::dec8(state, reg); }
 
 // Stubs for extended instructions
-void Processor::exec_ed_opcode() {
-  // To be implemented
+int Processor::exec_ed_opcode() {
+  byte extOpcode = state.getNextByteFromPC();
+  state.registers.PC++; // Increment past the extended opcode
+
+  int cycles = 0;
+
+  switch (extOpcode) {
+  // LDS
+  case 0x47:
+    state.registers.I = state.registers.A;
+    cycles = 9;
+    break;
+  case 0x57:
+    state.registers.A = state.registers.I;
+    cycles = 9;
+    {
+      byte f = state.registers.F & C_FLAG;
+      if (state.registers.A == 0)
+        f |= Z_FLAG;
+      if (state.registers.A & 0x80)
+        f |= S_FLAG;
+      if (state.registers.IFF2)
+        f |= P_FLAG;
+      state.registers.F = f;
+    }
+    break;
+
+  // LD A, R / LD R, A
+  case 0x4F:
+    state.registers.R = state.registers.A;
+    cycles = 9;
+    break;
+  case 0x5F:
+    // Preserves bit 7 of R? R is 7 bits refresh.
+    // Actually Z80 R register is 8 bits (top bit changes roughly).
+    // Emulator often keeps R as 8 bits.
+    state.registers.A = state.registers.R;
+    cycles = 9;
+    {
+      byte f = state.registers.F & C_FLAG;
+      if (state.registers.A == 0)
+        f |= Z_FLAG;
+      if (state.registers.A & 0x80)
+        f |= S_FLAG;
+      if (state.registers.IFF2)
+        f |= P_FLAG;
+      CLEAR_FLAG(N_FLAG, state.registers);
+      CLEAR_FLAG(H_FLAG, state.registers);
+      // Merge with existing flags (C preserved)
+      // wait, I constructed 'f' based on C_FLAG + new flags.
+      // existing code did: byte f = state.registers.F & C_FLAG; ...
+      // state.registers.F = f; This CLEARED other flags (like H/N). LD A, I
+      // documentation: S, Z, H=0, P/V=IFF2, N=0, C preserved. So code is
+      // correct.
+      state.registers.F = f;
+    }
+    break;
+
+  // RRD / RLD
+  case 0x67:
+    op_ed_rrd();
+    cycles = 18;
+    break;
+  case 0x6F:
+    op_ed_rld();
+    cycles = 18;
+    break;
+
+  // RETI
+  case 0x4D: {
+    word pc = state.memory[state.registers.SP];
+    pc |= (state.memory[state.registers.SP + 1] << 8);
+    state.registers.SP += 2;
+    state.registers.PC = pc;
+    cycles = 14;
+  } break;
+
+  // RETN
+  case 0x45: {
+    word pc = state.memory[state.registers.SP];
+    pc |= (state.memory[state.registers.SP + 1] << 8);
+    state.registers.SP += 2;
+    state.registers.PC = pc;
+    state.registers.IFF1 = state.registers.IFF2;
+    state.setInterrupts(state.registers.IFF1);
+    cycles = 14;
+  } break;
+  // IN r, (C)
+  case 0x40:
+    op_ed_in_r_C(state.registers.B);
+    cycles = 12;
+    break;
+  case 0x48:
+    op_ed_in_r_C(state.registers.C);
+    cycles = 12;
+    break;
+  case 0x50:
+    op_ed_in_r_C(state.registers.D);
+    cycles = 12;
+    break;
+  case 0x58:
+    op_ed_in_r_C(state.registers.E);
+    cycles = 12;
+    break;
+  case 0x60:
+    op_ed_in_r_C(state.registers.H);
+    cycles = 12;
+    break;
+  case 0x68:
+    op_ed_in_r_C(state.registers.L);
+    cycles = 12;
+    break;
+  case 0x78:
+    op_ed_in_r_C(state.registers.A);
+    cycles = 12;
+    break;
+
+  // SBC HL, rr
+  case 0x42:
+    op_ed_sbc16(state.registers.HL, state.registers.BC);
+    cycles = 15;
+    break;
+  case 0x52:
+    op_ed_sbc16(state.registers.HL, state.registers.DE);
+    cycles = 15;
+    break;
+  case 0x62:
+    op_ed_sbc16(state.registers.HL, state.registers.HL);
+    cycles = 15;
+    break;
+  case 0x72:
+    op_ed_sbc16(state.registers.HL, state.registers.SP);
+    cycles = 15;
+    break;
+
+  // ADC HL, rr
+  case 0x4A:
+    op_ed_adc16(state.registers.HL, state.registers.BC);
+    cycles = 15;
+    break;
+  case 0x5A:
+    op_ed_adc16(state.registers.HL, state.registers.DE);
+    cycles = 15;
+    break;
+  case 0x6A:
+    op_ed_adc16(state.registers.HL, state.registers.HL);
+    cycles = 15;
+    break;
+  case 0x7A:
+    op_ed_adc16(state.registers.HL, state.registers.SP);
+    cycles = 15;
+    break;
+
+  // LD (nn), rr - Consumes 2 byte operand (nn)
+  case 0x43:
+    op_ed_ld_nn_rr(state.getNextWordFromPC(), state.registers.BC);
+    state.registers.PC += 2;
+    cycles = 20;
+    break;
+  case 0x53:
+    op_ed_ld_nn_rr(state.getNextWordFromPC(), state.registers.DE);
+    state.registers.PC += 2;
+    cycles = 20;
+    break;
+  case 0x63:
+    op_ed_ld_nn_rr(state.getNextWordFromPC(), state.registers.HL);
+    state.registers.PC += 2;
+    cycles = 20;
+    break;
+  case 0x73:
+    op_ed_ld_nn_rr(state.getNextWordFromPC(), state.registers.SP);
+    state.registers.PC += 2;
+    cycles = 20;
+    break;
+
+  // LD rr, (nn) - Consumes 2 byte operand (nn)
+  case 0x4B:
+    op_ed_ld_rr_nn(state.registers.BC, state.getNextWordFromPC());
+    state.registers.PC += 2;
+    cycles = 20;
+    break;
+  case 0x5B:
+    op_ed_ld_rr_nn(state.registers.DE, state.getNextWordFromPC());
+    state.registers.PC += 2;
+    cycles = 20;
+    break;
+  case 0x6B:
+    op_ed_ld_rr_nn(state.registers.HL, state.getNextWordFromPC());
+    state.registers.PC += 2;
+    cycles = 20;
+    break;
+  case 0x7B:
+    op_ed_ld_rr_nn(state.registers.SP, state.getNextWordFromPC());
+    state.registers.PC += 2;
+    cycles = 20;
+    break;
+
+  // IM
+  case 0x46:
+    state.setInterruptMode(0);
+    cycles = 8;
+    break;
+  case 0x56:
+    state.setInterruptMode(1);
+    cycles = 8;
+    break;
+  case 0x5E:
+    state.setInterruptMode(2);
+    cycles = 8;
+    break;
+
+  // Block Ops
+  case 0xB0:
+    cycles = op_ed_ldir();
+    break;
+  case 0xB8:
+    cycles = op_ed_lddr();
+    break;
+  case 0xB1:
+    cycles = op_ed_cpir();
+    break;
+  case 0xB9:
+    cycles = op_ed_cpdr();
+    break;
+
+  default:
+    cycles = 8; // NOP (approx) for unknown ED to prevent infinite loops
+    break;
+  }
+  return cycles;
 }
-void Processor::exec_cb_opcode() {
-  // To be implemented
+int Processor::exec_cb_opcode() {
+  byte cbOpcode = state.getNextByteFromPC();
+  state.registers.PC++;
+
+  int x = (cbOpcode >> 6) & 3;
+  int y = (cbOpcode >> 3) & 7;
+  int z = cbOpcode & 7;
+
+  byte *regPtr = nullptr;
+  byte memVal = 0;
+  bool isMem = false;
+  word hlAddr = state.registers.HL;
+
+  // Decode register
+  switch (z) {
+  case 0:
+    regPtr = &state.registers.B;
+    break;
+  case 1:
+    regPtr = &state.registers.C;
+    break;
+  case 2:
+    regPtr = &state.registers.D;
+    break;
+  case 3:
+    regPtr = &state.registers.E;
+    break;
+  case 4:
+    regPtr = &state.registers.H;
+    break;
+  case 5:
+    regPtr = &state.registers.L;
+    break;
+  case 6: // (HL)
+    isMem = true;
+    memVal = state.memory[hlAddr];
+    regPtr = &memVal;
+    break;
+  case 7:
+    regPtr = &state.registers.A;
+    break;
+  }
+
+  int cycles = 8;
+  if (isMem)
+    cycles = (x == 1) ? 12 : 15; // BIT (HL)=12, others=15
+  else
+    cycles = 8;
+
+  if (x == 0) { // Rotate/Shift
+    switch (y) {
+    case 0:
+      rlc(*regPtr);
+      break;
+    case 1:
+      rrc(*regPtr);
+      break;
+    case 2:
+      rl(*regPtr);
+      break;
+    case 3:
+      rr(*regPtr);
+      break;
+    case 4:
+      sla(*regPtr);
+      break;
+    case 5:
+      sra(*regPtr);
+      break;
+    case 6:
+      sll(*regPtr);
+      break; // SLL (undocumented)
+    case 7:
+      srl(*regPtr);
+      break;
+    }
+  } else if (x == 1) { // BIT
+    bit(y, *regPtr);
+    // BIT doesn't write back
+    if (isMem) {
+      return cycles;
+    }
+  } else if (x == 2) { // RES
+    res(y, *regPtr);
+  } else if (x == 3) { // SET
+    set(y, *regPtr);
+  }
+
+  // Write back if memory and NOT BIT (BIT doesn't modify)
+  if (isMem && x != 1) {
+    writeMem(hlAddr, *regPtr);
+  }
+
+  return cycles;
 }
 void Processor::exec_index_opcode(byte prefix) {
   // To be implemented
@@ -2118,4 +2491,564 @@ void Processor::op_io(byte opcode) {
 
 void Processor::op_misc(byte opcode) {
   // To be implemented
+}
+
+// Bit Manipulation Helpers
+void Processor::rlc(byte &val) {
+  int carry = (val & 0x80) ? 1 : 0;
+  val = (val << 1) | carry;
+  // state.registers.F = (carry ? C_FLAG : 0) | (val & S_FLAG) | (val == 0 ?
+  // Z_FLAG : 0) | (state.registers.F & ~(C_FLAG | S_FLAG | Z_FLAG | H_FLAG |
+  // N_FLAG));
+
+  if (carry)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  if (val == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  if (val & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+}
+
+void Processor::rrc(byte &val) {
+  int carry = (val & 0x01) ? 1 : 0;
+  val = (val >> 1) | (carry << 7);
+
+  if (carry)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  if (val == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  if (val & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+}
+
+void Processor::rl(byte &val) {
+  int oldCarry = GET_FLAG(C_FLAG, state.registers) ? 1 : 0;
+  int newCarry = (val & 0x80) ? 1 : 0;
+  val = (val << 1) | oldCarry;
+
+  if (newCarry)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  if (val == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  if (val & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+}
+
+void Processor::rr(byte &val) {
+  int oldCarry = GET_FLAG(C_FLAG, state.registers) ? 1 : 0;
+  int newCarry = (val & 0x01) ? 1 : 0;
+  val = (val >> 1) | (oldCarry << 7);
+
+  if (newCarry)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  if (val == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  if (val & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+}
+
+void Processor::sla(byte &val) {
+  int carry = (val & 0x80) ? 1 : 0;
+  val = val << 1;
+
+  if (carry)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  if (val == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  if (val & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+}
+
+void Processor::sra(byte &val) {
+  int carry = (val & 0x01) ? 1 : 0;
+  int msb = val & 0x80;
+  val = (val >> 1) | msb;
+
+  if (carry)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  if (val == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  if (val & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+}
+
+void Processor::sll(byte &val) {
+  // SLL (Undocumented): Shift Left Logical, inserts 1 into bit 0
+  int carry = (val & 0x80) ? 1 : 0;
+  val = (val << 1) | 0x01;
+
+  if (carry)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  if (val == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  if (val & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+}
+
+void Processor::srl(byte &val) {
+  int carry = (val & 0x01) ? 1 : 0;
+  val = val >> 1;
+
+  if (carry)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  if (val == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  if (val & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+}
+
+void Processor::bit(int bit, byte val) {
+  bool z = !((val >> bit) & 1);
+  if (z)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  SET_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+}
+
+void Processor::set(int bit, byte &val) { val |= (1 << bit); }
+void Processor::res(int bit, byte &val) { val &= ~(1 << bit); }
+
+// Extended Helpers
+void Processor::op_ed_ld_nn_rr(word nn, word rr) {
+  // LD (nn), rr. Z80 writes Low byte to nn, High byte to nn+1.
+  writeMem(nn, (byte)(rr & 0xFF));
+  writeMem(nn + 1, (byte)((rr >> 8) & 0xFF));
+}
+
+void Processor::op_ed_ld_rr_nn(word &rr, word nn) {
+  // LD rr, (nn)
+  byte low = state.memory[nn];
+  byte high = state.memory[nn + 1];
+  rr = (word)(high << 8) | low;
+}
+
+void Processor::op_ed_in_r_C(byte &r) {
+  // IN r, (C)
+  // Results often placed in r. Flags affected.
+  // Port address is BC. High byte (B) selects the keyboard row.
+
+  // We must pass the High Byte to readPort to select the correct row.
+  byte val = state.keyboard.readPort(state.registers.B);
+
+  // If scanning the ULA (Port FE etc, usually Bit 0 is 0), we need to add EAR
+  // bit? The ULA responds to any even port number. Port address low byte is C.
+  if ((state.registers.C & 1) == 0) {
+    byte ear = state.tape.getEarBit() ? 0x40 : 0x00;
+    val |= ear;
+  }
+
+  // Note: real Z80 IN r, (C) behaviour puts data on bus
+  r = val;
+
+  // Flags: S, Z, H=0, P/V (parity), N=0
+  if (val & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+  if (val == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  // P/V for IN is Parity
+  int p = 0;
+  for (int i = 0; i < 8; i++) {
+    if (val & (1 << i))
+      p++;
+  }
+  if ((p % 2) == 0)
+    SET_FLAG(P_FLAG, state.registers);
+  else
+    CLEAR_FLAG(P_FLAG, state.registers);
+}
+
+void Processor::op_ed_out_C_r(byte r) {
+  // OUT (C), r
+  // state.registers.B is high byte of port, C is low
+  word port = (state.registers.B << 8) | state.registers.C;
+  // Perform IO
+  // Note: Existing IO logic handles port specific checks
+  if ((port & 0xFF) == 0xFE) {
+    // ULA
+    // Border etc
+  }
+}
+
+void Processor::op_ed_sbc16(word &dest, word src) {
+  // SBC HL, rr
+  long val = dest - src - (GET_FLAG(C_FLAG, state.registers) ? 1 : 0);
+  int H_carry = (((dest & 0x0FFF) - (src & 0x0FFF) -
+                  (GET_FLAG(C_FLAG, state.registers) ? 1 : 0)) < 0);
+
+  if ((val & 0xFFFF0000) != 0)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  SET_FLAG(N_FLAG, state.registers);
+  if (val == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  if (H_carry)
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+  if (val & 0x8000)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  dest = (word)val;
+}
+
+void Processor::op_ed_adc16(word &dest, word src) {
+  // ADC HL, rr
+  long val = dest + src + (GET_FLAG(C_FLAG, state.registers) ? 1 : 0);
+  // H flag (from bit 11 to 12)
+  int H_carry = (((dest & 0x0FFF) + (src & 0x0FFF) +
+                  (GET_FLAG(C_FLAG, state.registers) ? 1 : 0)) > 0x0FFF);
+
+  if (val > 0xFFFF)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  if ((val & 0xFFFF) == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  if (H_carry)
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+  if (val & 0x8000)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  dest = (word)val;
+}
+
+// Block Ops - return cycle count
+int Processor::op_ed_ldir() {
+  byte value = state.memory[state.registers.HL];
+  writeMem(state.registers.DE, value);
+  state.registers.DE++;
+  state.registers.HL++;
+  state.registers.BC--;
+
+  // Flags
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  CLEAR_FLAG(P_FLAG, state.registers);
+
+  if (state.registers.BC != 0) {
+    state.registers.PC -= 2;
+    return 21;
+  } else {
+    return 16;
+  }
+}
+
+int Processor::op_ed_lddr() {
+  byte value = state.memory[state.registers.HL];
+  writeMem(state.registers.DE, value);
+  state.registers.DE--;
+  state.registers.HL--;
+  state.registers.BC--;
+
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+  CLEAR_FLAG(P_FLAG, state.registers);
+
+  if (state.registers.BC != 0) {
+    state.registers.PC -= 2;
+    return 21;
+  } else {
+    return 16;
+  }
+}
+
+int Processor::op_ed_cpir() {
+  // Compare A with (HL), HL++, BC--
+  byte value = state.memory[state.registers.HL];
+  int result = state.registers.A - value;
+
+  bool z = (result == 0);
+  if (z)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+
+  SET_FLAG(N_FLAG, state.registers); // CP sets N
+
+  // S Flag
+  if (result & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  // H Flag
+  if ((state.registers.A & 0x0F) < (value & 0x0F))
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  state.registers.HL++;
+  state.registers.BC--;
+
+  bool bcNonZero = (state.registers.BC != 0);
+  if (bcNonZero)
+    SET_FLAG(P_FLAG, state.registers);
+  else
+    CLEAR_FLAG(P_FLAG, state.registers); // P/V indicates BC!=0
+
+  // If BC!=0 AND !Z, repeat
+  if (bcNonZero && !z) {
+    state.registers.PC -= 2;
+    return 21;
+  } else {
+    return 16;
+  }
+}
+
+int Processor::op_ed_cpdr() {
+  // Compare A with (HL), HL--, BC--
+  byte value = state.memory[state.registers.HL];
+  int result = state.registers.A - value;
+
+  bool z = (result == 0);
+  if (z)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+
+  SET_FLAG(N_FLAG, state.registers); // CP sets N
+
+  // S Flag
+  if (result & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  // H Flag
+  if ((state.registers.A & 0x0F) < (value & 0x0F))
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  state.registers.HL--;
+  state.registers.BC--;
+
+  bool bcNonZero = (state.registers.BC != 0);
+  if (bcNonZero)
+    SET_FLAG(P_FLAG, state.registers);
+  else
+    CLEAR_FLAG(P_FLAG, state.registers); // P/V indicates BC!=0
+
+  // If BC!=0 AND !Z, repeat
+  if (bcNonZero && !z) {
+    state.registers.PC -= 2;
+    return 21;
+  } else {
+    return 16;
+  }
+}
+int Processor::op_ed_ini() { return 0; /* TO IMPLEMENT */ }
+int Processor::op_ed_ind() { return 0; /* TO IMPLEMENT */ }
+int Processor::op_ed_outi() { return 0; /* TO IMPLEMENT */ }
+int Processor::op_ed_outd() { return 0; /* TO IMPLEMENT */ }
+
+void Processor::op_ed_rrd() {
+  byte hlVal = state.memory[state.registers.HL];
+  byte a = state.registers.A;
+
+  // A input: . . . . 3 2 1 0
+  // HL input: 7 6 5 4 3 2 1 0
+
+  // RRD:
+  // A(0-3) -> HL(0-3)
+  // HL(0-3) -> HL(4-7)
+  // HL(4-7) -> A(0-3)
+
+  byte newA = (a & 0xF0) | (hlVal & 0x0F);
+  byte newHL = ((hlVal >> 4) & 0x0F) | ((a & 0x0F) << 4);
+
+  /* Wait, RRD definition:
+     Rotate Right Decimal.
+     The 4 bits 0-3 of (HL) are shifted to 0-3 of A.
+     The 4 bits 0-3 of A are shifted to 4-7 of (HL).
+     The 4 bits 4-7 of (HL) are shifted to 0-3 of (HL).
+
+     Let's trace:
+     A:  [Ahi Alo]
+     HL: [Hhi Hlo]
+
+     Result:
+     A:  [Ahi Hlo]
+     HL: [Alo Hhi]
+
+     Documentation says:
+     "The contents of the low order four bits of the memory location (HL) are
+     copied into the low order four bits of the Accumulator. The previous
+     contents of the low order four bits of the Accumulator are copied into the
+     high order four bits of (HL). The previous contents of the high order four
+     bits of (HL) are copied into the low order four bits of (HL)."
+
+     So:
+     A(0-3) = old HL(0-3)
+     HL(4-7) = old A(0-3)
+     HL(0-3) = old HL(4-7)
+  */
+
+  byte oldA = state.registers.A;
+  byte oldHL = state.memory[state.registers.HL];
+
+  byte finalA = (oldA & 0xF0) | (oldHL & 0x0F);
+  byte finalHL = ((oldA & 0x0F) << 4) | ((oldHL >> 4) & 0x0F);
+
+  state.registers.A = finalA;
+  writeMem(state.registers.HL, finalHL);
+
+  // Flags
+  // S, Z, P/V set by A output
+  // H, N = 0
+  if (finalA & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+  if (finalA == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+
+  // P/V Parity of A
+  int p = 0;
+  for (int i = 0; i < 8; i++)
+    if (finalA & (1 << i))
+      p++;
+  if ((p % 2) == 0)
+    SET_FLAG(P_FLAG, state.registers);
+  else
+    CLEAR_FLAG(P_FLAG, state.registers);
+}
+
+void Processor::op_ed_rld() {
+  /* RLD:
+     Rotate Left Decimal.
+     A(0-3) -> HL(4-7) -> HL(0-3) -> A(0-3) is wrong direction.
+
+     Doc:
+     "The contents of the low order four bits of the Accumulator are copied into
+     the low order four bits of (HL). The previous contents of the low order
+     four bits of (HL) are copied into the high order four bits of (HL). The
+     previous contents of the high order four bits of (HL) are copied into the
+     low order four bits of the Accumulator."
+
+     A:  [Ahi Alo]
+     HL: [Hhi Hlo]
+
+     A(0-3) = old HL(4-7)
+     HL(4-7) = old HL(0-3)
+     HL(0-3) = old A(0-3)
+  */
+
+  byte oldA = state.registers.A;
+  byte oldHL = state.memory[state.registers.HL];
+
+  byte finalA = (oldA & 0xF0) | ((oldHL >> 4) & 0x0F);
+  byte finalHL = ((oldHL & 0x0F) << 4) | (oldA & 0x0F);
+
+  state.registers.A = finalA;
+  writeMem(state.registers.HL, finalHL);
+
+  // Flags same as RRD
+  if (finalA & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+  if (finalA == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+
+  int p = 0;
+  for (int i = 0; i < 8; i++)
+    if (finalA & (1 << i))
+      p++;
+  if ((p % 2) == 0)
+    SET_FLAG(P_FLAG, state.registers);
+  else
+    CLEAR_FLAG(P_FLAG, state.registers);
 }

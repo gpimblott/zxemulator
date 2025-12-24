@@ -26,6 +26,8 @@
 #include "spectrum/TapeLoader.h"
 #include "spectrum/video/Screen.h"
 #include "utils/Logger.h"
+#include <chrono>
+#include <thread>
 
 using namespace std;
 using namespace utils;
@@ -101,9 +103,21 @@ int main(int argc, char *argv[]) {
       screen->setDebugMode(true);
     }
 
+    auto frameDuration = std::chrono::milliseconds(20); // 50Hz
+
     while (screen->processEvents()) {
+      auto start = std::chrono::high_resolution_clock::now();
+
       processor.executeFrame();
       screen->update();
+
+      auto end = std::chrono::high_resolution_clock::now();
+      auto elapsed =
+          std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+      if (elapsed < frameDuration) {
+        std::this_thread::sleep_for(frameDuration - elapsed);
+      }
     }
 
   } catch (exception &ex) {

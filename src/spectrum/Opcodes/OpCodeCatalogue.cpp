@@ -23,22 +23,14 @@
  */
 
 #include "OpCodeCatalogue.h"
-#include "ExtendedOpcodes.h"
 #include "IndexOpcodes.h"
-
-#include "instructions/BitOpcodes.h"
-#include "instructions/IOOpcodes.h"
 
 /**
  * Constructor to build all the opcode instances and add to the catalogue
  */
 OpCodeCatalogue::OpCodeCatalogue() {
 
-  add(new IOOpcodes());
-  add(new ExtendedOpcodes());
   add(new IndexOpcodes());
-
-  add(new BitOpcodes());
 
   // Build the O(1) lookup table
   for (int i = 0; i < 256; i++) {
@@ -61,7 +53,6 @@ OpCodeCatalogue::~OpCodeCatalogue() {
 
 /**
  * Add a new provider to the lookup list
- * @param opcode
  */
 void OpCodeCatalogue::add(OpCodeProvider *provider) {
   providersList.push_back(provider);
