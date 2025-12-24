@@ -30,7 +30,6 @@
 #include "instructions/IOOpcodes.h"
 #include "instructions/InterruptOpcodes.h"
 #include "instructions/JumpOpcodes.h"
-#include "instructions/LoadOpcodes.h"
 
 #include "instructions/RotateOpcodes.h"
 
@@ -38,7 +37,7 @@
  * Constructor to build all the opcode instances and add to the catalogue
  */
 OpCodeCatalogue::OpCodeCatalogue() {
-  add(new LoadOpcodes());
+
   add(new InterruptOpcodes());
 
   add(new JumpOpcodes());

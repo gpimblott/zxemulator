@@ -194,6 +194,30 @@ void Processor::executeFrame() {
       cycles = 4;
       break;
 
+    case 0x08: // EX AF, AF'
+    {
+      word temp = state.registers.AF;
+      state.registers.AF = state.registers.AF_;
+      state.registers.AF_ = temp;
+      cycles = 4;
+      break;
+    }
+
+    case 0xD9: // EXX
+    {
+      word tempBC = state.registers.BC;
+      word tempDE = state.registers.DE;
+      word tempHL = state.registers.HL;
+      state.registers.BC = state.registers.BC_;
+      state.registers.DE = state.registers.DE_;
+      state.registers.HL = state.registers.HL_;
+      state.registers.BC_ = tempBC;
+      state.registers.DE_ = tempDE;
+      state.registers.HL_ = tempHL;
+      cycles = 4;
+      break;
+    }
+
     case 0x76: // HALT
       state.setHalted(true);
       cycles = 4;
