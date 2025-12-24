@@ -257,14 +257,9 @@ bool Tape::fastLoadBlock(byte expectedFlag, word length, word startAddress,
         // Advance Tape
         currentBlockIndex = scanIndex + 1;
 
-        if (currentBlockIndex < blocks.size()) {
-          currentState = PILOT;
-          tStateCounter = 0;
-          nextEdgeTState = PILOT_PULSE;
-          pulseCount = 0;
-        } else {
-          stop();
-        }
+        // Always stop after fast load - don't restart playback
+        // The tape pointer advances but audio doesn't play
+        stop();
 
         return true;
       } else {

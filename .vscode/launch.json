@@ -64,7 +64,7 @@
             "program": "${workspaceFolder}/build/ZXEmulator",
             "args": [
                 "-f",
-                "${workspaceFolder}/roms/jetsetwilly.tzx"
+                "${workspaceFolder}/roms/manicminer.tzx"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build"

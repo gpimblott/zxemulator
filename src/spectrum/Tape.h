@@ -70,6 +70,9 @@ public:
                      emulator_types::word startAddress, class Memory &memory);
 
   bool hasBlocks() const { return !blocks.empty(); }
+
+  // Returns true if tape has reached the end (all blocks loaded)
+  bool isFinished() const { return currentBlockIndex >= blocks.size(); }
 };
 
 #endif // ZXEMULATOR_TAPE_H

@@ -1723,7 +1723,11 @@ void Processor::executeFrame() {
         }
         break;
       case 9: // Play
-        state.tape.play();
+        // Only play tape if there are blocks remaining to load
+        // (fast load may have already loaded everything)
+        if (!state.tape.isFinished()) {
+          state.tape.play();
+        }
         autoLoadTape = false;
         break;
       }
@@ -2282,6 +2286,22 @@ void Processor::exec_index_opcode(byte prefix) {
   case 0x2D: {
     Arithmetic::dec8(state, *idxL);
     cycles = 8;
+    break;
+  }
+  // 26: LD IXH, n
+  case 0x26: {
+    byte n = state.getNextByteFromPC();
+    state.registers.PC++;
+    *idxH = n;
+    cycles = 11;
+    break;
+  }
+  // 2E: LD IXL, n
+  case 0x2E: {
+    byte n = state.getNextByteFromPC();
+    state.registers.PC++;
+    *idxL = n;
+    cycles = 11;
     break;
   }
 
