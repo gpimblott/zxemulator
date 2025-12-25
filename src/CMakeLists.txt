@@ -20,6 +20,9 @@ set(ZX_SOURCES
     spectrum/Memory.cpp spectrum/Memory.h
     exceptions/MemoryException.h
     spectrum/Processor.cpp
+    spectrum/Processor_Index.cpp
+    spectrum/Processor_Extended.cpp
+    spectrum/Processor_Ops.cpp
     spectrum/video/Screen.cpp spectrum/video/Screen.h
     spectrum/video/windows/WindowsScreen.cpp spectrum/video/windows/WindowsScreen.h
     spectrum/video/VideoBuffer.cpp spectrum/video/VideoBuffer.h

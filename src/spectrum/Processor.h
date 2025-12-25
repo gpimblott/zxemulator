@@ -68,6 +68,10 @@ private:
   // Stack helpers with safe memory access
   // Stack helpers moved to instructions/LoadInstructions.h
 
+  // Block execution helpers
+  int exec_loads_8bit(byte opcode); // 0x40 - 0x7F
+  int exec_alu_8bit(byte opcode);   // 0x80 - 0xBF
+
   // Helper methods for instruction groups
   void op_load(byte opcode);
   void op_arithmetic(byte opcode);
