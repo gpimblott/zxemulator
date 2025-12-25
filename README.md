@@ -1,6 +1,6 @@
 # ZX Spectrum Emulator
 
-A work-in-progress C++ emulator for the 48K ZX Spectrum.
+A work-in-progress ZX Spectrum Emulator written in C++.
 
 ## Features
 
