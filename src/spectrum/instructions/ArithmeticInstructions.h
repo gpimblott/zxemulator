@@ -200,6 +200,16 @@ inline void cp8(ProcessorState &state, emulator_types::byte val) {
   }
 
   SET_FLAG(N_FLAG, state.registers);
+
+  // Undocumented: X and Y flags are copied from the operand (val)
+  if (val & 0x08)
+    SET_FLAG(X_FLAG, state.registers);
+  else
+    CLEAR_FLAG(X_FLAG, state.registers);
+  if (val & 0x20)
+    SET_FLAG(Y_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Y_FLAG, state.registers);
 }
 
 inline void inc8(ProcessorState &state, emulator_types::byte &reg) {
@@ -250,6 +260,54 @@ inline void dec8(ProcessorState &state, emulator_types::byte &reg) {
     SET_FLAG(P_FLAG, state.registers);
   else
     CLEAR_FLAG(P_FLAG, state.registers);
+}
+
+inline void neg8(ProcessorState &state) {
+  // NEG is effectively 0 - A
+  emulator_types::byte val = state.registers.A;
+  int res = 0 - val;
+
+  // Flags
+  if ((res & 0xFF) == 0)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+
+  if (res & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  if (val != 0)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+
+  // H Flag: Set if borrow from bit 4. For 0 - A, this is set if A & 0x0F != 0
+  if ((val & 0x0F) != 0)
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  // P/V Flag: Overflow. Result is 0x80 only if A was 0x80.
+  if (val == 0x80)
+    SET_FLAG(P_FLAG, state.registers);
+  else
+    CLEAR_FLAG(P_FLAG, state.registers);
+
+  SET_FLAG(N_FLAG, state.registers);
+
+  // Undocumented X/Y from result
+  if (res & 0x08)
+    SET_FLAG(X_FLAG, state.registers);
+  else
+    CLEAR_FLAG(X_FLAG, state.registers);
+  if (res & 0x20)
+    SET_FLAG(Y_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Y_FLAG, state.registers);
+
+  state.registers.A = (emulator_types::byte)res;
 }
 
 // 16-Bit

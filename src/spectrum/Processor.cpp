@@ -2000,6 +2000,11 @@ int Processor::exec_ed_opcode() {
     cycles = 20;
     break;
 
+  case 0x44: // NEG
+    Arithmetic::neg8(state);
+    cycles = 8;
+    break;
+
   // IM
   case 0x46:
     state.setInterruptMode(0);
@@ -2149,10 +2154,17 @@ int Processor::exec_cb_opcode() {
       break;
     }
   } else if (x == 1) { // BIT
-    Bit::bit(state, y, *regPtr);
-    // BIT doesn't write back
     if (isMem) {
+      // Z80 Undocumented: BIT n, (HL) sets X/Y from internal register (MEMPTR
+      // high byte), which is H (High byte of HL) Here, MEMPTR = HL. So pass
+      // (hlAddr >> 8) as the source for X/Y flags, but 'val' for Z flag test.
+      // We need to modify Bit::bit signature or handle it here.
+      // Let's modify Bit::bit to take an optional 'undocSource'
+      // OR: handle flags manually here.
+      Bit::bitMem(state, y, *regPtr, (hlAddr >> 8));
       return cycles;
+    } else {
+      Bit::bit(state, y, *regPtr);
     }
   } else if (x == 2) { // RES
     Bit::res(state, y, *regPtr);
@@ -2257,7 +2269,10 @@ int Processor::exec_index_opcode(byte prefix) {
       if (z != 6)
         setUndocReg(z, val);
     } else if (x == 1) { // BIT
-      Bit::bit(state, y, val);
+      // Z80 Undocumented: BIT n, (IX+d).
+      // X/Y flags taken from High Byte of (IX+d) address.
+      // 'addr' is the calculated effective address.
+      Bit::bitMem(state, y, val, (addr >> 8));
       cycles = 20;       // BIT is 20
                          // No writeback to memory OR register
     } else if (x == 2) { // RES
