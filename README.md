@@ -67,6 +67,7 @@ The emulator maps standard ZX Spectrum keys to the PC keyboard.
 | :--- | :--- | :--- | :--- |
 | **Attack of teh killer tomato** | Snapshot (.z80) | **Working** | OK | 
 | **Everyone's a Wally** | Tape (.tzx) | **Not Working** | BAD |
+| **Gosh Wonderful ROM** | ROM (.rom) | **Working** | OK |
 | **Hobbit** | Tape (.tzx) | **Working** | OK |
 | **Horace and the spiders** | ROM (.rom) | **Working** | OK |
 | **Horace Goes Skiing** | Tape (.tzx) | **Working** | OK |
