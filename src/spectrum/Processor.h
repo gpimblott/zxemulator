@@ -59,6 +59,12 @@ private:
 
   // Write with ROM protection
   void writeMem(word address, byte value);
+
+  // Core helpers
+  bool handleInterrupts(int &tStates);
+  bool
+  handleFastLoad(); // Returns true if fast load occurred (skip instruction)
+
   // Stack helpers with safe memory access
   // Stack helpers moved to instructions/LoadInstructions.h
 

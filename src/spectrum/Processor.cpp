@@ -83,17 +83,7 @@ void Processor::run() {
   }
 }
 
-void Processor::executeFrame() {
-  // 3.5MHz * 0.02s (50Hz) ~= 69888 T-states per frame
-  int tStates = 0;
-  const int frameCycles = 69888;
-
-  state.setFrameTStates(0);
-  if (state.memory.getVideoBuffer()) {
-    state.memory.getVideoBuffer()->newFrame();
-  }
-
-  // Fire an interrupt
+bool Processor::handleInterrupts(int &tStates) {
   if (!paused && state.areInterruptsEnabled()) {
     // If we were halted, we are no longer halted
     if (state.isHalted()) {
@@ -129,6 +119,58 @@ void Processor::executeFrame() {
 
     // Disable interrupts (standard Z80 behavior on accept)
     state.setInterrupts(false);
+    return true;
+  }
+  return false;
+}
+
+bool Processor::handleFastLoad() {
+  if (state.isFastLoad() && state.registers.PC == 0x0556) {
+    // 0x0556 is LD_BYTES.
+    // inputs: IX=Dest, DE=Length, A=Flag(00=Header, FF=Data), Carry set=Load
+    // outputs: Carry set=Success.
+
+    // We delegate to Tape to see if it can satisfy this request from current
+    // block Note: We ignore the 'Verify' case (Carry clear on entry usually
+    // means Verify, but ROM routine handles both) We assume Load.
+    bool success =
+        state.tape.fastLoadBlock(state.registers.A, state.registers.DE,
+                                 state.registers.IX, state.memory);
+
+    if (success) {
+      // Set Carry
+      state.registers.F |= 1;
+    } else {
+      // Clear Carry
+      state.registers.F &= ~1;
+    }
+
+    // Execute RET (Pop PC)
+    byte low = state.memory[state.registers.SP];
+    byte high = state.memory[state.registers.SP + 1];
+    state.registers.PC = (high << 8) | low;
+    state.registers.SP += 2;
+
+    // Don't execute instruction at 0x0556
+    return true;
+  }
+  return false;
+}
+
+void Processor::executeFrame() {
+  // 3.5MHz * 0.02s (50Hz) ~= 69888 T-states per frame
+  int tStates = 0;
+  const int frameCycles = 69888;
+
+  state.setFrameTStates(0);
+  if (state.memory.getVideoBuffer()) {
+    state.memory.getVideoBuffer()->newFrame();
+  }
+
+  // Fire an interrupt
+  // Fire an interrupt
+  if (handleInterrupts(tStates)) {
+    // Interrupt fired
   }
 
   while (tStates < frameCycles && running) {
@@ -152,33 +194,8 @@ void Processor::executeFrame() {
     }
 
     // Fast Load Trap
-    if (state.isFastLoad() && state.registers.PC == 0x0556) {
-      // 0x0556 is LD_BYTES.
-      // inputs: IX=Dest, DE=Length, A=Flag(00=Header, FF=Data), Carry set=Load
-      // outputs: Carry set=Success.
-
-      // We delegate to Tape to see if it can satisfy this request from current
-      // block Note: We ignore the 'Verify' case (Carry clear on entry usually
-      // means Verify, but ROM routine handles both) We assume Load.
-      bool success =
-          state.tape.fastLoadBlock(state.registers.A, state.registers.DE,
-                                   state.registers.IX, state.memory);
-
-      if (success) {
-        // Set Carry
-        state.registers.F |= 1;
-      } else {
-        // Clear Carry
-        state.registers.F &= ~1;
-      }
-
-      // Execute RET (Pop PC)
-      byte low = state.memory[state.registers.SP];
-      byte high = state.memory[state.registers.SP + 1];
-      state.registers.PC = (high << 8) | low;
-      state.registers.SP += 2;
-
-      // Don't execute instruction at 0x0556
+    // Fast Load Trap
+    if (handleFastLoad()) {
       continue;
     }
 
