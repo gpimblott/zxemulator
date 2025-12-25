@@ -2799,12 +2799,19 @@ int Processor::exec_index_opcode(byte prefix) {
     break;
   }
 
-  // E1: POP IX
   case 0xE1: {
     idx = Load::pop16(state);
     cycles = 14;
     break;
   }
+
+  // 99: SBC A, C (Prefix ignored)
+  case 0x99: {
+    Arithmetic::sbc8(state, state.registers.C);
+    cycles = 4;
+    break;
+  }
+
   // E5: PUSH IX
   case 0xE5: {
     Load::push16(state, idx);
