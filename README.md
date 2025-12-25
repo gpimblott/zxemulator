@@ -62,20 +62,28 @@ The emulator maps standard ZX Spectrum keys to the PC keyboard.
 ## Compatibility
 
 * No Joystick support yet
+* Known issues with fast loading of tape files
 
-| Software | Format | Status | Notes |
-| :--- | :--- | :--- | :--- |
-| **Attack of teh killer tomato** | Snapshot (.z80) | **Working** | OK | 
-| **Everyone's a Wally** | Tape (.tzx) | **Not Working** | BAD |
-| **Gosh Wonderful ROM** | ROM (.rom) | **Working** | OK |
-| **Hobbit** | Tape (.tzx) | **Working** | OK |
-| **Horace and the spiders** | ROM (.rom) | **Working** | OK |
-| **Horace Goes Skiing** | Tape (.tzx) | **Working** | OK |
-| **Jetpac** | Snapshot (.z80) | **Working** | OK |
-| **Jet Set Willy** | Tape (.tzx) | **Working** | OK |
-| **Manic Miner** | Tape (.tzx) | **Working** | OK |
-| **Pacman** | Snapshot (.z80) | **Unknown** | Not sure about keys - seems to work? |
-| **ZX Diagnostics** | ROM | **Working** | Passes all diagnostic tests. |
+| Software | Publisher | Year | Format | Status | Notes |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Ant Attack** | Quicksilva | 1983 | Snapshot (.z80) | **Working** | OK |
+| **Atic Atac** | Ultimate Play The Game | 1983 | Snapshot (.z80) | **Working** | OK |
+| **Attack of the Killer Tomatoes** | Global Software | 1986 | Snapshot (.z80) | **Working** | OK | 
+| **Elite** | Firebird | 1985 | Snapshot (.z80) | **Not Working** | Hangs after showing start screen |
+| **Chuckie Egg** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |
+| **Everyone's a Wally** | Mikro-Gen | 1985 | Snapshot (.z80) | **Working** | OK |
+| **Gosh Wonderful ROM** | Geoff Wearmouth | 2003 | ROM (.rom) | **Working** | OK |
+| **Hobbit** | Melbourne House | 1982 | Tape (.tzx) | **Working** | OK |
+| **Horace and the spiders** | Sinclair Research | 1983 | ROM (.rom) | **Working** | OK |
+| **Horace Goes Skiing** | Sinclair Research | 1982 | Tape (.tzx) | **Working** | OK |
+| **Jetpac** | Ultimate Play The Game | 1983 | Snapshot (.z80) | **Working** | OK |
+| **Jet Set Willy** | Software Projects | 1984 | Tape (.tzx) | **Working** | OK |
+| **Knight Lore** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |
+| **Manic Miner** | Software Projects | 1983 | Tape (.tzx) | **Working** | OK |
+| **Pacman** | Atarisoft | 1983 | Snapshot (.z80) | **Unknown** | Not sure about keys - seems to work? |
+| **Sabre Wulf** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |
+| **Underwurlde** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |
+| **ZX Diagnostics** | Dylan Smith / Brendan Alford | 2017 | ROM | **Working** | Passes all diagnostic tests. |
 
 ## Project Structure
 
