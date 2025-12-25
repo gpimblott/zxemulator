@@ -112,6 +112,80 @@ inline int rst(ProcessorState &state, emulator_types::word address) {
 }
 
 // Search (Block)
+inline int cpi(ProcessorState &state) {
+  // Compare A with (HL), HL++, BC--
+  emulator_types::byte value = state.memory[state.registers.HL];
+  int result = state.registers.A - value;
+
+  bool z = (result == 0);
+  if (z)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+
+  SET_FLAG(N_FLAG, state.registers); // CP sets N
+
+  // S Flag
+  if (result & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  // H Flag
+  if ((state.registers.A & 0x0F) < (value & 0x0F))
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  state.registers.HL++;
+  state.registers.BC--;
+
+  bool bcNonZero = (state.registers.BC != 0);
+  if (bcNonZero)
+    SET_FLAG(P_FLAG, state.registers);
+  else
+    CLEAR_FLAG(P_FLAG, state.registers); // P/V indicates BC!=0
+
+  return 16;
+}
+
+inline int cpd(ProcessorState &state) {
+  // Compare A with (HL), HL--, BC--
+  emulator_types::byte value = state.memory[state.registers.HL];
+  int result = state.registers.A - value;
+
+  bool z = (result == 0);
+  if (z)
+    SET_FLAG(Z_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Z_FLAG, state.registers);
+
+  SET_FLAG(N_FLAG, state.registers); // CP sets N
+
+  // S Flag
+  if (result & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  // H Flag
+  if ((state.registers.A & 0x0F) < (value & 0x0F))
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  state.registers.HL--;
+  state.registers.BC--;
+
+  bool bcNonZero = (state.registers.BC != 0);
+  if (bcNonZero)
+    SET_FLAG(P_FLAG, state.registers);
+  else
+    CLEAR_FLAG(P_FLAG, state.registers); // P/V indicates BC!=0
+
+  return 16;
+}
+
 inline int cpir(ProcessorState &state) {
   // Compare A with (HL), HL++, BC--
   emulator_types::byte value = state.memory[state.registers.HL];

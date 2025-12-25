@@ -215,6 +215,16 @@ void Processor::executeFrame() {
 
       CLEAR_FLAG(H_FLAG, state.registers);
       CLEAR_FLAG(N_FLAG, state.registers);
+
+      if (val & 0x20)
+        SET_FLAG(Y_FLAG, state.registers);
+      else
+        CLEAR_FLAG(Y_FLAG, state.registers);
+      if (val & 0x08)
+        SET_FLAG(X_FLAG, state.registers);
+      else
+        CLEAR_FLAG(X_FLAG, state.registers);
+
       cycles = 4;
       break;
     }
@@ -265,6 +275,16 @@ void Processor::executeFrame() {
 
       CLEAR_FLAG(H_FLAG, state.registers);
       CLEAR_FLAG(N_FLAG, state.registers);
+
+      if (val & 0x20)
+        SET_FLAG(Y_FLAG, state.registers);
+      else
+        CLEAR_FLAG(Y_FLAG, state.registers);
+      if (val & 0x08)
+        SET_FLAG(X_FLAG, state.registers);
+      else
+        CLEAR_FLAG(X_FLAG, state.registers);
+
       cycles = 4;
       break;
     }
@@ -321,6 +341,16 @@ void Processor::executeFrame() {
 
       CLEAR_FLAG(H_FLAG, state.registers);
       CLEAR_FLAG(N_FLAG, state.registers);
+
+      if (val & 0x20)
+        SET_FLAG(Y_FLAG, state.registers);
+      else
+        CLEAR_FLAG(Y_FLAG, state.registers);
+      if (val & 0x08)
+        SET_FLAG(X_FLAG, state.registers);
+      else
+        CLEAR_FLAG(X_FLAG, state.registers);
+
       cycles = 4;
       break;
     }
@@ -344,6 +374,16 @@ void Processor::executeFrame() {
 
       CLEAR_FLAG(H_FLAG, state.registers);
       CLEAR_FLAG(N_FLAG, state.registers);
+
+      if (val & 0x20)
+        SET_FLAG(Y_FLAG, state.registers);
+      else
+        CLEAR_FLAG(Y_FLAG, state.registers);
+      if (val & 0x08)
+        SET_FLAG(X_FLAG, state.registers);
+      else
+        CLEAR_FLAG(X_FLAG, state.registers);
+
       cycles = 4;
       break;
     }
@@ -419,6 +459,33 @@ void Processor::executeFrame() {
       byte value = m_memory[state.registers.PC++];
       state.registers.L = value;
       cycles = 7;
+      break;
+    }
+
+    // 16-bit Load
+    case 0x21: { // LD HL, nn
+      word nn = state.getNextWordFromPC();
+      state.registers.PC += 2;
+      state.registers.HL = nn;
+      cycles = 10;
+      break;
+    }
+
+    case 0x22: { // LD (nn), HL
+      word addr = state.getNextWordFromPC();
+      state.registers.PC += 2;
+      writeMem(addr, state.registers.L);
+      writeMem(addr + 1, state.registers.H);
+      cycles = 16;
+      break;
+    }
+
+    case 0x2A: { // LD HL, (nn)
+      word addr = state.getNextWordFromPC();
+      state.registers.PC += 2;
+      state.registers.L = m_memory[addr];
+      state.registers.H = m_memory[addr + 1];
+      cycles = 16;
       break;
     }
 
@@ -918,35 +985,6 @@ void Processor::executeFrame() {
       state.registers.PC += 2;
       state.registers.DE = value;
       cycles = 10;
-      break;
-    }
-
-    case 0x21: { // LD HL, nn
-      word value = m_memory[state.registers.PC] |
-                   (m_memory[state.registers.PC + 1] << 8);
-      state.registers.PC += 2;
-      state.registers.HL = value;
-      cycles = 10;
-      break;
-    }
-
-    case 0x22: { // LD (nn), HL
-      word address = m_memory[state.registers.PC] |
-                     (m_memory[state.registers.PC + 1] << 8);
-      state.registers.PC += 2;
-      writeMem(address, state.registers.L);
-      writeMem(address + 1, state.registers.H);
-      cycles = 16;
-      break;
-    }
-
-    case 0x2A: { // LD HL, (nn)
-      word address = m_memory[state.registers.PC] |
-                     (m_memory[state.registers.PC + 1] << 8);
-      state.registers.PC += 2;
-      state.registers.L = m_memory[address];
-      state.registers.H = m_memory[address + 1];
-      cycles = 16;
       break;
     }
 
@@ -1511,6 +1549,15 @@ void Processor::executeFrame() {
       else
         CLEAR_FLAG(S_FLAG, state.registers);
 
+      if (res & 0x20)
+        SET_FLAG(Y_FLAG, state.registers);
+      else
+        CLEAR_FLAG(Y_FLAG, state.registers);
+      if (res & 0x08)
+        SET_FLAG(X_FLAG, state.registers);
+      else
+        CLEAR_FLAG(X_FLAG, state.registers);
+
       cycles = 4;
       break;
     }
@@ -1968,11 +2015,23 @@ int Processor::exec_ed_opcode() {
     break;
 
   // Block Ops
+  case 0xA0:
+    cycles = Load::ldi(state);
+    break;
+  case 0xA8:
+    cycles = Load::ldd(state);
+    break;
   case 0xB0:
     cycles = Load::ldir(state);
     break;
   case 0xB8:
     cycles = Load::lddr(state);
+    break;
+  case 0xA1:
+    cycles = Control::cpi(state);
+    break;
+  case 0xA9:
+    cycles = Control::cpd(state);
     break;
   case 0xB1:
     cycles = Control::cpir(state);

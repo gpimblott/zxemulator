@@ -269,19 +269,29 @@ inline void bit(ProcessorState &state, int bit, emulator_types::byte val) {
 
   SET_FLAG(H_FLAG, state.registers);
   CLEAR_FLAG(N_FLAG, state.registers);
-  // P/V Flag not standard for BIT? Z80 docs say P/V is unknown/not affected?
-  // Or P/V is effectively Z?
-  // For BIT n, r: Z is set if bit is 0. H=1, N=0. P/V is as Z?
-  // Let's stick to existing implementation from Processor.cpp:
-  // Existing Processor.cpp only set Z, H, N.
-  // Wait, I check lines 3146:
-  // void Processor::bit(int bit, byte val) {
-  //   bool z = !((val >> bit) & 1);
-  //   if (z) SET_FLAG(Z_FLAG...); else CLEAR_FLAG...
-  //   SET_FLAG(H_FLAG...);
-  //   CLEAR_FLAG(N_FLAG...)
-  // }
-  // So no P/V or S or anything else.
+
+  // Undocumented Flags:
+  // S, 5 (Y), 3 (X) are copied from the input value
+  if (val & 0x80)
+    SET_FLAG(S_FLAG, state.registers);
+  else
+    CLEAR_FLAG(S_FLAG, state.registers);
+
+  if (val & 0x20)
+    SET_FLAG(Y_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Y_FLAG, state.registers);
+
+  if (val & 0x08)
+    SET_FLAG(X_FLAG, state.registers);
+  else
+    CLEAR_FLAG(X_FLAG, state.registers);
+
+  // P/V is set to the same state as Z
+  if (z)
+    SET_FLAG(P_FLAG, state.registers);
+  else
+    CLEAR_FLAG(P_FLAG, state.registers);
 }
 
 inline void set(ProcessorState &state, int bit, emulator_types::byte &val) {

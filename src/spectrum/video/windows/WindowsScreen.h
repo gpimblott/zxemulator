@@ -58,6 +58,7 @@ private:
                        4]; // * 4 because pixelBuffer have 4 components (RGBA)
 
   sf::Color colors[16];
+  int flashFrameCounter = 0;
 
   void drawRow(unsigned char **pixels, int y, int absY) const;
 

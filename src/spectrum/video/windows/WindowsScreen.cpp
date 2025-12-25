@@ -94,6 +94,9 @@ void WindowsScreen::hide() { printf("Hide window()\n"); }
  * copied to the window The window copy is scaled to increase its size
  */
 void WindowsScreen::update() {
+  // Update Flash Counter (0-31), toggles every 16 frames
+  flashFrameCounter = (flashFrameCounter + 1) % 32;
+
   // printf("Starting frame update\n");
 
   // Start a timer
@@ -191,6 +194,11 @@ void WindowsScreen::drawRow(std::uint8_t **pixels, int y, int absY) const {
 
     sf::Color paperColor = colors[paperIdx];
     sf::Color inkColor = colors[inkIdx];
+
+    // Handle Flash (Bit 7)
+    if ((attr & 0x80) && (flashFrameCounter >= 16)) {
+      std::swap(paperColor, inkColor);
+    }
 
     for (int bits = 0; bits < 8; bits++) {
       // MSB is left pixel
