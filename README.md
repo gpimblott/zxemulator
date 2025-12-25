@@ -67,6 +67,7 @@ The emulator maps standard ZX Spectrum keys to the PC keyboard.
 | :--- | :--- | :--- | :--- |
 | **Everyone's a Wally** | Tape (.tzx) | **Not Working** | BAD |
 | **Manic Miner** | Tape (.tzx) | **Working** | OK |
+| **Jetpac** | Snapshot (.z80) | **Working** | OK |
 | **Jet Set Willy** | Tape (.tzx) | **Working** | OK |
 | **Horace Goes Skiing** | Tape (.tzx) | **Working** | OK |
 | **Pacman** | Snapshot (.z80) | **Working** | Not sure about keys - seems to work? |
