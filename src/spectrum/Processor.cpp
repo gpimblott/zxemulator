@@ -202,56 +202,19 @@ void Processor::executeFrame() {
       break;
 
     case 0x07: // RLCA
-    {
-      byte val = state.registers.A;
-      int carry = (val & 0x80) ? 1 : 0;
-      val = (val << 1) | carry;
-      state.registers.A = val;
-
-      if (carry)
-        SET_FLAG(C_FLAG, state.registers);
-      else
-        CLEAR_FLAG(C_FLAG, state.registers);
-
-      CLEAR_FLAG(H_FLAG, state.registers);
-      CLEAR_FLAG(N_FLAG, state.registers);
-
-      if (val & 0x20)
-        SET_FLAG(Y_FLAG, state.registers);
-      else
-        CLEAR_FLAG(Y_FLAG, state.registers);
-      if (val & 0x08)
-        SET_FLAG(X_FLAG, state.registers);
-      else
-        CLEAR_FLAG(X_FLAG, state.registers);
-
+      Bit::rlca(state);
       cycles = 4;
       break;
-    }
 
     case 0x08: // EX AF, AF'
-    {
-      word temp = state.registers.AF;
-      state.registers.AF = state.registers.AF_;
-      state.registers.AF_ = temp;
+      Load::ex_af_af(state);
       cycles = 4;
       break;
-    }
 
     case 0xD9: // EXX
-    {
-      word tempBC = state.registers.BC;
-      word tempDE = state.registers.DE;
-      word tempHL = state.registers.HL;
-      state.registers.BC = state.registers.BC_;
-      state.registers.DE = state.registers.DE_;
-      state.registers.HL = state.registers.HL_;
-      state.registers.BC_ = tempBC;
-      state.registers.DE_ = tempDE;
-      state.registers.HL_ = tempHL;
+      Load::exx(state);
       cycles = 4;
       break;
-    }
 
     case 0xDD: // IX
       cycles = exec_index_opcode(0xDD);
@@ -262,32 +225,9 @@ void Processor::executeFrame() {
       break;
 
     case 0x0F: // RRCA
-    {
-      byte val = state.registers.A;
-      int carry = (val & 0x01) ? 1 : 0;
-      val = (val >> 1) | (carry << 7);
-      state.registers.A = val;
-
-      if (carry)
-        SET_FLAG(C_FLAG, state.registers);
-      else
-        CLEAR_FLAG(C_FLAG, state.registers);
-
-      CLEAR_FLAG(H_FLAG, state.registers);
-      CLEAR_FLAG(N_FLAG, state.registers);
-
-      if (val & 0x20)
-        SET_FLAG(Y_FLAG, state.registers);
-      else
-        CLEAR_FLAG(Y_FLAG, state.registers);
-      if (val & 0x08)
-        SET_FLAG(X_FLAG, state.registers);
-      else
-        CLEAR_FLAG(X_FLAG, state.registers);
-
+      Bit::rrca(state);
       cycles = 4;
       break;
-    }
 
     case 0x10: // DJNZ e
       cycles = Control::djnz(state, (int8_t)state.getNextByteFromPC());
@@ -327,66 +267,18 @@ void Processor::executeFrame() {
       break;
 
     case 0x17: // RLA
-    {
-      byte val = state.registers.A;
-      int oldCarry = GET_FLAG(C_FLAG, state.registers) ? 1 : 0;
-      int newCarry = (val & 0x80) ? 1 : 0;
-      val = (val << 1) | oldCarry;
-      state.registers.A = val;
-
-      if (newCarry)
-        SET_FLAG(C_FLAG, state.registers);
-      else
-        CLEAR_FLAG(C_FLAG, state.registers);
-
-      CLEAR_FLAG(H_FLAG, state.registers);
-      CLEAR_FLAG(N_FLAG, state.registers);
-
-      if (val & 0x20)
-        SET_FLAG(Y_FLAG, state.registers);
-      else
-        CLEAR_FLAG(Y_FLAG, state.registers);
-      if (val & 0x08)
-        SET_FLAG(X_FLAG, state.registers);
-      else
-        CLEAR_FLAG(X_FLAG, state.registers);
-
+      Bit::rla(state);
       cycles = 4;
       break;
-    }
 
     case 0x18: // JR e
       cycles = Control::jr(state, (int8_t)state.getNextByteFromPC());
       break;
 
     case 0x1F: // RRA
-    {
-      byte val = state.registers.A;
-      int oldCarry = GET_FLAG(C_FLAG, state.registers) ? 1 : 0;
-      int newCarry = (val & 0x01) ? 1 : 0;
-      val = (val >> 1) | (oldCarry << 7);
-      state.registers.A = val;
-
-      if (newCarry)
-        SET_FLAG(C_FLAG, state.registers);
-      else
-        CLEAR_FLAG(C_FLAG, state.registers);
-
-      CLEAR_FLAG(H_FLAG, state.registers);
-      CLEAR_FLAG(N_FLAG, state.registers);
-
-      if (val & 0x20)
-        SET_FLAG(Y_FLAG, state.registers);
-      else
-        CLEAR_FLAG(Y_FLAG, state.registers);
-      if (val & 0x08)
-        SET_FLAG(X_FLAG, state.registers);
-      else
-        CLEAR_FLAG(X_FLAG, state.registers);
-
+      Bit::rra(state);
       cycles = 4;
       break;
-    }
 
     case 0x20: // JR NZ, e
       cycles = Control::jr_cond(state, !GET_FLAG(Z_FLAG, state.registers),
@@ -662,27 +554,18 @@ void Processor::executeFrame() {
                                   state.getNextWordFromPC());
       break;
 
-    case 0xE3: { // EX (SP), HL
-      byte l = m_memory[state.registers.SP];
-      byte h = m_memory[state.registers.SP + 1];
-      writeMem(state.registers.SP, state.registers.L);
-      writeMem(state.registers.SP + 1, state.registers.H);
-      state.registers.H = h;
-      state.registers.L = l;
-      cycles = 19; // 4 + 3 + 4 + 3 + 5 wait? Z80 Manual says 19.
+    case 0xE3: // EX (SP), HL
+      Load::ex_sp_hl(state);
+      cycles = 19;
       break;
-    }
 
-    case 0xEB: { // EX DE, HL
-      word temp = state.registers.HL;
-      state.registers.HL = state.registers.DE;
-      state.registers.DE = temp;
+    case 0xEB: // EX DE, HL
+      Load::ex_de_hl(state);
       cycles = 4;
       break;
-    }
 
     case 0xF9: // LD SP, HL
-      state.registers.SP = state.registers.HL;
+      Load::ld_sp_hl(state);
       cycles = 6;
       break;
 
@@ -1483,111 +1366,32 @@ void Processor::executeFrame() {
       // Misc
       // ------------------------------------------------------------------------
 
-    case 0x3F: { // CCF
-      if (GET_FLAG(C_FLAG, state.registers)) {
-        CLEAR_FLAG(C_FLAG, state.registers);
-        SET_FLAG(H_FLAG, state.registers);
-      } else {
-        SET_FLAG(C_FLAG, state.registers);
-        CLEAR_FLAG(H_FLAG, state.registers);
-      }
-      CLEAR_FLAG(N_FLAG, state.registers);
+    case 0x3F: // CCF
+      Logic::ccf(state);
       cycles = 4;
       break;
-    }
 
     case 0x27: // DAA
-    {
-      byte a = state.registers.A;
-      byte correction = 0;
-      bool n = GET_FLAG(N_FLAG, state.registers);
-      bool c = GET_FLAG(C_FLAG, state.registers);
-      bool h = GET_FLAG(H_FLAG, state.registers);
-
-      // Wait, DAA flags are specific. sub8/add8 overwrite flags including C, H,
-      // N. DAA should preserve N. Set P/V to parity. S, Z from result. And H is
-      // diff. Re-doing DAA manually.
-
-      int res = a;
-      if (!n) {
-        if (h || (a & 0x0F) > 9)
-          res += 0x06;
-        if (c || (a > 0x99))
-          res += 0x60;
-      } else {
-        if (h || (a & 0x0F) > 9)
-          res -= 0x06;
-        if (c || res > 0x99)
-          res -= 0x60;
-      }
-
-      // Flags
-      if (c || (!n && a > 0x99))
-        SET_FLAG(C_FLAG, state.registers);
-      // Logic for H is complex.
-      if ((!n && (a & 0x0F) > 9) || (n && h && (a & 0x0F) < 6))
-        SET_FLAG(H_FLAG, state.registers); // Approximate
-      else
-        CLEAR_FLAG(H_FLAG, state.registers);
-
-      state.registers.A = (byte)res;
-      // Parity
-      int bits = 0;
-      for (int i = 0; i < 8; i++)
-        if (res & (1 << i))
-          bits++;
-      if (bits % 2 == 0)
-        SET_FLAG(P_FLAG, state.registers);
-      else
-        CLEAR_FLAG(P_FLAG, state.registers);
-      if ((res & 0xFF) == 0)
-        SET_FLAG(Z_FLAG, state.registers);
-      else
-        CLEAR_FLAG(Z_FLAG, state.registers);
-      if (res & 0x80)
-        SET_FLAG(S_FLAG, state.registers);
-      else
-        CLEAR_FLAG(S_FLAG, state.registers);
-
-      if (res & 0x20)
-        SET_FLAG(Y_FLAG, state.registers);
-      else
-        CLEAR_FLAG(Y_FLAG, state.registers);
-      if (res & 0x08)
-        SET_FLAG(X_FLAG, state.registers);
-      else
-        CLEAR_FLAG(X_FLAG, state.registers);
-
+      Arithmetic::daa(state);
       cycles = 4;
       break;
-    }
 
     case 0x2F: // CPL
-      state.registers.A = ~state.registers.A;
-      SET_FLAG(H_FLAG, state.registers);
-      SET_FLAG(N_FLAG, state.registers);
+      Logic::cpl(state);
       cycles = 4;
       break;
 
     case 0x37: // SCF
-      SET_FLAG(C_FLAG, state.registers);
-      CLEAR_FLAG(H_FLAG, state.registers);
-      CLEAR_FLAG(N_FLAG, state.registers);
+      Logic::scf(state);
       cycles = 4;
       break;
 
     case 0xF3: // DI
-      state.setInterrupts(false);
-      state.registers.IFF1 = 0;
-      state.registers.IFF2 = 0;
-      cycles = 4;
+      cycles = Control::di(state);
       break;
 
     case 0xFB: // EI
-      state.setInterrupts(true);
-      state.registers.IFF1 = 1;
-      state.registers.IFF2 = 1;
-      cycles = 4;
+      cycles = Control::ei(state);
       break;
 
     // ------------------------------------------------------------------------

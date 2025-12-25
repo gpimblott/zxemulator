@@ -284,6 +284,20 @@ inline int retn(ProcessorState &state) {
   return 14;
 }
 
+inline int di(ProcessorState &state) {
+  state.setInterrupts(false);
+  state.registers.IFF1 = 0;
+  state.registers.IFF2 = 0;
+  return 4;
+}
+
+inline int ei(ProcessorState &state) {
+  state.setInterrupts(true);
+  state.registers.IFF1 = 1;
+  state.registers.IFF2 = 1;
+  return 4;
+}
+
 } // namespace Control
 
 #endif

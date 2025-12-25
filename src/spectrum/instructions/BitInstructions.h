@@ -8,6 +8,101 @@
 
 namespace Bit {
 
+// Accumulator Rotates (Preserve S, Z, P/V)
+inline void rlca(ProcessorState &state) {
+  emulator_types::byte val = state.registers.A;
+  int carry = (val & 0x80) ? 1 : 0;
+  val = (val << 1) | carry;
+  state.registers.A = val;
+
+  if (carry)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+
+  if (val & 0x20)
+    SET_FLAG(Y_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Y_FLAG, state.registers);
+  if (val & 0x08)
+    SET_FLAG(X_FLAG, state.registers);
+  else
+    CLEAR_FLAG(X_FLAG, state.registers);
+}
+
+inline void rrca(ProcessorState &state) {
+  emulator_types::byte val = state.registers.A;
+  int carry = (val & 0x01) ? 1 : 0;
+  val = (val >> 1) | (carry << 7);
+  state.registers.A = val;
+
+  if (carry)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+
+  if (val & 0x20)
+    SET_FLAG(Y_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Y_FLAG, state.registers);
+  if (val & 0x08)
+    SET_FLAG(X_FLAG, state.registers);
+  else
+    CLEAR_FLAG(X_FLAG, state.registers);
+}
+
+inline void rla(ProcessorState &state) {
+  emulator_types::byte val = state.registers.A;
+  int carry = (val & 0x80) ? 1 : 0;
+  int oldCarry = GET_FLAG(C_FLAG, state.registers) ? 1 : 0;
+  val = (val << 1) | oldCarry;
+  state.registers.A = val;
+
+  if (carry)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+
+  if (val & 0x20)
+    SET_FLAG(Y_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Y_FLAG, state.registers);
+  if (val & 0x08)
+    SET_FLAG(X_FLAG, state.registers);
+  else
+    CLEAR_FLAG(X_FLAG, state.registers);
+}
+
+inline void rra(ProcessorState &state) {
+  emulator_types::byte val = state.registers.A;
+  int carry = (val & 0x01) ? 1 : 0;
+  int oldCarry = GET_FLAG(C_FLAG, state.registers) ? 1 : 0;
+  val = (val >> 1) | (oldCarry << 7);
+  state.registers.A = val;
+
+  if (carry)
+    SET_FLAG(C_FLAG, state.registers);
+  else
+    CLEAR_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+
+  if (val & 0x20)
+    SET_FLAG(Y_FLAG, state.registers);
+  else
+    CLEAR_FLAG(Y_FLAG, state.registers);
+  if (val & 0x08)
+    SET_FLAG(X_FLAG, state.registers);
+  else
+    CLEAR_FLAG(X_FLAG, state.registers);
+}
+
 inline void rlc(ProcessorState &state, emulator_types::byte &val) {
   int carry = (val & 0x80) ? 1 : 0;
   val = (val << 1) | carry;

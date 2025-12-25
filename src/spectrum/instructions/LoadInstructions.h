@@ -119,6 +119,44 @@ inline int ldd(ProcessorState &state) {
   return 16;
 }
 
+// Exchange Instructions
+inline void ex_af_af(ProcessorState &state) {
+  emulator_types::word temp = state.registers.AF;
+  state.registers.AF = state.registers.AF_;
+  state.registers.AF_ = temp;
+}
+
+inline void exx(ProcessorState &state) {
+  emulator_types::word tempBC = state.registers.BC;
+  emulator_types::word tempDE = state.registers.DE;
+  emulator_types::word tempHL = state.registers.HL;
+  state.registers.BC = state.registers.BC_;
+  state.registers.DE = state.registers.DE_;
+  state.registers.HL = state.registers.HL_;
+  state.registers.BC_ = tempBC;
+  state.registers.DE_ = tempDE;
+  state.registers.HL_ = tempHL;
+}
+
+inline void ex_de_hl(ProcessorState &state) {
+  emulator_types::word temp = state.registers.HL;
+  state.registers.HL = state.registers.DE;
+  state.registers.DE = temp;
+}
+
+inline void ex_sp_hl(ProcessorState &state) {
+  emulator_types::byte l = state.memory[state.registers.SP];
+  emulator_types::byte h = state.memory[state.registers.SP + 1];
+  state.memory.fastWrite(state.registers.SP, state.registers.L);
+  state.memory.fastWrite(state.registers.SP + 1, state.registers.H);
+  state.registers.H = h;
+  state.registers.L = l;
+}
+
+inline void ld_sp_hl(ProcessorState &state) {
+  state.registers.SP = state.registers.HL;
+}
+
 } // namespace Load
 
 #endif

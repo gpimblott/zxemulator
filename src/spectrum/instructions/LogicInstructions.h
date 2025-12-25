@@ -94,6 +94,33 @@ inline void xor8(ProcessorState &state, emulator_types::byte val) {
     CLEAR_FLAG(P_FLAG, state.registers);
 }
 
+inline void cpl(ProcessorState &state) {
+  state.registers.A = ~state.registers.A;
+  SET_FLAG(H_FLAG, state.registers);
+  SET_FLAG(N_FLAG, state.registers);
+}
+
+inline void scf(ProcessorState &state) {
+  SET_FLAG(C_FLAG, state.registers);
+  CLEAR_FLAG(H_FLAG, state.registers);
+  CLEAR_FLAG(N_FLAG, state.registers);
+}
+
+inline void ccf(ProcessorState &state) {
+  bool c = GET_FLAG(C_FLAG, state.registers);
+  if (c)
+    SET_FLAG(H_FLAG, state.registers);
+  else
+    CLEAR_FLAG(H_FLAG, state.registers);
+
+  if (c)
+    CLEAR_FLAG(C_FLAG, state.registers);
+  else
+    SET_FLAG(C_FLAG, state.registers);
+
+  CLEAR_FLAG(N_FLAG, state.registers);
+}
+
 } // namespace Logic
 
 #endif
