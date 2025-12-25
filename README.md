@@ -68,11 +68,11 @@ The emulator maps standard ZX Spectrum keys to the PC keyboard.
 | **Attack of teh killer tomato** | Snapshot (.z80) | **Working** | OK | 
 | **Everyone's a Wally** | Tape (.tzx) | **Not Working** | BAD |
 | **Hobbit** | Tape (.tzx) | **Working** | OK |
-| **Manic Miner** | Tape (.tzx) | **Working** | OK |
-| **Jetpac** | Snapshot (.z80) | **Working** | OK |
-| **Jet Set Willy** | Tape (.tzx) | **Working** | OK |
 | **Horace and the spiders** | ROM (.rom) | **Working** | OK |
 | **Horace Goes Skiing** | Tape (.tzx) | **Working** | OK |
+| **Jetpac** | Snapshot (.z80) | **Working** | OK |
+| **Jet Set Willy** | Tape (.tzx) | **Working** | OK |
+| **Manic Miner** | Tape (.tzx) | **Working** | OK |
 | **Pacman** | Snapshot (.z80) | **Unknown** | Not sure about keys - seems to work? |
 | **ZX Diagnostics** | ROM | **Working** | Passes all diagnostic tests. |
 
