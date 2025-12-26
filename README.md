@@ -50,11 +50,17 @@ cpack
 Run the emulator from the project root. By default, it loads the standard 48K ROM located in `roms/48k.bin`.
 
 ### macOS
-**Running from Build Directory:**
+**Running from Build Directory (Bundle):**
 ```bash
 ./build/ZXEmulator.app/Contents/MacOS/ZXEmulator
 ```
 Or simply double-click `ZXEmulator` in the `build` folder.
+
+**Running from Build Directory (Standalone Binary):**
+A standalone copy of the executable is also created in the build folder, similar to Linux/Windows.
+```bash
+./build/ZXEmulator
+```
 
 **Running after Installation (in /Applications):**
 ```bash

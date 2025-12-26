@@ -57,7 +57,15 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES
     MACOSX_BUNDLE_ICON_FILE "icon.icns"
 )
 
-# Detect and add SFML
+# Post-build: Copy executable to build root for convenience
+add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:${EXECUTABLE_NAME}>
+    ${CMAKE_BINARY_DIR}/${EXECUTABLE_NAME}
+    COMMENT "Copying executable to build directory..."
+)
+
+# Detect dependencies
 find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Network Audio)
 
 if(SFML_FOUND)
