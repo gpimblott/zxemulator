@@ -32,9 +32,39 @@
 using namespace std;
 using namespace utils;
 
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#include <sys/syslimits.h>
+#endif
+#include <filesystem>
+#include <iostream>
+
+using namespace std;
+using namespace utils;
+
+std::string getResourcePath(const std::string &relativePath) {
+#ifdef __APPLE__
+  char path[PATH_MAX];
+  uint32_t size = sizeof(path);
+  if (_NSGetExecutablePath(path, &size) == 0) {
+    std::filesystem::path exePath(path);
+    // Standard macOS Bundle Structure: AppName.app/Contents/MacOS/AppName
+    // Resources are in: AppName.app/Contents/Resources/
+    std::filesystem::path resourcePath =
+        exePath.parent_path().parent_path() / "Resources" / relativePath;
+
+    if (std::filesystem::exists(resourcePath)) {
+      return resourcePath.string();
+    }
+  }
+#endif
+  // Fallback for development / command line
+  return relativePath;
+}
+
 int main(int argc, char *argv[]) {
   try {
-    const char *romFileLocation = "./roms/48k.bin";
+    std::string romFileLocation = getResourcePath("roms/48k.bin");
     bool debugMode = false;
     bool fastLoad = false;
 
@@ -67,10 +97,11 @@ int main(int argc, char *argv[]) {
     }
 
     Logger::write("Starting ZX Spectrum Emulator v0.2");
+    Logger::write(("Loading ROM from: " + romFileLocation).c_str());
 
     // Create a processor and load the basic ROM
     Processor processor;
-    processor.init(romFileLocation);
+    processor.init(romFileLocation.c_str());
     // processor.setFastLoad(fastLoad); // Will add this method
 
     if (!tapeFile.empty()) {

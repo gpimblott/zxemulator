@@ -37,8 +37,16 @@ set(ZX_SOURCES
     spectrum/SnapshotLoader.cpp spectrum/SnapshotLoader.h
     spectrum/TapeLoader.cpp spectrum/TapeLoader.h)
 
-add_executable(${EXECUTABLE_NAME} ${ZX_SOURCES})
+add_executable(${EXECUTABLE_NAME} MACOSX_BUNDLE ${ZX_SOURCES})
 
+# Bundle Properties
+set_target_properties(${EXECUTABLE_NAME} PROPERTIES
+    MACOSX_BUNDLE_BUNDLE_NAME "ZXEmulator"
+    MACOSX_BUNDLE_GUI_IDENTIFIER "com.pimblott.zxemulator"
+    MACOSX_BUNDLE_BUNDLE_VERSION "0.2.0"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING "0.2"
+    MACOSX_BUNDLE_ICON_FILE "icon.icns" # Optional: Add icon if available
+)
 
 # Detect and add SFML
 find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Network Audio)
@@ -50,6 +58,24 @@ else()
 endif()
 
 add_subdirectory(tests)
+
+# Install Application Bundle
+install(TARGETS ${EXECUTABLE_NAME}
+    BUNDLE DESTINATION .
+)
+
+# Install Resources (ROMs) into the Bundle
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/../roms"
+    DESTINATION "${EXECUTABLE_NAME}.app/Contents/Resources"
+)
+
+# CPack Configuration
+set(CPACK_GENERATOR "DragNDrop")
+set(CPACK_DMG_VOLUME_NAME "ZXEmulator Installer")
+
+set(CPACK_PACKAGE_FILE_NAME "ZXEmulator-0.2.0-macOS")
+
+include(CPack)
 
 
 
