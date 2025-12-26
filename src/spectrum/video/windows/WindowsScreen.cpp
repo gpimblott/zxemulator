@@ -244,9 +244,16 @@ void WindowsScreen::waitForEvent() {
 }
 
 void WindowsScreen::initDebug() {
-  if (!debugFont.openFromFile("/System/Library/Fonts/Monaco.ttf")) {
+  std::string fontPath = "/System/Library/Fonts/Monaco.ttf";
+#ifdef _WIN32
+  fontPath = "C:/Windows/Fonts/Consola.ttf";
+#elif __linux__
+  fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf";
+#endif
+
+  if (!debugFont.openFromFile(fontPath)) {
     // Fallback if needed or log error
-    printf("Failed to load debug font\n");
+    printf("Failed to load debug font from %s\n", fontPath.c_str());
   } else {
     printf("Loaded debug font\n");
   }

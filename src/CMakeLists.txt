@@ -70,10 +70,25 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/../roms"
 )
 
 # CPack Configuration
-set(CPACK_GENERATOR "DragNDrop")
-set(CPACK_DMG_VOLUME_NAME "ZXEmulator Installer")
-
-set(CPACK_PACKAGE_FILE_NAME "ZXEmulator-0.2.0-macOS")
+if(WIN32)
+    set(CPACK_GENERATOR "NSIS")
+    set(CPACK_NSIS_DISPLAY_NAME "ZXEmulator")
+    set(CPACK_NSIS_PACKAGE_NAME "ZXEmulator")
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "ZXEmulator")
+    set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/../resources/icon.ico") # Optional
+    set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/../resources/icon.ico") # Optional
+    set(CPACK_PACKAGE_FILE_NAME "ZXEmulator-0.2.0-win64")
+elseif(APPLE)
+    set(CPACK_GENERATOR "DragNDrop")
+    set(CPACK_DMG_VOLUME_NAME "ZXEmulator Installer")
+    set(CPACK_PACKAGE_FILE_NAME "ZXEmulator-0.2.0-macOS")
+elseif(UNIX)
+    set(CPACK_GENERATOR "DEB;TGZ")
+    set(CPACK_PACKAGE_FILE_NAME "ZXEmulator-0.2.0-Linux")
+    # Debian Specifics
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "gpimblott <gpimblott@example.com>")
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON) # Calculate dependencies automatically
+endif()
 
 include(CPack)
 

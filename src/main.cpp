@@ -35,6 +35,11 @@ using namespace utils;
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
 #include <sys/syslimits.h>
+#elif _WIN32
+#include <windows.h>
+#elif __linux__
+#include <limits.h>
+#include <unistd.h>
 #endif
 #include <filesystem>
 #include <iostream>
@@ -55,6 +60,33 @@ std::string getResourcePath(const std::string &relativePath) {
 
     if (std::filesystem::exists(resourcePath)) {
       return resourcePath.string();
+    }
+  }
+#elif _WIN32
+  char path[MAX_PATH];
+  if (GetModuleFileNameA(NULL, path, MAX_PATH)) {
+    std::filesystem::path exePath(path);
+    // On Windows, resources are typically next to the executable
+    std::filesystem::path resourcePath = exePath.parent_path() / relativePath;
+    if (std::filesystem::exists(resourcePath)) {
+      return resourcePath.string();
+    }
+  }
+#elif __linux__
+  char path[PATH_MAX];
+  ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);
+  if (count != -1) {
+    path[count] = '\0';
+    std::filesystem::path exePath(path);
+    std::filesystem::path resourcePath = exePath.parent_path() / relativePath;
+    if (std::filesystem::exists(resourcePath)) {
+      return resourcePath.string();
+    }
+    // Check standard install location: /usr/share/zxemulator/resources
+    std::filesystem::path installPath =
+        "/usr/share/zxemulator/resources" / relativePath;
+    if (std::filesystem::exists(installPath)) {
+      return installPath.string();
     }
   }
 #endif
