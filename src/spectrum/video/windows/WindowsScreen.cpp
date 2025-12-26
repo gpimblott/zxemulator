@@ -23,10 +23,12 @@
  */
 
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Image.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <cstdio>
 
 #include "../../../utils/PeriodTimer.h"
+#include "../../../utils/ResourceUtils.h"
 #include "../../Processor.h"
 #include "WindowsScreen.h"
 
@@ -83,6 +85,15 @@ void WindowsScreen::show() {
   // theWindow.setFramerateLimit(50);
   theWindow.setKeyRepeatEnabled(false);
   theWindow.clear(sf::Color::White);
+
+  // Set Icon
+  sf::Image icon;
+  std::string iconPath = utils::getResourcePath("icon.png");
+  if (icon.loadFromFile(iconPath)) {
+    theWindow.setIcon(icon.getSize(), icon.getPixelsPtr());
+  } else {
+    printf("Warning: Failed to load icon from %s\n", iconPath.c_str());
+  }
 }
 
 void WindowsScreen::hide() { printf("Hide window()\n"); }

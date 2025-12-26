@@ -37,15 +37,24 @@ set(ZX_SOURCES
     spectrum/SnapshotLoader.cpp spectrum/SnapshotLoader.h
     spectrum/TapeLoader.cpp spectrum/TapeLoader.h)
 
-add_executable(${EXECUTABLE_NAME} MACOSX_BUNDLE ${ZX_SOURCES})
+# Collect Resource Files
+file(GLOB ROM_FILES "${CMAKE_SOURCE_DIR}/../roms/*")
+set(ICON_FILE "${CMAKE_SOURCE_DIR}/../resources/icon.icns")
+
+# Set Bundle Location Properties
+set_source_files_properties(${ROM_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/roms)
+set_source_files_properties(${ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
+add_executable(${EXECUTABLE_NAME} MACOSX_BUNDLE ${ZX_SOURCES} ${ROM_FILES} ${ICON_FILE})
 
 # Bundle Properties
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES
     MACOSX_BUNDLE_BUNDLE_NAME "ZXEmulator"
+    MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2025 G.Pimblott"
     MACOSX_BUNDLE_GUI_IDENTIFIER "com.pimblott.zxemulator"
     MACOSX_BUNDLE_BUNDLE_VERSION "0.2.0"
     MACOSX_BUNDLE_SHORT_VERSION_STRING "0.2"
-    MACOSX_BUNDLE_ICON_FILE "icon.icns" # Optional: Add icon if available
+    MACOSX_BUNDLE_ICON_FILE "icon.icns"
 )
 
 # Detect and add SFML
@@ -60,16 +69,28 @@ endif()
 add_subdirectory(tests)
 
 # Install Application Bundle
-install(TARGETS ${EXECUTABLE_NAME}
-    BUNDLE DESTINATION .
-)
-
-# Install Resources (ROMs) into the Bundle
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/../roms"
-    DESTINATION "${EXECUTABLE_NAME}.app/Contents/Resources"
-)
+# Install Application Bundle
+if(APPLE)
+    install(TARGETS ${EXECUTABLE_NAME} BUNDLE DESTINATION .)
+    # Install Resources (ROMs) into the Bundle
+    install(DIRECTORY "${CMAKE_SOURCE_DIR}/../roms" DESTINATION "${EXECUTABLE_NAME}.app/Contents/Resources")
+    # Install Icon into Bundle
+    install(FILES "${CMAKE_SOURCE_DIR}/../resources/icon.icns" DESTINATION "${EXECUTABLE_NAME}.app/Contents/Resources")
+else()
+    install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin)
+    install(DIRECTORY "${CMAKE_SOURCE_DIR}/../roms" DESTINATION share/zxemulator)
+    # Install Runtime Icon
+    install(FILES "${CMAKE_SOURCE_DIR}/../resources/icon.png" DESTINATION share/zxemulator/resources) 
+    if(UNIX)
+        install(FILES "${CMAKE_SOURCE_DIR}/../resources/icon.png" DESTINATION share/pixmaps)
+    endif()
+endif()
 
 # CPack Configuration
+set(CPACK_PACKAGE_VENDOR "G.Pimblott")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ZX Spectrum Emulator")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/../LICENSE")
+
 if(WIN32)
     set(CPACK_GENERATOR "NSIS")
     set(CPACK_NSIS_DISPLAY_NAME "ZXEmulator")
@@ -81,12 +102,14 @@ if(WIN32)
 elseif(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_DMG_VOLUME_NAME "ZXEmulator Installer")
+    set(CPACK_MACOSX_BUNDLE_ICON_FILE "icon.icns")
+    set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/../resources/icon.icns")
     set(CPACK_PACKAGE_FILE_NAME "ZXEmulator-0.2.0-macOS")
 elseif(UNIX)
     set(CPACK_GENERATOR "DEB;TGZ")
     set(CPACK_PACKAGE_FILE_NAME "ZXEmulator-0.2.0-Linux")
     # Debian Specifics
-    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "gpimblott <gpimblott@example.com>")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "gpimblott <gordon@pimblott.com>")
     set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON) # Calculate dependencies automatically
 endif()
 

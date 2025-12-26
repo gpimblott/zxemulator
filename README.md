@@ -30,23 +30,46 @@ cmake -S src -B build
 cmake --build build
 ```
 
+## Packaging (Installers)
+
+You can generate platform-specific installers (macOS DMG, Windows Installer, Linux Debian/TGZ) using CPack:
+
+```bash
+# Generate package
+cd build
+cpack
+```
+
+**Platform Specifics**:
+- **macOS**: Generates a `.dmg` disk image.
+- **Windows**: Generates an `.exe` installer (requires NSIS).
+- **Linux**: Generates `.deb` and `.tar.gz` packages.
+
 ## Running
 
 Run the emulator from the project root. By default, it loads the standard 48K ROM located in `roms/48k.bin`.
 
+### macOS
+Running from the command line:
+```bash
+./build/ZXEmulator.app/Contents/MacOS/ZXEmulator
+```
+Or simply double-click `ZXEmulator` in the `build` folder.
+
+### Linux / Windows
 ```bash
 ./build/ZXEmulator
 ```
 
 ### Command Line Arguments
 
-| Argument | Description | Example |
+| Argument | Description | Example (macOS) |
 | :--- | :--- | :--- |
-| `-r <file>` | Load a custom ROM file. | `./build/ZXEmulator -r roms/brendanalford.bin` |
-| `-s <file>` | Load a Snapshot file (`.sna` or `.z80`). | `./build/ZXEmulator -s roms/pacman.z80` |
-| `-t <file>` | Load a Tape file (`.tzx` or `.tap`). | `./build/ZXEmulator -t roms/game.tzx` |
-| `-f <file>` | Fast Load a Tape file (skips loading time). | `./build/ZXEmulator -f roms/game.tzx` |
-| `-d` | Start in Debug mode (paused). | `./build/ZXEmulator -d` |
+| `-r <file>` | Load a custom ROM file. | `./build/ZXEmulator.app/Contents/MacOS/ZXEmulator -r roms/brendanalford.bin` |
+| `-s <file>` | Load a Snapshot file (`.sna` or `.z80`). | `./build/ZXEmulator.app/Contents/MacOS/ZXEmulator -s roms/pacman.z80` |
+| `-t <file>` | Load a Tape file (`.tzx` or `.tap`). | `./build/ZXEmulator.app/Contents/MacOS/ZXEmulator -t roms/game.tzx` |
+| `-f <file>` | Fast Load a Tape file (skips loading time). | `./build/ZXEmulator.app/Contents/MacOS/ZXEmulator -f roms/game.tzx` |
+| `-d` | Start in Debug mode (paused). | `./build/ZXEmulator.app/Contents/MacOS/ZXEmulator -d` |
 
 ## Controls
 

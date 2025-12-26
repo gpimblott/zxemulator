@@ -26,73 +26,12 @@
 #include "spectrum/TapeLoader.h"
 #include "spectrum/video/Screen.h"
 #include "utils/Logger.h"
+#include "utils/ResourceUtils.h"
 #include <chrono>
 #include <thread>
 
 using namespace std;
 using namespace utils;
-
-#ifdef __APPLE__
-#include <mach-o/dyld.h>
-#include <sys/syslimits.h>
-#elif _WIN32
-#include <windows.h>
-#elif __linux__
-#include <limits.h>
-#include <unistd.h>
-#endif
-#include <filesystem>
-#include <iostream>
-
-using namespace std;
-using namespace utils;
-
-std::string getResourcePath(const std::string &relativePath) {
-#ifdef __APPLE__
-  char path[PATH_MAX];
-  uint32_t size = sizeof(path);
-  if (_NSGetExecutablePath(path, &size) == 0) {
-    std::filesystem::path exePath(path);
-    // Standard macOS Bundle Structure: AppName.app/Contents/MacOS/AppName
-    // Resources are in: AppName.app/Contents/Resources/
-    std::filesystem::path resourcePath =
-        exePath.parent_path().parent_path() / "Resources" / relativePath;
-
-    if (std::filesystem::exists(resourcePath)) {
-      return resourcePath.string();
-    }
-  }
-#elif _WIN32
-  char path[MAX_PATH];
-  if (GetModuleFileNameA(NULL, path, MAX_PATH)) {
-    std::filesystem::path exePath(path);
-    // On Windows, resources are typically next to the executable
-    std::filesystem::path resourcePath = exePath.parent_path() / relativePath;
-    if (std::filesystem::exists(resourcePath)) {
-      return resourcePath.string();
-    }
-  }
-#elif __linux__
-  char path[PATH_MAX];
-  ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);
-  if (count != -1) {
-    path[count] = '\0';
-    std::filesystem::path exePath(path);
-    std::filesystem::path resourcePath = exePath.parent_path() / relativePath;
-    if (std::filesystem::exists(resourcePath)) {
-      return resourcePath.string();
-    }
-    // Check standard install location: /usr/share/zxemulator/resources
-    std::filesystem::path installPath =
-        "/usr/share/zxemulator/resources" / relativePath;
-    if (std::filesystem::exists(installPath)) {
-      return installPath.string();
-    }
-  }
-#endif
-  // Fallback for development / command line
-  return relativePath;
-}
 
 int main(int argc, char *argv[]) {
   try {

@@ -8,3 +8,4 @@
 /roms/*.z80
 /roms/*.rom
 /src/.cache/
+/do_not_copy/
