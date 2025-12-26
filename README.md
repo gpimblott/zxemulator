@@ -104,22 +104,27 @@ The emulator maps standard ZX Spectrum keys to the PC keyboard.
 | **Ant Attack** | Quicksilva | 1983 | Snapshot (.z80) | **Working** | OK |
 | **Atic Atac** | Ultimate Play The Game | 1983 | Snapshot (.z80) | **Working** | OK |
 | **Attack of the Killer Tomatoes** | Global Software | 1986 | Snapshot (.z80) | **Working** | OK | 
-| **Back to Skool** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |
-| **Bomb Jack** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |
+| **Back to Skool** | Microsphere | 1985 | Snapshot (.z80) | **Working** | OK |
+| **Bomb Jack** | Elite Systems | 1986 | Snapshot (.z80) | **Working** | OK |
+| **Chuckie Egg** | A&F Software | 1983 | Snapshot (.z80) | **Working** | OK |
 | **Elite** | Firebird | 1985 | Snapshot (.z80) | **Not Working** | Hangs after showing start screen |
-| **Chuckie Egg** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |
-| **Everyone's a Wally** | Mikro-Gen | 1985 | Snapshot (.z80) | **Working** | OK |
+| **Everyone's a Wally** | Mikro-Gen | 1985 | Snapshot (.z80) | **Working** | OK|
+| **Ghosts 'n Goblins** | Elite Systems| 1986 | Snapshot (.z80) | **Not Working** | Fails after menu |
 | **Gosh Wonderful ROM** | Geoff Wearmouth | 2003 | ROM (.rom) | **Working** | OK |
+| **Head over Heels** | Ocean Software | 1987 | Snapshot (.z80) | **Working** | OK |
 | **Hobbit** | Melbourne House | 1982 | Tape (.tzx) | **Working** | OK |
 | **Horace and the spiders** | Sinclair Research | 1983 | ROM (.rom) | **Working** | OK |
 | **Horace Goes Skiing** | Sinclair Research | 1982 | Tape (.tzx) | **Working** | OK |
+| **Hungry Horace** | Sinclair Research | 1982 | Snapshot (.z80) | **Working** | OK |
 | **Jetpac** | Ultimate Play The Game | 1983 | Snapshot (.z80) | **Working** | OK |
 | **Jet Set Willy** | Software Projects | 1984 | Tape (.tzx) | **Working** | OK |
 | **Knight Lore** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |
+| **Lunar Jetman** | Ultimate Play The Game | 1983 | Snapshot (.z80) | **Working** | OK |
 | **Manic Miner** | Software Projects | 1983 | Tape (.tzx) | **Working** | OK |
-| **Pacman** | Atarisoft | 1983 | Snapshot (.z80) | **Unknown** | Not sure about keys - seems to work? |
+| **Nightshade** | Ultimate Play The Game | 1985 | Snapshot (.z80) | **Working** | OK |
+| **Pacman** | Atarisoft | 1984 | Snapshot (.z80) | **Working** | OK |
 | **Sabre Wulf** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |
-| **Three weeks in paradise** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |
+| **Three weeks in paradise** | Mikro-Gen | 1986 | Snapshot (.z80) | **Working** | OK |
 | **Underwurlde** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |
 | **ZX Diagnostics** | Dylan Smith / Brendan Alford | 2017 | ROM | **Working** | Passes all diagnostic tests. |
 
