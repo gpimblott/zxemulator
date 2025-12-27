@@ -25,6 +25,7 @@
 #include "Memory.h"
 #include "../exceptions/MemoryException.h"
 #include <cstdlib>
+#include <cstring>
 
 /**
  * Constructor

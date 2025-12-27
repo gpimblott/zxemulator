@@ -66,7 +66,9 @@ add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
 )
 
 # Detect dependencies
-set(SFML_STATIC_LIBRARIES TRUE)
+if(UNIX AND NOT APPLE)
+    set(SFML_STATIC_LIBRARIES TRUE)
+endif()
 find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Network Audio)
 
 if(SFML_FOUND)
