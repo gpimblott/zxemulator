@@ -50,7 +50,7 @@ inline std::string getResourcePath(const std::string &relativePath) {
       return resourcePath.string();
     }
     std::filesystem::path installPath =
-        "/usr/share/zxemulator/resources" / relativePath;
+        std::filesystem::path("/usr/share/zxemulator/resources") / relativePath;
     if (std::filesystem::exists(installPath)) {
       return installPath.string();
     }
