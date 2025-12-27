@@ -37,6 +37,7 @@ jobs:
         # Build SFML 3 from source
         git clone -b 3.0.0 --depth 1 https://github.com/SFML/SFML.git
         cmake -S SFML -B SFML/build -DCMAKE_BUILD_TYPE=Release -DSFML_BUILD_EXAMPLES=OFF -DSFML_BUILD_DOC=OFF
+        cmake --build SFML/build --config Release
         sudo cmake --install SFML/build
 
     - name: Configure CMake
