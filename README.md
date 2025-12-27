@@ -2,7 +2,14 @@
 
 A work-in-progress ZX Spectrum Emulator written in C++.
 
-NB: The current GitHub workflow currenlty only builds a MacOS bundle. To build for other platforms, you will need to use CMake directly.  I will add support for other platforms in the future.
+The current GitHub workflow builds the following artifacts:
+- macOS DMG
+- macOS Standalone Binary
+- Linux Debian
+- Linux TGZ
+- Linux RPM
+
+A windows executable will be added in the future.
 
 ## Features
 
