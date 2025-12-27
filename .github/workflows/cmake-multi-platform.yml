@@ -11,7 +11,8 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  APP_VERSION: 0.2.0
+  APP_VERSION: 0.0.1-dev
+
 
 jobs:
   build:
@@ -40,10 +41,16 @@ jobs:
         cmake --build SFML/build --config Release
         sudo cmake --install SFML/build
 
+    - name: Set App Version
+      run: |
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          echo "APP_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+        fi
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -S ${{github.workspace}}/src -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake -S ${{github.workspace}}/src -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DZX_VERSION=${{env.APP_VERSION}}
 
     - name: Build
       # Build your program with the given configuration
@@ -84,6 +91,7 @@ jobs:
 
   publish:
     needs: build
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
       contents: write

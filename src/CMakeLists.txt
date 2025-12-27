@@ -5,6 +5,10 @@ set(EXECUTABLE_NAME ${PROJECT_NAME})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if(NOT DEFINED ZX_VERSION)
+    set(ZX_VERSION "0.0.1")
+endif()
+
 # Need to ensure that the SFML libraries are included in the runtime path
 # set(MY_DEPENDANCIES_PATHS /SFML/SFML-2.5.1/bin) # Removed legacy path
 # set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../cmake_modules" ${CMAKE_MODULE_PATH})
@@ -52,8 +56,8 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES
     MACOSX_BUNDLE_BUNDLE_NAME "ZXEmulator"
     MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2025 G.Pimblott"
     MACOSX_BUNDLE_GUI_IDENTIFIER "com.pimblott.zxemulator"
-    MACOSX_BUNDLE_BUNDLE_VERSION "0.2.0"
-    MACOSX_BUNDLE_SHORT_VERSION_STRING "0.2"
+    MACOSX_BUNDLE_BUNDLE_VERSION "${ZX_VERSION}"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING "${ZX_VERSION}"
     MACOSX_BUNDLE_ICON_FILE "icon.icns"
 )
 
@@ -109,16 +113,16 @@ if(WIN32)
     set(CPACK_PACKAGE_INSTALL_DIRECTORY "ZXEmulator")
     set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/../resources/icon.ico") # Optional
     set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/../resources/icon.ico") # Optional
-    set(CPACK_PACKAGE_FILE_NAME "ZXEmulator-0.2.0-win64")
+    set(CPACK_PACKAGE_FILE_NAME "ZXEmulator-${ZX_VERSION}-win64")
 elseif(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_DMG_VOLUME_NAME "ZXEmulator Installer")
     set(CPACK_MACOSX_BUNDLE_ICON_FILE "icon.icns")
     set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/../resources/icon.icns")
-    set(CPACK_PACKAGE_FILE_NAME "ZXEmulator-0.2.0-macOS")
+    set(CPACK_PACKAGE_FILE_NAME "ZXEmulator-${ZX_VERSION}-macOS")
 elseif(UNIX)
     set(CPACK_GENERATOR "DEB;RPM;TGZ")
-    set(CPACK_PACKAGE_FILE_NAME "ZXEmulator-0.2.0-Linux")
+    set(CPACK_PACKAGE_FILE_NAME "ZXEmulator-${ZX_VERSION}-Linux")
     # Debian Specifics
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "gpimblott <gordon@pimblott.com>")
     set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON) # Calculate dependencies automatically
