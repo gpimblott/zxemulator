@@ -64,6 +64,13 @@ A standalone copy of the executable is also created in the build folder, similar
 ./build/ZXEmulator
 ```
 
+**Loading a Game:**
+You can drag and drop a file onto the executable or pass it as an argument. The emulator detects the file type automatically.
+```bash
+./build/ZXEmulator game.z80
+./build/ZXEmulator game.tzx
+```
+
 **Running after Installation (in /Applications):**
 ```bash
 /Applications/ZXEmulator.app/Contents/MacOS/ZXEmulator [args]
@@ -109,6 +116,7 @@ The emulator maps standard ZX Spectrum keys to the PC keyboard.
 | **Back to Skool** | Microsphere | 1985 | Snapshot (.z80) | **Working** | OK |
 | **Bomb Jack** | Elite Systems | 1986 | Snapshot (.z80) | **Working** | OK |
 | **Chuckie Egg** | A&F Software | 1983 | Snapshot (.z80) | **Working** | OK |
+| **Boulder Dash** | Front Runner | 1984 | Snapshot (.z80) | **Working** | OK |
 | **Elite** | Firebird | 1985 | Snapshot (.z80) | **Not Working** | Hangs after showing start screen |
 | **Everyone's a Wally** | Mikro-Gen | 1985 | Snapshot (.z80) | **Working** | OK|
 | **Ghosts 'n Goblins** | Elite Systems| 1986 | Snapshot (.z80) | **Not Working** | Fails after menu |
@@ -118,6 +126,7 @@ The emulator maps standard ZX Spectrum keys to the PC keyboard.
 | **Horace and the spiders** | Sinclair Research | 1983 | ROM (.rom) | **Working** | OK |
 | **Horace Goes Skiing** | Sinclair Research | 1982 | Tape (.tzx) | **Working** | OK |
 | **Hungry Horace** | Sinclair Research | 1982 | Snapshot (.z80) | **Working** | OK |
+| **Jack the Nipper** | Gremlin Graphics | 1986 | Snapshot (.z80) | **Working** | OK |
 | **Jetpac** | Ultimate Play The Game | 1983 | Snapshot (.z80) | **Working** | OK |
 | **Jet Set Willy** | Software Projects | 1984 | Tape (.tzx) | **Working** | OK |
 | **Knight Lore** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |

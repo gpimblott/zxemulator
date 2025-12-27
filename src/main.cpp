@@ -64,6 +64,23 @@ int main(int argc, char *argv[]) {
           tapeFile = argv[++i];
           fastLoad = true;
         }
+      } else {
+        // Positional argument - try to detect type by extension
+        std::string ext = "";
+        if (arg.find_last_of(".") != std::string::npos) {
+          ext = arg.substr(arg.find_last_of(".") + 1);
+          // To lowercase
+          for (auto &c : ext)
+            c = tolower(c);
+        }
+
+        if (ext == "z80" || ext == "sna") {
+          snapshotFile = arg;
+        } else if (ext == "tap" || ext == "tzx") {
+          tapeFile = arg;
+        } else if (ext == "bin" || ext == "rom") {
+          romFileLocation = arg;
+        }
       }
     }
 

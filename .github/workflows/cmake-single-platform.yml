@@ -1,6 +1,6 @@
 # This starter workflow is for a CMake project running on a single platform. There is a different starter workflow if you need cross-platform coverage.
 # See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-multi-platform.yml
-name: CMake on a single platform
+name: CMake Build Matrix
 
 on:
   push:
@@ -15,18 +15,29 @@ env:
 
 jobs:
   build:
-    permissions:
-      contents: write
-    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
-    # You can convert this to a matrix build if you need cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install dependencies
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
       run: brew install sfml
+
+    - name: Install dependencies (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxrandr-dev libxcursor-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev libdrm-dev libgbm-dev
+        # Build SFML 3 from source
+        git clone -b 3.0.0 --depth 1 https://github.com/SFML/SFML.git
+        cmake -S SFML -B SFML/build -DCMAKE_BUILD_TYPE=Release -DSFML_BUILD_EXAMPLES=OFF -DSFML_BUILD_DOC=OFF
+        sudo cmake --install SFML/build
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -48,22 +59,47 @@ jobs:
       run: cpack -C ${{env.BUILD_TYPE}}
 
     - name: Organize Artifacts
+      shell: bash
       run: |
-        mkdir -p ${{github.workspace}}/dist/macos
-        cp ${{github.workspace}}/build/ZXEmulator ${{github.workspace}}/dist/macos/ZXEmulator-${{env.APP_VERSION}}-macOS
-        cp ${{github.workspace}}/build/*.dmg ${{github.workspace}}/dist/macos/
+        if [ "${{ matrix.os }}" == "macos-latest" ]; then
+          DIST_DIR=${{github.workspace}}/dist/macos
+          mkdir -p $DIST_DIR
+          cp ${{github.workspace}}/build/ZXEmulator $DIST_DIR/ZXEmulator-${{env.APP_VERSION}}-macOS
+          cp ${{github.workspace}}/build/*.dmg $DIST_DIR/
+        else
+          DIST_DIR=${{github.workspace}}/dist/linux
+          mkdir -p $DIST_DIR
+          cp ${{github.workspace}}/build/ZXEmulator $DIST_DIR/ZXEmulator-${{env.APP_VERSION}}-Linux
+          cp ${{github.workspace}}/build/*.deb $DIST_DIR/
+          cp ${{github.workspace}}/build/*.tar.gz $DIST_DIR/
+        fi
 
-    - name: Upload Dist
+    - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ZXEmulator-Dist
+        name: dist-${{ matrix.os }}
         path: ${{github.workspace}}/dist/
 
-    - name: Commit and Push Dist
-      run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-        git add dist/
-        git commit -m "Build: Update distribution artifacts [skip ci]" || echo "No changes to commit"
-        git push
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          merge-multiple: true
+          path: dist/
+          
+      - name: Commit and Push
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add dist/
+          git commit -m "Build: Update distribution artifacts [skip ci]" || echo "No changes to commit"
+          git push
 
