@@ -40,3 +40,19 @@ jobs:
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C ${{env.BUILD_TYPE}}
 
+    - name: Package
+      working-directory: ${{github.workspace}}/build
+      run: cpack -C ${{env.BUILD_TYPE}}
+
+    - name: Organize Artifacts
+      run: |
+        mkdir -p ${{github.workspace}}/dist
+        cp ${{github.workspace}}/build/ZXEmulator ${{github.workspace}}/dist/
+        cp ${{github.workspace}}/build/*.dmg ${{github.workspace}}/dist/
+
+    - name: Upload Dist
+      uses: actions/upload-artifact@v4
+      with:
+        name: ZXEmulator-Dist
+        path: ${{github.workspace}}/dist/
+
