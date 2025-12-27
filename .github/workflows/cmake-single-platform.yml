@@ -11,6 +11,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  APP_VERSION: 0.2.0
 
 jobs:
   build:
@@ -48,9 +49,9 @@ jobs:
 
     - name: Organize Artifacts
       run: |
-        mkdir -p ${{github.workspace}}/dist
-        cp ${{github.workspace}}/build/ZXEmulator ${{github.workspace}}/dist/
-        cp ${{github.workspace}}/build/*.dmg ${{github.workspace}}/dist/
+        mkdir -p ${{github.workspace}}/dist/macos
+        cp ${{github.workspace}}/build/ZXEmulator ${{github.workspace}}/dist/macos/ZXEmulator-${{env.APP_VERSION}}-macOS
+        cp ${{github.workspace}}/build/*.dmg ${{github.workspace}}/dist/macos/
 
     - name: Upload Dist
       uses: actions/upload-artifact@v4
