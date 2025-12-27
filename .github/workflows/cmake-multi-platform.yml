@@ -69,14 +69,17 @@ jobs:
     - name: Organize Artifacts
       shell: bash
       run: |
+        # Clear dist folder completely to strictly separate platform artifacts
+        rm -rf ${{github.workspace}}/dist
+        
         if [ "${{ matrix.os }}" == "macos-latest" ]; then
           DIST_DIR=${{github.workspace}}/dist/macos
-          mkdir -p $DIST_DIR
+          mkdir -p "$DIST_DIR"
           cp ${{github.workspace}}/build/ZXEmulator $DIST_DIR/ZXEmulator-${{env.APP_VERSION}}-macOS
           cp ${{github.workspace}}/build/*.dmg $DIST_DIR/
         else
           DIST_DIR=${{github.workspace}}/dist/linux
-          mkdir -p $DIST_DIR
+          mkdir -p "$DIST_DIR"
           cp ${{github.workspace}}/build/ZXEmulator $DIST_DIR/ZXEmulator-${{env.APP_VERSION}}-Linux
           cp ${{github.workspace}}/build/*.deb $DIST_DIR/
           cp ${{github.workspace}}/build/*.rpm $DIST_DIR/
