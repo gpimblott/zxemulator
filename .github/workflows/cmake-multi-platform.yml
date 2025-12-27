@@ -33,7 +33,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libxrandr-dev libxcursor-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev libdrm-dev libgbm-dev libxi-dev libfreetype6-dev
+        sudo apt-get install -y libxrandr-dev libxcursor-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev libdrm-dev libgbm-dev libxi-dev libfreetype6-dev rpm
         # Build SFML 3 from source
         git clone -b 3.0.0 --depth 1 https://github.com/SFML/SFML.git
         cmake -S SFML -B SFML/build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DSFML_BUILD_EXAMPLES=OFF -DSFML_BUILD_DOC=OFF
@@ -72,6 +72,7 @@ jobs:
           mkdir -p $DIST_DIR
           cp ${{github.workspace}}/build/ZXEmulator $DIST_DIR/ZXEmulator-${{env.APP_VERSION}}-Linux
           cp ${{github.workspace}}/build/*.deb $DIST_DIR/
+          cp ${{github.workspace}}/build/*.rpm $DIST_DIR/
           cp ${{github.workspace}}/build/*.tar.gz $DIST_DIR/
         fi
 
