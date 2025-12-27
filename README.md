@@ -2,6 +2,8 @@
 
 A work-in-progress ZX Spectrum Emulator written in C++.
 
+NB: The current GitHub workflow currenlty only builds a MacOS bundle. To build for other platforms, you will need to use CMake directly.  I will add support for other platforms in the future.
+
 ## Features
 
 - **Core Emulation**: 48K RAM, Z80 CPU implementation (including undocumented opcodes and R register emulation).
