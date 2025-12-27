@@ -14,6 +14,8 @@ env:
 
 jobs:
   build:
+    permissions:
+      contents: write
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
     # You can convert this to a matrix build if you need cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
@@ -55,4 +57,12 @@ jobs:
       with:
         name: ZXEmulator-Dist
         path: ${{github.workspace}}/dist/
+
+    - name: Commit and Push Dist
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add dist/
+        git commit -m "Build: Update distribution artifacts [skip ci]" || echo "No changes to commit"
+        git push
 
