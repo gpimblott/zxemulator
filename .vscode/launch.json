@@ -52,7 +52,37 @@
             },
             "args": [
                 "-t",
-                "${workspaceFolder}/roms/hobbit.tzx"
+                "${workspaceFolder}/do_not_copy/Hobbit, The (1982)(Sinclair Research)[re-release].tzx"
+            ],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build"
+        },
+        {
+            "name": "ZXEmulator TZX - Fastload",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/ZXEmulator",
+            "osx": {
+                "program": "${workspaceFolder}/build/ZXEmulator.app/Contents/MacOS/ZXEmulator"
+            },
+            "args": [
+                "-f",
+                "${workspaceFolder}/do_not_copy/Hobbit, The (1982)(Sinclair Research)[re-release].tzx"
+            ],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build"
+        },
+        {
+            "name": "ZXEmulator ROM Game",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/ZXEmulator",
+            "osx": {
+                "program": "${workspaceFolder}/build/ZXEmulator.app/Contents/MacOS/ZXEmulator"
+            },
+            "args": [
+                "-r",
+                "${workspaceFolder}/do_not_copy/Jetpac (1983)(Sinclair Research)(16K)[re-release].rom"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build"
@@ -67,37 +97,7 @@
             },
             "args": [
                 "-s",
-                "${workspaceFolder}/roms/jetpac.z80"
-            ],
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "build"
-        },
-        {
-            "name": "ZXEmulator TZX Fastload",
-            "type": "lldb",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/ZXEmulator",
-            "osx": {
-                "program": "${workspaceFolder}/build/ZXEmulator.app/Contents/MacOS/ZXEmulator"
-            },
-            "args": [
-                "-f",
-                "${workspaceFolder}/roms/manicminer.tzx"
-            ],
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "build"
-        },
-        {
-            "name": "ZXEmulator TZX Fastload 2",
-            "type": "lldb",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/ZXEmulator",
-            "osx": {
-                "program": "${workspaceFolder}/build/ZXEmulator.app/Contents/MacOS/ZXEmulator"
-            },
-            "args": [
-                "-f",
-                "~/Downloads/everyonesawally.tzx"
+                "${workspaceFolder}/do_not_copy/Knight Lore (1984)(Ultimate Play The Game).z80"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build"
