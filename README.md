@@ -68,6 +68,12 @@ xattr -cr /Applications/ZXEmulator.app
 ```
 Or simply double-click `ZXEmulator` in the `build` folder.
 
+**Input Monitoring:**
+MacOS requires 'Input Monitoring' to be enabled for the application for the keyboard to work correctly.
+1. Open **System Settings** -> **Privacy & Security** -> **Input Monitoring**.
+2. Add the ZXEmulator app to the list of allowed apps.
+3. Restart the application.
+
 **Running from Build Directory (Standalone Binary):**
 A standalone copy of the executable is also created in the build folder, similar to Linux/Windows.
 ```bash

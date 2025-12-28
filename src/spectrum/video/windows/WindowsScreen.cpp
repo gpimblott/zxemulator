@@ -487,8 +487,32 @@ void WindowsScreen::handleKey(sf::Keyboard::Key key, bool pressed) {
   // Line 3 (0xF7): 1 (0), 2 (1), 3 (2), 4 (3), 5 (4)
   if (key == sf::Keyboard::Key::Num1 || key == sf::Keyboard::Key::Numpad1)
     processor->getState().keyboard.setKey(3, 0, pressed);
-  if (key == sf::Keyboard::Key::Num2 || key == sf::Keyboard::Key::Numpad2)
-    processor->getState().keyboard.setKey(3, 1, pressed);
+  if (key == sf::Keyboard::Key::Num2 || key == sf::Keyboard::Key::Numpad2) {
+    bool shift = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) ||
+                 sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RShift);
+    if (pressed) {
+      if (shift) {
+        // Shift + 2 = " (UK Layout) -> Symbol Shift + P
+        processor->getState().keyboard.setKey(7, 1, true);  // Symbol Shift
+        processor->getState().keyboard.setKey(5, 0, true);  // P
+        processor->getState().keyboard.setKey(0, 0, false); // Caps Shift OFF
+      } else {
+        processor->getState().keyboard.setKey(3, 1, true); // 2
+      }
+    } else {
+      processor->getState().keyboard.setKey(3, 1, false); // 2
+      processor->getState().keyboard.setKey(5, 0, false); // P
+
+      // Restore states based on physical keys
+      bool ctrl = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl) ||
+                  sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RControl);
+      if (!ctrl)
+        processor->getState().keyboard.setKey(7, 1, false);
+
+      if (shift)
+        processor->getState().keyboard.setKey(0, 0, true);
+    }
+  }
   if (key == sf::Keyboard::Key::Num3 || key == sf::Keyboard::Key::Numpad3)
     processor->getState().keyboard.setKey(3, 2, pressed);
   if (key == sf::Keyboard::Key::Num4 || key == sf::Keyboard::Key::Numpad4)
