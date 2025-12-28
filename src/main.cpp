@@ -94,6 +94,16 @@ int main(int argc, char *argv[]) {
       }
     }
 
+    // Parse command line arguments
+    // ...
+
+    FILE *log = fopen("/tmp/zxdebug.log", "a");
+    if (log) {
+      fprintf(log, "ZXEmulator starting...\n");
+      fprintf(log, "ROM Path: %s\n", romFileLocation.c_str());
+      fclose(log);
+    }
+
     Logger::write("Starting ZX Spectrum Emulator v0.3.5");
     Logger::write(("Loading ROM from: " + romFileLocation).c_str());
 
@@ -133,6 +143,12 @@ int main(int argc, char *argv[]) {
     }
 
     auto frameDuration = std::chrono::milliseconds(20); // 50Hz
+
+    FILE *loopLog = fopen("/tmp/zxdebug.log", "a");
+    if (loopLog) {
+      fprintf(loopLog, "Entering main loop\n");
+      fclose(loopLog);
+    }
 
     while (screen->processEvents()) {
       // Check for pending file load (from Drag & Drop or Mac Open Event)
