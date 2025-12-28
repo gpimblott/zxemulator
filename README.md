@@ -155,4 +155,4 @@ The emulator maps standard ZX Spectrum keys to the PC keyboard.
 
 ## License
 
-MIT License. See `LICENSE` file for details.
+Apache 2.0 License. See `LICENSE` file for details.
