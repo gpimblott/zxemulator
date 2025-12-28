@@ -48,10 +48,6 @@ int main(int argc, char *argv[]) {
     std::string tapeFile = "";
     std::string snapshotFile = "";
 
-#ifdef __APPLE__
-    platform::mac::installFileHandler(handleMacOpenFile);
-#endif
-
     // Parse command line arguments
     for (int i = 1; i < argc; ++i) {
       std::string arg = argv[i];
@@ -97,14 +93,7 @@ int main(int argc, char *argv[]) {
     // Parse command line arguments
     // ...
 
-    FILE *log = fopen("/tmp/zxdebug.log", "a");
-    if (log) {
-      fprintf(log, "ZXEmulator starting...\n");
-      fprintf(log, "ROM Path: %s\n", romFileLocation.c_str());
-      fclose(log);
-    }
-
-    Logger::write("Starting ZX Spectrum Emulator v0.3.5");
+    Logger::write("Starting ZX Spectrum Emulator v0.4.1");
     Logger::write(("Loading ROM from: " + romFileLocation).c_str());
 
     // Create a processor and load the basic ROM
@@ -142,13 +131,11 @@ int main(int argc, char *argv[]) {
       screen->setDebugMode(true);
     }
 
-    auto frameDuration = std::chrono::milliseconds(20); // 50Hz
+#ifdef __APPLE__
+    platform::mac::installFileHandler(handleMacOpenFile);
+#endif
 
-    FILE *loopLog = fopen("/tmp/zxdebug.log", "a");
-    if (loopLog) {
-      fprintf(loopLog, "Entering main loop\n");
-      fclose(loopLog);
-    }
+    auto frameDuration = std::chrono::milliseconds(20); // 50Hz
 
     while (screen->processEvents()) {
       // Check for pending file load (from Drag & Drop or Mac Open Event)

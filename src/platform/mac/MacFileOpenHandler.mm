@@ -48,13 +48,6 @@
 
     if (url && [url path]) {
       std::string path = [[url path] UTF8String];
-
-      FILE *log = fopen("/tmp/zxdebug.log", "a");
-      if (log) {
-        fprintf(log, "MacOpenHandler: Received path: %s\n", path.c_str());
-        fclose(log);
-      }
-
       if (self.callback) {
         self.callback(path);
       }
