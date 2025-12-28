@@ -62,11 +62,6 @@ jobs:
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C ${{env.BUILD_TYPE}}
 
-    - name: Code Sign (macOS)
-      if: matrix.os == 'macos-latest'
-      run: |
-        codesign --force --deep --sign - ${{github.workspace}}/build/ZXEmulator.app
-
     - name: Package
       working-directory: ${{github.workspace}}/build
       run: cpack -C ${{env.BUILD_TYPE}}

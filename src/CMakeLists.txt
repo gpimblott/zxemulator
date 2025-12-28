@@ -92,11 +92,12 @@ if(APPLE)
     # Install Icon into Bundle
     install(FILES "${CMAKE_SOURCE_DIR}/../resources/icon.icns" DESTINATION "${EXECUTABLE_NAME}.app/Contents/Resources")
 
-    # Fixup Bundle (Copy Dependencies)
+    # Fixup Bundle (Copy Dependencies) and Ad-Hoc Sign
     install(CODE "
         include(BundleUtilities)
         set(BU_CHMOD_BUNDLE_ITEMS ON)
         fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/${EXECUTABLE_NAME}.app\" \"\" \"\")
+        execute_process(COMMAND codesign --force --deep --sign - \"\${CMAKE_INSTALL_PREFIX}/${EXECUTABLE_NAME}.app\")
     ")
 else()
     install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin)
