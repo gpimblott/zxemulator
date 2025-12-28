@@ -91,6 +91,13 @@ if(APPLE)
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/../roms" DESTINATION "${EXECUTABLE_NAME}.app/Contents/Resources")
     # Install Icon into Bundle
     install(FILES "${CMAKE_SOURCE_DIR}/../resources/icon.icns" DESTINATION "${EXECUTABLE_NAME}.app/Contents/Resources")
+
+    # Fixup Bundle (Copy Dependencies)
+    install(CODE "
+        include(BundleUtilities)
+        set(BU_CHMOD_BUNDLE_ITEMS ON)
+        fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/${EXECUTABLE_NAME}.app\" \"\" \"\")
+    ")
 else()
     install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin)
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/../roms" DESTINATION share/zxemulator/resources)
