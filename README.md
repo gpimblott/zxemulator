@@ -155,11 +155,12 @@ Supported controllers include Xbox, PlayStation (DualShock/DualSense), and gener
 | **Attack of the Killer Tomatoes** | Global Software | 1986 | Snapshot (.z80) | **Working** | OK | 
 | **Back to Skool** | Microsphere | 1985 | Snapshot (.z80) | **Working** | OK |
 | **Bomb Jack** | Elite Systems | 1986 | Snapshot (.z80) | **Working** | OK |
+| **Chase HQ** | Ocean Software | 1989 | Snapshot (.z80) | **Working** | OK |
 | **Chuckie Egg** | A&F Software | 1983 | Snapshot (.z80) | **Working** | OK |
 | **Boulder Dash** | Front Runner | 1984 | Snapshot (.z80) | **Working** | OK |
-| **Elite** | Firebird | 1985 | Snapshot (.z80) | **Not Working** | Hangs after showing start screen |
+| **Elite** | Firebird | 1985 | Snapshot (.z80) | **Partially Working** | Some versions work? |
 | **Everyone's a Wally** | Mikro-Gen | 1985 | Snapshot (.z80) | **Working** | OK|
-| **Ghosts 'n Goblins** | Elite Systems| 1986 | Snapshot (.z80) | **Not Working** | Fails after menu |
+| **Ghosts 'n Goblins** | Elite Systems| 1986 | Snapshot (.z80) | **Not Working** | Corrupted after menu |
 | **Gosh Wonderful ROM** | Geoff Wearmouth | 2003 | ROM (.rom) | **Working** | OK |
 | **Head over Heels** | Ocean Software | 1987 | Snapshot (.z80) | **Working** | OK |
 | **Hobbit** | Melbourne House | 1982 | Tape (.tzx) | **Working** | OK |
@@ -173,7 +174,9 @@ Supported controllers include Xbox, PlayStation (DualShock/DualSense), and gener
 | **Lunar Jetman** | Ultimate Play The Game | 1983 | Snapshot (.z80) | **Working** | OK |
 | **Manic Miner** | Software Projects | 1983 | Tape (.tzx) | **Working** | OK |
 | **Nightshade** | Ultimate Play The Game | 1985 | Snapshot (.z80) | **Working** | OK |
+| **Nebulus** | Hewson Consultants | 1987 | Snapshot (.z80) | **Working** | OK |
 | **Pacman** | Atarisoft | 1984 | Snapshot (.z80) | **Working** | OK |
+| **Rainbow Islands**| Hit Squad | 1990 | Snapshot (.tzx) | **Not Working** | Doesn't load |
 | **Sabre Wulf** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |
 | **Three weeks in paradise** | Mikro-Gen | 1986 | Snapshot (.z80) | **Working** | OK |
 | **Underwurlde** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |

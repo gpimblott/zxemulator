@@ -84,6 +84,7 @@ int main(int argc, char *argv[]) {
           snapshotFile = arg;
         } else if (ext == "tap" || ext == "tzx") {
           tapeFile = arg;
+          fastLoad = true;
         } else if (ext == "bin" || ext == "rom") {
           romFileLocation = arg;
         }
@@ -157,6 +158,7 @@ int main(int argc, char *argv[]) {
         if (ext == "tap" || ext == "tzx") {
           Tape tape = TapeLoader::load(fileToLoad.c_str());
           processor.loadTape(tape);
+          processor.getState().setFastLoad(true);
         } else {
           processor.loadSnapshot(fileToLoad.c_str());
         }
