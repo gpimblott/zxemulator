@@ -130,8 +130,7 @@ The emulator maps standard ZX Spectrum keys to the PC keyboard.
 - **Caps Shift**: Left Shift.
 - **Enter**: Return/Enter.
 - **Space**: Space.
-- **Space**: Space.
-- **Kempston Joystick**: Arrow Keys + Left Alt (Fire).
+- **Kempston Joystick**: Arrow Keys + Right Alt (Fire).
 
 ### Gamepad / Joystick support
 
@@ -142,14 +141,15 @@ The emulator automatically detects connected controllers (Bluetooth or USB) and 
 Supported controllers include Xbox, PlayStation (DualShock/DualSense), and generic USB gamepads.
 **Note**: On macOS, ensure the controller is connected *before* launching the emulator or ensure "Input Monitoring" is enabled if buttons are not detected.
 
-## Compatibility
+Keyboard emulation of the kempston joystick is also enabled by default. The Mac/PC arrow keys are mapped to the Kempston joystick. The Right alt/Option key is mapped to the Kempston fire button.
 
 ## Compatibility
 
-* Known issues with fast loading of tape files
+* Known issues with tape loading - especially when fast loading,  .z80 files are much more reliable.
 
 | Software | Publisher | Year | Format | Status | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| **1942** | Elite Systems | 1986 | Snapshot (.z80) | **Working** | OK|
 | **Ant Attack** | Quicksilva | 1983 | Snapshot (.z80) | **Working** | OK |
 | **Atic Atac** | Ultimate Play The Game | 1983 | Snapshot (.z80) | **Working** | OK |
 | **Attack of the Killer Tomatoes** | Global Software | 1986 | Snapshot (.z80) | **Working** | OK | 
@@ -176,10 +176,12 @@ Supported controllers include Xbox, PlayStation (DualShock/DualSense), and gener
 | **Nightshade** | Ultimate Play The Game | 1985 | Snapshot (.z80) | **Working** | OK |
 | **Nebulus** | Hewson Consultants | 1987 | Snapshot (.z80) | **Working** | OK |
 | **Pacman** | Atarisoft | 1984 | Snapshot (.z80) | **Working** | OK |
+| **Pyjamarama** | Micro-Gen   | 1984 | Snapshot (.z80) | **Working** | OK |
 | **Rainbow Islands**| Hit Squad | 1990 | Snapshot (.tzx) | **Not Working** | Doesn't load |
 | **Sabre Wulf** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |
 | **Three weeks in paradise** | Mikro-Gen | 1986 | Snapshot (.z80) | **Working** | OK |
 | **Underwurlde** | Ultimate Play The Game | 1984 | Snapshot (.z80) | **Working** | OK |
+| **Way of the Tiger** | Gremlin Graphics | 1986 | Snapshot (.tzx , .tap) | **Partially Working** | Not playable |
 | **ZX Diagnostics** | Dylan Smith / Brendan Alford | 2017 | ROM | **Working** | Passes all diagnostic tests. |
 
 ## Project Structure

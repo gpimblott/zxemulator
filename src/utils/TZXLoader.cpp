@@ -30,17 +30,54 @@ bool TZXLoader::isValid() {
 
   // TZX Header: "ZXTape!" + 0x1A
   const char *expected = "ZXTape!";
-  if (memcmp(this->data, expected, 7) != 0)
-    return false;
-  if (this->data[7] != 0x1A)
-    return false;
+  if (this->size >= 10 && memcmp(this->data, expected, 7) == 0 &&
+      this->data[7] == 0x1A) {
+    return true;
+  }
 
-  return true;
+  // Try to validate as TAP
+  // TAP format: [LEN_LO] [LEN_HI] [DATA...] repeated
+  long offset = 0;
+  bool validTap = false;
+  while (offset < this->size) {
+    if (offset + 2 > this->size)
+      return false;
+    int len = this->data[offset] | (this->data[offset + 1] << 8);
+    offset += 2;
+    if (offset + len > this->size)
+      return false;
+    offset += len;
+    validTap = true;
+  }
+  return validTap;
 }
 
 void TZXLoader::parse() {
   if (!isValid()) {
     Logger::write("Invalid TZX file");
+    return;
+  }
+
+  // Check format again to decide parsing strategy
+  const char *expected = "ZXTape!";
+  bool isTzx = (this->size >= 10 && memcmp(this->data, expected, 7) == 0);
+
+  if (!isTzx) {
+    // Parse as TAP
+    Logger::write("Parsing as TAP format");
+    long offset = 0;
+    while (offset < this->size) {
+      int len = this->data[offset] | (this->data[offset + 1] << 8);
+      offset += 2;
+
+      TapeBlock block;
+      block.id = 0x10;         // Standard Block
+      block.pauseAfter = 1000; // Default pause for TAP blocks (1s)
+      block.data.assign(this->data + offset, this->data + offset + len);
+      blocks.push_back(block);
+
+      offset += len;
+    }
     return;
   }
 

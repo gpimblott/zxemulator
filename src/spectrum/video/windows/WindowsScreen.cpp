@@ -115,16 +115,6 @@ void WindowsScreen::update() {
   PeriodTimer timer;
   timer.start();
 
-  // Get a pointer for the screen buffer
-  // byte *screenBufferPtr = this->videoBuffer->getBuffer();
-  // byte *currentLinePtr = this->videoBuffer->getBuffer(); // unused
-
-  //    for (int row = 0; row < numberOfRows; row++) {
-  //
-  //        // Move to the next row
-  //        currentLinePtr += bytesPerRow;
-  //    }
-
   // Redraw the double buffer
   std::uint8_t *currentPixelPtr = pixelBuffer;
   int bufferRow = 0;
@@ -152,8 +142,6 @@ void WindowsScreen::update() {
   theWindow.draw(sprite);
 
   theWindow.draw(sprite);
-
-  /* Debug button removed as per request */
 
   theWindow.display();
 
