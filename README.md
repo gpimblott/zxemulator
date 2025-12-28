@@ -17,10 +17,13 @@ A windows executable will be added in the future.
 - **Z80 Support**: Fully implemented instructions, including Extended (ED), Index (DD/FD), and Bit (CB) prefixes.
 - **Interrupts**: Support for Interrupt Modes 0, 1, and 2.
 - **Graphics**: Real-time display using SFML.
+- **Sound**: Basic sound support using SFML.
+- **Joystick**: Kempston joystick support using USB and Bluetooth controllers.
 - **Loading Formats**:
   - **SNA Snapshots**: Support for 48K SNA files.
   - **Z80 Snapshots**: Support for versions 1, 2, and 3 (compressed and uncompressed).
   - **TAP/TZX Tapes**: Basic support for tape loading.
+  - **ROM Files**: Support for loading custom ROM files.
 - **Diagnostic Support**: Compatible with diagnostic ROMs (e.g., Brendan Alford's ZX Diagnostics).
 
 ## Prerequisites

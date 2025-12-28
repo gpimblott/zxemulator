@@ -22,6 +22,7 @@
 class SnapshotLoader {
 public:
   static void load(const char *filename, ProcessorState &state);
+  static void exportSNA(const char *filename, ProcessorState &state);
 
 private:
   static void loadSNA(const char *filename, ProcessorState &state);

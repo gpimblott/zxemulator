@@ -63,6 +63,7 @@ private:
   void handleKey(sf::Keyboard::Key key, bool pressed);
   void mapSymbol(bool pressed, int unshiftedLine, int unshiftedBit,
                  int shiftedLine, int shiftedBit);
+  void handleJoystickConnect(bool connected, unsigned int id);
 
 public:
   sf::RenderWindow debugWindow;

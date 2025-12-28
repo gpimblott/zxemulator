@@ -86,6 +86,13 @@ void WindowsScreen::show() {
   } else {
     printf("Warning: Failed to load icon from %s\n", iconPath.c_str());
   }
+
+  // Check for connected Joysticks
+  for (unsigned int i = 0; i < sf::Joystick::Count; ++i) {
+    if (sf::Joystick::isConnected(i)) {
+      handleJoystickConnect(true, i);
+    }
+  }
 }
 
 void WindowsScreen::hide() { printf("Hide window()\n"); }
@@ -375,6 +382,33 @@ bool WindowsScreen::processEvents() {
       if (mouseButton->button == sf::Mouse::Button::Left) {
         // Debug Button removed
       }
+    } else if (const auto *joyMove = event->getIf<sf::Event::JoystickMoved>()) {
+      // Axis 0 = X, Axis 1 = Y
+      // Kempston: 0=Right, 1=Left, 2=Down, 3=Up
+      if (joyMove->axis == sf::Joystick::Axis::X) {
+        processor->getState().keyboard.setKempstonKey(0, joyMove->position >
+                                                             50.0f);
+        processor->getState().keyboard.setKempstonKey(1, joyMove->position <
+                                                             -50.0f);
+      } else if (joyMove->axis == sf::Joystick::Axis::Y) {
+        processor->getState().keyboard.setKempstonKey(2, joyMove->position >
+                                                             50.0f);
+        processor->getState().keyboard.setKempstonKey(3, joyMove->position <
+                                                             -50.0f);
+      }
+    } else if (const auto *joyBtnPress =
+                   event->getIf<sf::Event::JoystickButtonPressed>()) {
+      // Map any button to Fire (Bit 4)
+      processor->getState().keyboard.setKempstonKey(4, true);
+    } else if (const auto *joyBtnRelease =
+                   event->getIf<sf::Event::JoystickButtonReleased>()) {
+      processor->getState().keyboard.setKempstonKey(4, false);
+    } else if (const auto *joyConnect =
+                   event->getIf<sf::Event::JoystickConnected>()) {
+      handleJoystickConnect(true, joyConnect->joystickId);
+    } else if (const auto *joyDisconnect =
+                   event->getIf<sf::Event::JoystickDisconnected>()) {
+      handleJoystickConnect(false, joyDisconnect->joystickId);
     }
   }
 
@@ -427,6 +461,14 @@ bool WindowsScreen::processEvents() {
   }
 
   return theWindow.isOpen();
+}
+
+void WindowsScreen::handleJoystickConnect(bool connected, unsigned int id) {
+  if (connected) {
+    printf("Joystick Connected: %d\n", id);
+  } else {
+    printf("Joystick Disconnected: %d\n", id);
+  }
 }
 
 void WindowsScreen::handleKey(sf::Keyboard::Key key, bool pressed) {

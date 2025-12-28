@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    Logger::write("Starting ZX Spectrum Emulator v0.2");
+    Logger::write("Starting ZX Spectrum Emulator v0.3.5");
     Logger::write(("Loading ROM from: " + romFileLocation).c_str());
 
     // Create a processor and load the basic ROM

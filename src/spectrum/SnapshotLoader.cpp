@@ -17,6 +17,7 @@
 #include "SnapshotLoader.h"
 #include "../utils/BinaryFileLoader.h"
 #include "../utils/Logger.h"
+#include <fstream>
 #include <string>
 
 void SnapshotLoader::load(const char *filename, ProcessorState &state) {
@@ -295,4 +296,90 @@ void SnapshotLoader::loadZ80(const char *filename, ProcessorState &state) {
   }
 
   utils::Logger::write("Z80 Snapshot loaded successfully.");
+}
+
+void SnapshotLoader::exportSNA(const char *filename, ProcessorState &state) {
+  std::ofstream outFile(filename, std::ios::binary);
+  if (!outFile) {
+    utils::Logger::write("Error: Could not open file for writing.");
+    return;
+  }
+
+  // SNA requires PC to be pushed onto the stack
+  // We simulate this push without permanently modifying the running state logic
+  // if possible. But for simplicity, let's write to memory and restore?
+  // actually, let's just use the current memory but handle the stack area
+  // modification carefully.
+
+  // 1. Push PC onto the Stack (in memory)
+  // SP is decremented by 2
+  word sp = state.registers.SP - 2;
+  word pc = state.registers.PC;
+
+  // Back up existing memory at stack location (to restore later if needed,
+  // though we probably don't need to)
+  byte oldLow = state.memory[sp];
+  byte oldHigh = state.memory[sp + 1];
+
+  state.memory[sp] = pc & 0xFF;
+  state.memory[sp + 1] = (pc >> 8) & 0xFF;
+
+  // 2. Create Header
+  byte header[27];
+  header[0] = state.registers.I;
+  header[1] = state.registers.HL_ & 0xFF;
+  header[2] = (state.registers.HL_ >> 8) & 0xFF;
+  header[3] = state.registers.DE_ & 0xFF;
+  header[4] = (state.registers.DE_ >> 8) & 0xFF;
+  header[5] = state.registers.BC_ & 0xFF;
+  header[6] = (state.registers.BC_ >> 8) & 0xFF;
+  header[7] = state.registers.AF_ & 0xFF;
+  header[8] = (state.registers.AF_ >> 8) & 0xFF;
+
+  header[9] = state.registers.L;
+  header[10] = state.registers.H;
+  header[11] = state.registers.E;
+  header[12] = state.registers.D;
+  header[13] = state.registers.C;
+  header[14] = state.registers.B;
+
+  header[15] = state.registers.IX & 0xFF;
+  header[16] = (state.registers.IX >> 8) & 0xFF;
+  header[17] = state.registers.IY & 0xFF;
+  header[18] = (state.registers.IY >> 8) & 0xFF;
+
+  header[19] = (state.areInterruptsEnabled() ? 0x04 : 0x00);
+
+  header[20] = state.registers.R;
+  header[21] = state.registers.F;
+  header[22] = state.registers.A;
+
+  header[23] = sp & 0xFF;
+  header[24] = (sp >> 8) & 0xFF;
+
+  header[25] = state.getInterruptMode();
+
+  if (state.memory.getVideoBuffer()) {
+    header[26] = state.memory.getVideoBuffer()->getBorderColor();
+  } else {
+    header[26] = 7; // Default White
+  }
+
+  // Write Header
+  outFile.write(reinterpret_cast<const char *>(header), 27);
+
+  // Write RAM (16384 to 65535)
+  for (int i = 16384; i < 65536; ++i) {
+    char byteVal = (char)state.memory[i];
+    outFile.write(&byteVal, 1);
+  }
+
+  outFile.close();
+
+  // Restore memory (just in case the stack pointed to something critical
+  // execution relies on, though typically it points to free stack space)
+  state.memory[sp] = oldLow;
+  state.memory[sp + 1] = oldHigh;
+
+  utils::Logger::write("Snapshot saved to " + std::string(filename));
 }

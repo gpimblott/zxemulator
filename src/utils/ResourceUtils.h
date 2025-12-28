@@ -56,6 +56,14 @@ inline std::string getResourcePath(const std::string &relativePath) {
     }
   }
 #endif
+
+  // Fallback: Check if it exists in a 'resources' folder in CWD
+  std::filesystem::path localResource =
+      std::filesystem::path("resources") / relativePath;
+  if (std::filesystem::exists(localResource)) {
+    return localResource.string();
+  }
+
   return relativePath;
 }
 
