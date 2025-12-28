@@ -156,10 +156,13 @@ int main(int argc, char *argv[]) {
         // Simple detection logic duplicated from main arg parsing
         // Ideal refactor: move 'loadFile' to Processor or Loader class
         if (ext == "tap" || ext == "tzx") {
+          Logger::write(
+              "Loading tape (pending event)... setting Fast Load TRUE");
           Tape tape = TapeLoader::load(fileToLoad.c_str());
           processor.loadTape(tape);
           processor.getState().setFastLoad(true);
         } else {
+          Logger::write("Loading snapshot (pending event)...");
           processor.loadSnapshot(fileToLoad.c_str());
         }
       }

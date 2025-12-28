@@ -215,64 +215,64 @@ bool Tape::fastLoadBlock(byte expectedFlag, word length, word startAddress,
       // Check Flag
       if (blocks[scanIndex].data.size() > 0 &&
           blocks[scanIndex].data[0] == expectedFlag) {
-        // Found match!
-        // Verify size. TZX Block Data includes Flag + Data + Checksum.
-        // We need to load 'length' bytes.
-        // The block size should be at least length + 2.
-        // Actually ROM expects 'length' bytes. plus Flag (1) and Checksum
-        // (1). So total block size must be >= length + 2.
 
-        if (blocks[scanIndex].data.size() < (size_t)(length + 2)) {
-          // Error: Block too short?
-          Logger::write("Block too short for fast load");
-          return false;
+        // Found match! Validate checksum/length roughly
+        // If length is huge (65535), we just trust the block size.
+        // We ensure we have at least 2 bytes (Flag + Checksum)
+        if (blocks[scanIndex].data.size() < 2) {
+          Logger::write("Block too short (no flag/checksum) - skipping");
+          scanIndex++;
+          continue;
         }
 
         // Debug Logging
         char msg[128];
         snprintf(msg, sizeof(msg),
-                 "FastLoad: Flag=%02X Exp=%02X Len=%d IX=%04X Data[0]=%02X "
-                 "Data[1]=%02X",
-                 blocks[scanIndex].data[0], expectedFlag, length, startAddress,
-                 blocks[scanIndex].data[0], blocks[scanIndex].data[1]);
+                 "FastLoad: Match! Flag=%02X Len=%d IX=%04X BlockLen=%zu",
+                 expectedFlag, length, startAddress,
+                 blocks[scanIndex].data.size());
         Logger::write(msg);
 
         // Load Data
-        // Skip Flag (index 0)
-        // Copy length bytes to memory
-        // rom routine loads to IX.
+        // We load MIN(requested_length, available_payload)
+        // Payload = BlockSize - 1 (Flag) - 1 (Checksum)
+        // Actually, some TZX might not have checksum?
+        // Standard ROM expects checksum byte at end.
+        // We will copy payload bytes to memory.
+
         const std::vector<byte> &data = blocks[scanIndex].data;
-        for (size_t i = 0; i < length; i++) {
-          if (i + 1 < data.size())
-            memory[(startAddress + i) & 0xFFFF] = data[i + 1];
+        size_t payloadSize = data.size() - 2; // Exclude Flag and Checksum
+        size_t copyLen = length;
+
+        // If request is larger than block, we only copy what we have
+        if (copyLen > payloadSize)
+          copyLen = payloadSize;
+
+        for (size_t i = 0; i < copyLen; i++) {
+          memory[(startAddress + i) & 0xFFFF] = data[i + 1]; // +1 to skip Flag
         }
 
-        // Advance Tape
+        // Advance Tape to *next* block
         currentBlockIndex = scanIndex + 1;
 
-        // Always stop after fast load - don't restart playback
-        // The tape pointer advances but audio doesn't play
+        // Always stop after fast load
         stop();
 
         return true;
       } else {
-        // Flag mismatch. (e.g. found Header when looking for Data).
-        // Should we skip it? No, if we expect Data but find Header, strict
-        // trapping says Fail. The ROM would read the flag, see mismatch, and
-        // fail (or retry). However, for Fast Load, if we are desynced, maybe
-        // we search? Standard behavior: Return false. The ROM will then fail
-        // (Carry Clear) and maybe retry? Or we just return false and let the
-        // ROM execute normally (and likely fail if tape not playing). But if
-        // we are -fast-loading, we want to force it? If we find a Header (00)
-        // and we wanted Data (FF), it's a fail. BUT, if we have Block 0x30
-        // (Text), we should skip it. My loop below skips ID != 0x10.
-
-        // If we found 0x10 block and flag doesn't match...
-        // Maybe we should just return false.
-        return false;
+        // Flag mismatch (e.g. found Data when looking for Header)
+        // Skip this block and keep searching
+        char msg[128];
+        snprintf(msg, sizeof(msg),
+                 "FastLoad: Skipping block %zu (Flag %02X != Wanted %02X)",
+                 scanIndex,
+                 (blocks[scanIndex].data.size() > 0 ? blocks[scanIndex].data[0]
+                                                    : 0xFF),
+                 expectedFlag);
+        Logger::write(msg);
       }
     }
-    // Skip non-data blocks (Text, etc)
+    // Skip this block (non-data or mismatch)
     scanIndex++;
   }
 

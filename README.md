@@ -160,7 +160,7 @@ Keyboard emulation of the kempston joystick is also enabled by default. The Mac/
 | **Boulder Dash** | Front Runner | 1984 | Snapshot (.z80) | **Working** | OK |
 | **Elite** | Firebird | 1985 | Snapshot (.z80) | **Partially Working** | Some versions work? |
 | **Everyone's a Wally** | Mikro-Gen | 1985 | Snapshot (.z80) | **Working** | OK|
-| **Ghosts 'n Goblins** | Elite Systems| 1986 | Snapshot (.z80) | **Not Working** | Corrupted after menu |
+| **Ghosts 'n Goblins** | Elite Systems| 1986 | Snapshot (.z80, .tzx) | **Not Working** | Corrupted after menu |
 | **Gosh Wonderful ROM** | Geoff Wearmouth | 2003 | ROM (.rom) | **Working** | OK |
 | **Head over Heels** | Ocean Software | 1987 | Snapshot (.z80) | **Working** | OK |
 | **Hobbit** | Melbourne House | 1982 | Tape (.tzx) | **Working** | OK |
