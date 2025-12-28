@@ -22,6 +22,7 @@
 #include "../../../utils/PeriodTimer.h"
 #include "../../../utils/ResourceUtils.h"
 #include "../../Processor.h"
+#include "../../SnapshotLoader.h"
 #include "WindowsScreen.h"
 
 using namespace std::chrono;
@@ -488,6 +489,11 @@ void WindowsScreen::handleKey(sf::Keyboard::Key key, bool pressed) {
   if (key == sf::Keyboard::Key::LAlt || key == sf::Keyboard::Key::RAlt ||
       key == sf::Keyboard::Key::RControl)
     processor->getState().keyboard.setKempstonKey(4, pressed);
+
+  // F5 = Fast Save
+  if (key == sf::Keyboard::Key::F5 && pressed) {
+    SnapshotLoader::exportSNA("snapshot.sna", processor->getState());
+  }
 
   // Mapping
   // Line 0 (0xFE): SHIFT (0), Z (1), X (2), C (3), V (4)

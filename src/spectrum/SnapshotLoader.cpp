@@ -381,5 +381,5 @@ void SnapshotLoader::exportSNA(const char *filename, ProcessorState &state) {
   state.memory[sp] = oldLow;
   state.memory[sp + 1] = oldHigh;
 
-  utils::Logger::write("Snapshot saved to " + std::string(filename));
+  utils::Logger::write(("Snapshot saved to " + std::string(filename)).c_str());
 }
