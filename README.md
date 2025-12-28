@@ -60,7 +60,10 @@ Run the emulator from the project root. By default, it loads the standard 48K RO
 
 ### macOS
 **Running from Build Directory (Bundle):**
+
+The Apple gatekeeper will prevent the emulator from running unless it is signed. You can sign the app using the following command:
 ```bash
+xattr -cr /Applications/ZXEmulator.app
 ./build/ZXEmulator.app/Contents/MacOS/ZXEmulator
 ```
 Or simply double-click `ZXEmulator` in the `build` folder.
