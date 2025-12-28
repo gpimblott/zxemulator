@@ -21,9 +21,23 @@
 #include "utils/ResourceUtils.h"
 #include <chrono>
 #include <thread>
+#ifdef __APPLE__
+#include "platform/mac/MacFileOpenHandler.h"
+#endif
 
 using namespace std;
 using namespace utils;
+
+// Forward declaration if needed, or better, make load logic separate
+// For now, let's keep it simple.
+// We need a way to pass the file from the handler to the main loop.
+
+static std::string g_pendingLoadFile = "";
+
+void handleMacOpenFile(std::string path) {
+  Logger::write(("Mac Open File Event: " + path).c_str());
+  g_pendingLoadFile = path;
+}
 
 int main(int argc, char *argv[]) {
   try {
@@ -33,6 +47,10 @@ int main(int argc, char *argv[]) {
 
     std::string tapeFile = "";
     std::string snapshotFile = "";
+
+#ifdef __APPLE__
+    platform::mac::installFileHandler(handleMacOpenFile);
+#endif
 
     // Parse command line arguments
     for (int i = 1; i < argc; ++i) {
@@ -117,6 +135,30 @@ int main(int argc, char *argv[]) {
     auto frameDuration = std::chrono::milliseconds(20); // 50Hz
 
     while (screen->processEvents()) {
+      // Check for pending file load (from Drag & Drop or Mac Open Event)
+      if (!g_pendingLoadFile.empty()) {
+        std::string fileToLoad = g_pendingLoadFile;
+        g_pendingLoadFile = "";
+
+        Logger::write(("Loading pending file: " + fileToLoad).c_str());
+        std::string fn = fileToLoad;
+        std::string ext = "";
+        if (fn.find_last_of(".") != std::string::npos) {
+          ext = fn.substr(fn.find_last_of(".") + 1);
+          for (auto &c : ext)
+            c = tolower(c);
+        }
+
+        // Simple detection logic duplicated from main arg parsing
+        // Ideal refactor: move 'loadFile' to Processor or Loader class
+        if (ext == "tap" || ext == "tzx") {
+          Tape tape = TapeLoader::load(fileToLoad.c_str());
+          processor.loadTape(tape);
+        } else {
+          processor.loadSnapshot(fileToLoad.c_str());
+        }
+      }
+
       auto start = std::chrono::high_resolution_clock::now();
 
       processor.executeFrame();

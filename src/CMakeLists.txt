@@ -41,6 +41,10 @@ set(ZX_SOURCES
     spectrum/SnapshotLoader.cpp spectrum/SnapshotLoader.h
     spectrum/TapeLoader.cpp spectrum/TapeLoader.h)
 
+if(APPLE)
+    list(APPEND ZX_SOURCES platform/mac/MacFileOpenHandler.mm)
+endif()
+
 # Collect Resource Files
 file(GLOB ROM_FILES "${CMAKE_SOURCE_DIR}/../roms/*")
 set(ICON_FILE "${CMAKE_SOURCE_DIR}/../resources/icon.icns")
@@ -77,7 +81,11 @@ endif()
 find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Network Audio)
 
 if(SFML_FOUND)
-    target_link_libraries(${CMAKE_PROJECT_NAME} SFML::Graphics SFML::Window SFML::System SFML::Network SFML::Audio)
+    if(APPLE)
+        target_link_libraries(${CMAKE_PROJECT_NAME} SFML::Graphics SFML::Window SFML::System SFML::Network SFML::Audio "-framework Cocoa")
+    else()
+        target_link_libraries(${CMAKE_PROJECT_NAME} SFML::Graphics SFML::Window SFML::System SFML::Network SFML::Audio)
+    endif()
 else()
     target_link_libraries(${CMAKE_PROJECT_NAME})
 endif()
