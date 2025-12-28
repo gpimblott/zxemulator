@@ -19,6 +19,7 @@
 #include <SFML/Window/Keyboard.hpp>
 #include <cstdio>
 
+#include "../../../utils/FileDialog.h"
 #include "../../../utils/PeriodTimer.h"
 #include "../../../utils/ResourceUtils.h"
 #include "../../Processor.h"
@@ -490,9 +491,13 @@ void WindowsScreen::handleKey(sf::Keyboard::Key key, bool pressed) {
       key == sf::Keyboard::Key::RControl)
     processor->getState().keyboard.setKempstonKey(4, pressed);
 
-  // F5 = Fast Save
+  // F5 = Save Snapshot
   if (key == sf::Keyboard::Key::F5 && pressed) {
-    SnapshotLoader::exportSNA("snapshot.sna", processor->getState());
+    std::string path =
+        utils::FileDialog::saveFile("Save Snapshot", "snapshot.sna");
+    if (!path.empty()) {
+      SnapshotLoader::exportSNA(path.c_str(), processor->getState());
+    }
   }
 
   // Mapping

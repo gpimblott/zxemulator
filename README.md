@@ -5,11 +5,13 @@ A work-in-progress ZX Spectrum Emulator written in C++.
 The current GitHub workflow builds the following artifacts:
 - macOS DMG
 - macOS Standalone Binary
-- Linux Debian
-- Linux TGZ
-- Linux RPM
+- Linux Debian (Experimental)
+- Linux TGZ (Experimental)
+- Linux RPM (Experimental)
 
-A windows executable will be added in the future.
+NB : The Linux packages are experimental and may not work as expected as I have developed this on Mac.
+
+A windows executable may be added in the future.
 
 ## Features
 
@@ -24,6 +26,7 @@ A windows executable will be added in the future.
   - **Z80 Snapshots**: Support for versions 1, 2, and 3 (compressed and uncompressed).
   - **TAP/TZX Tapes**: Basic support for tape loading.
   - **ROM Files**: Support for loading custom ROM files.
+- **Save States**: Save and load game progress instantly using 'F5' to `.sna` files.
 - **Diagnostic Support**: Compatible with diagnostic ROMs (e.g., Brendan Alford's ZX Diagnostics).
 
 ## Prerequisites
@@ -111,6 +114,13 @@ You can drag and drop a file onto the executable or pass it as an argument. The 
 | `-f <file>` | Fast Load a Tape file (skips loading time). | `./build/ZXEmulator.app/Contents/MacOS/ZXEmulator -f roms/game.tzx` |
 | `-d` | Start in Debug mode (paused). | `./build/ZXEmulator.app/Contents/MacOS/ZXEmulator -d` |
 
+## Save States
+
+You can save your current game progress at any time.
+
+- **Save**: Press **F5**. A file dialog will appear allowing you to save the current state as a `.sna` file.
+- **Load**: Drag and drop the `.sna` file onto the emulator window (or executable), or run with `-s path/to/save.sna`.
+
 ## Controls
 
 The emulator maps standard ZX Spectrum keys to the PC keyboard. 
@@ -120,11 +130,22 @@ The emulator maps standard ZX Spectrum keys to the PC keyboard.
 - **Caps Shift**: Left Shift.
 - **Enter**: Return/Enter.
 - **Space**: Space.
+- **Space**: Space.
 - **Kempston Joystick**: Arrow Keys + Left Alt (Fire).
+
+### Gamepad / Joystick support
+
+The emulator automatically detects connected controllers (Bluetooth or USB) and maps them to the Kempston interface.
+- **D-Pad / Left Stick**: Movement (Up, Down, Left, Right).
+- **Face Buttons**: Fire (Kempston Fire).
+
+Supported controllers include Xbox, PlayStation (DualShock/DualSense), and generic USB gamepads.
+**Note**: On macOS, ensure the controller is connected *before* launching the emulator or ensure "Input Monitoring" is enabled if buttons are not detected.
 
 ## Compatibility
 
-* No Joystick support yet
+## Compatibility
+
 * Known issues with fast loading of tape files
 
 | Software | Publisher | Year | Format | Status | Notes |
