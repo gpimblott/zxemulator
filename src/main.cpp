@@ -161,6 +161,10 @@ int main(int argc, char *argv[]) {
           Tape tape = TapeLoader::load(fileToLoad.c_str());
           processor.loadTape(tape);
           processor.getState().setFastLoad(true);
+        } else if (ext == "rom" || ext == "bin") {
+          Logger::write("Loading ROM (pending event)...");
+          processor.init(fileToLoad.c_str());
+          processor.reset(); // Ensure CPU reset
         } else {
           Logger::write("Loading snapshot (pending event)...");
           processor.loadSnapshot(fileToLoad.c_str());

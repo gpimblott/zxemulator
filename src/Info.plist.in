@@ -93,6 +93,20 @@
             <key>CFBundleTypeIconFile</key>
             <string>${MACOSX_BUNDLE_ICON_FILE}</string>
         </dict>
+        <dict>
+            <key>CFBundleTypeExtensions</key>
+            <array>
+                <string>rom</string>
+            </array>
+            <key>CFBundleTypeName</key>
+            <string>ZX Spectrum ROM</string>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>LSHandlerRank</key>
+            <string>Default</string>
+            <key>CFBundleTypeIconFile</key>
+            <string>${MACOSX_BUNDLE_ICON_FILE}</string>
+        </dict>
     </array>
 </dict>
 </plist>
