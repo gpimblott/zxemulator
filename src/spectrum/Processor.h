@@ -32,10 +32,10 @@ private:
   Audio audio;
   // OpCodeCatalogue catalogue = OpCodeCatalogue(); // Removed
 
-  bool running = false;
+  bool running = true;
   bool paused = false;
+  bool turboEnabled = false; // Bypass audio sync for benchmarking
   bool stepRequest = false;
-  bool turbo = false; // Bypass audio sync for benchmarking
 
   // Auto-Load
   bool autoLoadTape = false;
@@ -128,7 +128,11 @@ public:
       stepRequest = true;
   }
   bool isPaused() const { return paused; }
-  void setTurbo(bool t) { turbo = t; }
+  void setTurbo(bool t) { turboEnabled = t; }
+  void setScreen(class Screen *s) { screen = s; }
+
+private:
+  class Screen *screen = nullptr;
 };
 
 #endif // ZXEMULATOR_PROCESSOR_H

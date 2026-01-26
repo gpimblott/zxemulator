@@ -52,7 +52,7 @@
             },
             "args": [
                 "-t",
-                "${workspaceFolder}/do_not_copy/Hobbit, The (1982)(Sinclair Research)[re-release].tzx"
+                "${workspaceFolder}/do_not_copy/Ghost 'n Goblins (1986)(Elite Systems)[aka Ghosts 'n Goblins].tzx"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build"
@@ -67,7 +67,7 @@
             },
             "args": [
                 "-f",
-                "${workspaceFolder}/do_not_copy/Hobbit, The (1982)(Sinclair Research)[re-release].tzx"
+                "${workspaceFolder}/do_not_copy/Ghost 'n Goblins (1986)(Elite Systems)[aka Ghosts 'n Goblins].tzx"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build"

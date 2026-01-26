@@ -688,6 +688,10 @@ int Processor::exec_index_opcode(byte prefix) {
     break;
   }
 
+  case 0x00: // NOP (Index prefix ignored)
+    cycles = 4;
+    break;
+
   default:
 
     // Handle unhandled index ops as standard opcodes with no displacement?

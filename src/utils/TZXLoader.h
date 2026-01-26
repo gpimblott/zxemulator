@@ -23,10 +23,40 @@
 
 namespace utils {
 
+enum BlockType {
+  STANDARD_SPEED_DATA, // 0x10
+  TURBO_SPEED_DATA,    // 0x11
+  PURE_TONE,           // 0x12
+  PULSE_SEQUENCE,      // 0x13
+  PURE_DATA,           // 0x14
+  DIRECT_RECORDING,    // 0x15
+  PAUSE,               // 0x20
+  GROUP_START,         // 0x21
+  GROUP_END,           // 0x22
+  LOOP_START,          // 0x24
+  LOOP_END,            // 0x25
+  UNKNOWN
+};
+
 struct TapeBlock {
-  int id;
-  std::vector<emulator_types::byte> data;
-  int pauseAfter; // block ID 0x10 usually has a pause
+  BlockType type = UNKNOWN;
+  int id = 0;
+  std::vector<emulator_types::byte> data; // For Standard/Turbo/PureData
+
+  // Timing / Pulse info
+  int pauseAfter = 0;                              // ms
+  int pulseLength = 0;                             // T-states
+  int pulseCount;                                  // For Pure Tone / Loop Count
+  std::vector<emulator_types::word> pulseSequence; // For Block 0x13
+
+  // Turbo Block Timings (0x11)
+  int pilotPulseLen = 2168;
+  int sync1Len = 667;
+  int sync2Len = 735;
+  int zeroLen = 855;
+  int oneLen = 1710;
+  int pilotToneLen = 3220; // Number of pulses
+  int lastByteUsedBits = 8;
 };
 
 class TZXLoader : public BinaryFileLoader {

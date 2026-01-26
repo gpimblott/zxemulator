@@ -124,6 +124,7 @@ int main(int argc, char *argv[]) {
     Screen *screen = Screen::Factory();
     screen->init(processor.getVideoBuffer());
     screen->setProcessor(&processor);
+    processor.setScreen(screen);
 
     screen->show();
 

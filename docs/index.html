@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZX Emulator - The 80s Reborn</title>
+    <meta name="description" content="A modern, high-performance ZX Spectrum emulator for macOS, Linux, and Windows. Experience classic 8-bit gaming with modern features.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="assets/icon.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="rainbow-border-bottom">
+        <div class="container">
+            <a href="#" class="logo">
+                <img src="assets/icon.png" alt="ZX Logo">
+                ZXEmulator
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#compatibility">Compatibility</a></li>
+                    <li><a href="https://github.com/gpimblott/zxemulator">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>The 80s <span class="text-gradient">Reborn</span></h1>
+                <p class="lead">A modern, high-performance ZX Spectrum emulator built with C++ and SFML. accurate timing, authentic sound, and modern conveniences.</p>
+                <div class="buttons">
+                    <a href="https://github.com/gpimblott/zxemulator/releases" class="btn btn-primary"><i class="fas fa-download"></i> Download Now</a>
+                    <a href="https://github.com/gpimblott/zxemulator" class="btn btn-outline"><i class="fab fa-github"></i> View Source</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="features">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Modern Power, Retro Soul</h2>
+                    <p>Built for accuracy and ease of use.</p>
+                </div>
+                
+                <div class="grid">
+                    <div class="card">
+                        <h3><i class="fas fa-microchip"></i> Core Accurate</h3>
+                        <p>Faithful Z80 CPU implementation including undocumented opcodes and R register behavior. Experience the 48K spectrum exactly as it was.</p>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-gamepad"></i> Controller Support</h3>
+                        <p>Plug and play with your favorite controllers. Supports Xbox, PlayStation, and generic USB gamepads via the Kempston interface.</p>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-tv"></i> Authentic AV</h3>
+                        <p>Real-time graphics and sound generation using SFML without the hassle of configuring complex plugins.</p>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-save"></i> Save States</h3>
+                        <p>Never lose your progress again. Instant save and load functionality lets you freeze time and resume whenever you want.</p>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-tape"></i> Multi-Format</h3>
+                        <p>Supports SNA snapshots, Z80 snapshots (v1/v2/v3), and TAPE files (.tap, .tzx) for maximum library compatibility.</p>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fas fa-laptop-code"></i> Cross Platform</h3>
+                        <p>Native support for macOS (including Apple Silicon), Linux, and Windows. Developed with portability in mind.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="compatibility" class="compatibility">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Game Compatibility</h2>
+                    <p>Tested with classic titles.</p>
+                </div>
+
+                <div class="compat-list">
+                    <!-- Sample of games -->
+                    <div class="compat-item working">
+                        <span class="game-title">Manic Miner</span>
+                        <div class="meta">
+                            <span class="status-badge">Working</span>
+                        </div>
+                    </div>
+                    <div class="compat-item working">
+                        <span class="game-title">Jet Set Willy</span>
+                        <div class="meta">
+                            <span class="status-badge">Working</span>
+                        </div>
+                    </div>
+                     <div class="compat-item working">
+                        <span class="game-title">The Hobbit</span>
+                        <div class="meta">
+                            <span class="status-badge">Working</span>
+                        </div>
+                    </div>
+                    <div class="compat-item working">
+                        <span class="game-title">Atic Atac</span>
+                        <div class="meta">
+                            <span class="status-badge">Working</span>
+                        </div>
+                    </div>
+                    <div class="compat-item working">
+                        <span class="game-title">Sabre Wulf</span>
+                        <div class="meta">
+                            <span class="status-badge">Working</span>
+                        </div>
+                    </div>
+                    <div class="compat-item partial">
+                        <span class="game-title">Elite</span>
+                        <div class="meta">
+                            <span class="status-badge">Partial</span>
+                        </div>
+                    </div>
+                    <div class="compat-item broken">
+                        <span class="game-title">Ghosts 'n Goblins</span>
+                        <div class="meta">
+                            <span class="status-badge">Issues</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a href="https://github.com/gpimblott/zxemulator#compatibility" style="font-size: 0.9rem; text-decoration: underline;">View Full Compatibility List</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="download-cta">
+            <div class="container">
+                <h2>Ready to play?</h2>
+                <p style="margin-bottom: 2rem; color: #888;">Download the latest version for your operating system.</p>
+                <a href="https://github.com/gpimblott/zxemulator/releases" class="btn btn-primary">Get ZXEmulator</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 ZXEmulator Project. Licensed under Apache 2.0.</p>
+            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: #444;">ZX Spectrum is a trademark of its respective owners. This is a fan project.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

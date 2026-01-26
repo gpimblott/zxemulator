@@ -684,8 +684,17 @@ void WindowsScreen::setDebugMode(bool debug) {
       initDebug();
     }
     debugWindow.requestFocus();
-  } else {
     if (debugWindow.isOpen())
       debugWindow.close();
+  }
+}
+
+void WindowsScreen::setTurboMode(bool enabled) {
+  if (enabled) {
+    theWindow.setFramerateLimit(0);
+    theWindow.setVerticalSyncEnabled(false);
+  } else {
+    theWindow.setFramerateLimit(50);
+    theWindow.setVerticalSyncEnabled(true);
   }
 }

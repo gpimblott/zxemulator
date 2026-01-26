@@ -89,6 +89,7 @@ public:
 
   void setProcessor(Processor *p) override { processor = p; };
   void setDebugMode(bool debug) override;
+  void setTurboMode(bool enabled) override;
 };
 
 #endif // ZXEMULATOR_WINDOWSSCREEN_H

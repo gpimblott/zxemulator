@@ -38,6 +38,7 @@ public:
 
   virtual void setProcessor(Processor *p) {}
   virtual void setDebugMode(bool debug) {}
+  virtual void setTurboMode(bool enabled) {}
 
   static Screen *Factory();
 };

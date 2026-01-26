@@ -19,8 +19,14 @@
 
 #include "../utils/BaseTypes.h"
 #include "../utils/TZXLoader.h"
+#include <stack>
 #include <string>
 #include <vector>
+
+struct LoopState {
+  size_t startBlockIndex;
+  int iterationsRemaining;
+};
 
 class Tape {
 private:
@@ -29,7 +35,17 @@ private:
   std::vector<utils::TapeBlock> blocks;
 
   // Playback state
-  enum TapeState { STOPPED, PILOT, SYNC1, SYNC2, DATA, PAUSE };
+  enum TapeState {
+    STOPPED,
+    PILOT,
+    SYNC1,
+    SYNC2,
+    DATA,
+    PAUSE,
+    TONE,
+    PULSE_SEQUENCE,
+    LEAD_IN
+  };
   TapeState currentState = STOPPED;
   size_t currentBlockIndex = 0;
   size_t currentByteIndex = 0;
@@ -38,6 +54,7 @@ private:
   long tStateCounter = 0;
   long nextEdgeTState = 0;
   bool earBit = false;
+  std::stack<LoopState> loopStack;
 
 public:
   Tape();
@@ -65,6 +82,9 @@ public:
 
   // Returns true if tape has reached the end (all blocks loaded)
   bool isFinished() const { return currentBlockIndex >= blocks.size(); }
+
+private:
+  void startNextBlock();
 };
 
 #endif // ZXEMULATOR_TAPE_H
