@@ -13,22 +13,20 @@ endif()
 # set(MY_DEPENDANCIES_PATHS /SFML/SFML-2.5.1/bin) # Removed legacy path
 # set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../cmake_modules" ${CMAKE_MODULE_PATH})
 
-set(ZX_SOURCES
-    main.cpp
+set(ZX_CORE_SOURCES
     utils/Logger.cpp utils/Logger.h
     utils/BinaryFileLoader.cpp utils/BinaryFileLoader.h
     utils/BaseTypes.h
     utils/RegisterUtils.cpp utils/RegisterUtils.h
     spectrum/Rom.cpp spectrum/Rom.h
     spectrum/Memory.cpp spectrum/Memory.h
-    spectrum/Memory.cpp spectrum/Memory.h
     exceptions/MemoryException.h
     spectrum/Processor.cpp
     spectrum/Processor_Index.cpp
     spectrum/Processor_Extended.cpp
     spectrum/Processor_Ops.cpp
-    spectrum/video/Screen.cpp spectrum/video/Screen.h
-    spectrum/video/windows/WindowsScreen.cpp spectrum/video/windows/WindowsScreen.h
+    # Note: VideoBuffer is core, but Screen currently relies on SFML.
+    # Keep VideoBuffer in core.
     spectrum/video/VideoBuffer.cpp spectrum/video/VideoBuffer.h
     utils/PeriodTimer.cpp utils/PeriodTimer.h
     utils/debug.h
@@ -36,13 +34,34 @@ set(ZX_SOURCES
     spectrum/ProcessorState.cpp spectrum/ProcessorState.h
     spectrum/Tape.cpp spectrum/Tape.h
     utils/TZXLoader.cpp utils/TZXLoader.h
+    # Note: Keyboard should eventually decouple entirely, but it's core logic for now.
     spectrum/Keyboard.cpp spectrum/Keyboard.h
+    # Audio core buffer logic
     spectrum/Audio.cpp spectrum/Audio.h
     spectrum/SnapshotLoader.cpp spectrum/SnapshotLoader.h
     spectrum/TapeLoader.cpp spectrum/TapeLoader.h)
 
+set(ZX_PLATFORM_SOURCES
+    main.cpp
+    spectrum/video/Screen.cpp spectrum/video/Screen.h
+    spectrum/video/windows/WindowsScreen.cpp spectrum/video/windows/WindowsScreen.h)
+
+# Create an OBJECT library for the core emulator so it can be reused easily
+# without being compiled as a static/shared archivable library just yet.
+add_library(zx_core OBJECT ${ZX_CORE_SOURCES})
+target_include_directories(zx_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Detect dependencies
+if(UNIX AND NOT APPLE)
+    set(SFML_STATIC_LIBRARIES TRUE)
+endif()
+find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Network Audio)
+
+# Temporarily link zx_core to SFML::Audio since Audio.h still includes it
+target_link_libraries(zx_core PUBLIC SFML::Audio)
+
 if(APPLE)
-    list(APPEND ZX_SOURCES platform/mac/MacFileOpenHandler.mm)
+    list(APPEND ZX_PLATFORM_SOURCES platform/mac/MacFileOpenHandler.mm)
 endif()
 
 # Collect Resource Files
@@ -53,8 +72,8 @@ set(ICON_FILE "${CMAKE_SOURCE_DIR}/../resources/icon.icns")
 set_source_files_properties(${ROM_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/roms)
 set_source_files_properties(${ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
-add_executable(${EXECUTABLE_NAME} MACOSX_BUNDLE ${ZX_SOURCES} ${ROM_FILES} ${ICON_FILE})
-
+add_executable(${EXECUTABLE_NAME} MACOSX_BUNDLE $<TARGET_OBJECTS:zx_core> ${ZX_PLATFORM_SOURCES} ${ROM_FILES} ${ICON_FILE})
+target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 # Bundle Properties
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES
     MACOSX_BUNDLE_BUNDLE_NAME "ZXEmulator"
@@ -73,12 +92,6 @@ add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
     ${CMAKE_BINARY_DIR}/${EXECUTABLE_NAME}
     COMMENT "Copying executable to build directory..."
 )
-
-# Detect dependencies
-if(UNIX AND NOT APPLE)
-    set(SFML_STATIC_LIBRARIES TRUE)
-endif()
-find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Network Audio)
 
 if(SFML_FOUND)
     if(APPLE)
