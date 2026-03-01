@@ -102,6 +102,7 @@ int main(int argc, char *argv[]) {
     Processor processor;
     Audio audio;
     processor.setAudioDevice(&audio);
+    audio.start();
 
     processor.init(romFileLocation.c_str());
     // processor.setFastLoad(fastLoad); // Will add this method
