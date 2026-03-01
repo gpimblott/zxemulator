@@ -17,6 +17,7 @@
 #include "Processor.h"
 #include "../utils/Logger.h"
 #include "../utils/debug.h"
+#include <stdexcept>
 // #include "ALUHelpers.h" // Removed
 #include "ProcessorMacros.h"
 #include "SnapshotLoader.h"
@@ -30,10 +31,11 @@
 #include <chrono>
 #include <thread>
 
-Processor::Processor() : state(), audio() {
+Processor::Processor() : state() {
   // Set up the default state of the registers
   reset();
-  audio.start();
+  if (audioDevice)
+    audioDevice->start();
   m_memory = state.memory.getRawMemory();
 }
 
@@ -49,6 +51,29 @@ void Processor::init(const char *romFile) {
     throw std::runtime_error("Failed to load ROM file");
   }
   state.memory.loadIntoMemory(theROM);
+
+  // set up the start point
+  state.registers.PC = ROM_LOCATION;
+  state.setFastLoad(false); // Default to Slow/Authentic load
+}
+
+/**
+ * initialise the processor from a memory buffer (e.g. embedded ROM)
+ */
+void Processor::init(const emulator_types::byte *romData, size_t size) {
+  if (romData == nullptr || size == 0) {
+    utils::Logger::write("Error: ROM data pointer is null or size is 0");
+    throw std::runtime_error("Failed to load ROM from memory");
+  }
+
+  // Cast const away ONLY because loadIntoMemory assumes taking a mutable
+  // pointer (legacy) Or better, since loadIntoMemory copies, just pass the cast
+  state.memory.loadIntoMemory(ROM_LOCATION, size,
+                              (emulator_types::byte *)romData);
+
+  // Debug: verify ROM loaded correctly into the memory space
+  printf("Memory contents after loadIntoMemory (first 32 bytes):\n");
+  state.memory.dump(0, 32);
 
   // set up the start point
   state.registers.PC = ROM_LOCATION;
@@ -939,7 +964,9 @@ void Processor::executeFrame() {
         state.addFrameTStates(cycles);
         this->state.tape.update(cycles);
         if (!turboEnabled) {
-          audio.update(cycles, state.getSpeakerBit(), state.tape.getEarBit());
+          if (audioDevice)
+            audioDevice->update(cycles, state.getSpeakerBit(),
+                                state.tape.getEarBit());
         }
       } else {
         // Fallback removed (Legacy OpCode classes removed)
@@ -964,14 +991,15 @@ void Processor::executeFrame() {
     }
     // } // Extraneous brace removed
     if (!turboEnabled) {
-      audio.flush();
+      if (audioDevice)
+        audioDevice->flush();
     }
 
     // Audio Sync: Throttle execution to match audio consumption rate
     // If buffer has > 3 frames of audio (approx 60ms), slow down.
     // This locks emulation speed to the audio card clock (44.1kHz).
     if (!turboEnabled) {
-      while (audio.getBufferSize() > 2646) {
+      while (audioDevice && audioDevice->getBufferSize() > 2646) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
       }
     }
@@ -1100,7 +1128,8 @@ void Processor::reset() {
   lastError = "";
   running = true;
   paused = false;
-  audio.reset();
+  if (audioDevice)
+    audioDevice->reset();
 }
 
 void Processor::writeMem(word address, byte value) {

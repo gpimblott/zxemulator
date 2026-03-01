@@ -21,7 +21,7 @@
 #include "../utils/BaseTypes.h"
 #include "ProcessorState.h"
 
-#include "Audio.h"
+#include "audio/AudioDevice.h"
 
 class Processor {
   friend class InstructionTest;
@@ -29,7 +29,7 @@ class Processor {
 private:
   // State variables
   ProcessorState state;
-  Audio audio;
+  AudioDevice *audioDevice = nullptr;
   // OpCodeCatalogue catalogue = OpCodeCatalogue(); // Removed
 
   bool running = true;
@@ -90,6 +90,7 @@ public:
   // OpCode *getOpCode(byte b) { return catalogue.lookupOpcode(b); } // Removed
 
   void init(const char *romFile);
+  void init(const emulator_types::byte *romData, size_t size);
   void loadTape(Tape tape);
   void loadSnapshot(const char *filename);
 
@@ -130,6 +131,9 @@ public:
   bool isPaused() const { return paused; }
   void setTurbo(bool t) { turboEnabled = t; }
   void setScreen(class Screen *s) { screen = s; }
+
+  void setAudioDevice(AudioDevice *a) { audioDevice = a; }
+  AudioDevice *getAudioDevice() const { return audioDevice; }
 
 private:
   class Screen *screen = nullptr;

@@ -36,13 +36,13 @@ set(ZX_CORE_SOURCES
     utils/TZXLoader.cpp utils/TZXLoader.h
     # Note: Keyboard should eventually decouple entirely, but it's core logic for now.
     spectrum/Keyboard.cpp spectrum/Keyboard.h
-    # Audio core buffer logic
-    spectrum/Audio.cpp spectrum/Audio.h
+    # Audio core buffer logic has been decoupled to platform/desktop
     spectrum/SnapshotLoader.cpp spectrum/SnapshotLoader.h
     spectrum/TapeLoader.cpp spectrum/TapeLoader.h)
 
 set(ZX_PLATFORM_SOURCES
     main.cpp
+    platform/desktop/Audio.cpp platform/desktop/Audio.h
     spectrum/video/Screen.cpp spectrum/video/Screen.h
     spectrum/video/windows/WindowsScreen.cpp spectrum/video/windows/WindowsScreen.h)
 
@@ -56,9 +56,6 @@ if(UNIX AND NOT APPLE)
     set(SFML_STATIC_LIBRARIES TRUE)
 endif()
 find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Network Audio)
-
-# Temporarily link zx_core to SFML::Audio since Audio.h still includes it
-target_link_libraries(zx_core PUBLIC SFML::Audio)
 
 if(APPLE)
     list(APPEND ZX_PLATFORM_SOURCES platform/mac/MacFileOpenHandler.mm)

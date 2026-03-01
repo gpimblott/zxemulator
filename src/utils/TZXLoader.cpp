@@ -294,7 +294,7 @@ void TZXLoader::parse() {
       char msg[64];
       snprintf(msg, sizeof(msg),
                "Unknown Block %02X at offset %zu - Parsing stopped", blockId,
-               offset);
+               (size_t)offset);
       Logger::write(msg);
       break;
     }

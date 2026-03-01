@@ -6,3 +6,6 @@
 /.cache/
 /src/.cache/
 /do_not_copy/
+/esp32/build/
+/esp32/.cache
+/esp32/managed_components/

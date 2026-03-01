@@ -243,28 +243,28 @@ int Processor::exec_ed_opcode() {
 
   // Block I/O
   case 0xA2:
-    cycles = cycles = IO::ini(state);
+    cycles = IO::ini(state);
     break;
   case 0xB2:
-    cycles = cycles = IO::inir(state);
+    cycles = IO::inir(state);
     break;
   case 0xAA:
-    cycles = cycles = IO::ind(state);
+    cycles = IO::ind(state);
     break;
   case 0xBA:
-    cycles = cycles = IO::indr(state);
+    cycles = IO::indr(state);
     break;
   case 0xA3:
-    cycles = cycles = IO::outi(state);
+    cycles = IO::outi(state);
     break;
   case 0xB3:
-    cycles = cycles = IO::otir(state);
+    cycles = IO::otir(state);
     break;
   case 0xAB:
-    cycles = cycles = IO::outd(state);
+    cycles = IO::outd(state);
     break;
   case 0xBB:
-    cycles = cycles = IO::otdr(state);
+    cycles = IO::otdr(state);
     break;
 
   default:

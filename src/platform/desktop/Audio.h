@@ -17,13 +17,14 @@
 #ifndef ZXEMULATOR_AUDIO_H
 #define ZXEMULATOR_AUDIO_H
 
-#include "../utils/BaseTypes.h"
+#include "../../spectrum/audio/AudioDevice.h"
+#include "../../utils/BaseTypes.h"
 #include <SFML/Audio.hpp>
 #include <cstdint>
 #include <mutex>
 #include <vector>
 
-class Audio : public sf::SoundStream {
+class Audio : public sf::SoundStream, public AudioDevice {
 private:
   std::vector<std::int16_t> pendingSamples;
   std::vector<std::int16_t> samples;
@@ -45,11 +46,12 @@ public:
   Audio();
   virtual ~Audio();
 
-  void update(int tStates, bool speakerBit, bool earBit);
-  void flush();
-  size_t getBufferSize();
-  void start();
-  void reset();
+  virtual void update(int tStates, bool speakerBit, bool earBit) override;
+  virtual void flush() override;
+  virtual size_t getBufferSize() override;
+  virtual void start() override;
+  virtual void stop() override { sf::SoundStream::stop(); }
+  virtual void reset() override;
 };
 
 #endif // ZXEMULATOR_AUDIO_H

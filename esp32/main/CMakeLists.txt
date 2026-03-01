@@ -3,6 +3,7 @@
 idf_component_register(
     SRCS
         "app_main.cpp"
+        "ESP32Screen.cpp"
         "../../src/utils/Logger.cpp"
         "../../src/utils/BinaryFileLoader.cpp"
         "../../src/utils/RegisterUtils.cpp"
@@ -18,7 +19,6 @@ idf_component_register(
         "../../src/spectrum/Tape.cpp"
         "../../src/utils/TZXLoader.cpp"
         "../../src/spectrum/Keyboard.cpp"
-        "../../src/spectrum/Audio.cpp"
         "../../src/spectrum/SnapshotLoader.cpp"
         "../../src/spectrum/TapeLoader.cpp"
 
@@ -27,7 +27,11 @@ idf_component_register(
         "../../src"
         
     REQUIRES 
-        # Add required ESP-IDF components here later (e.g. fatfs, spi_flash)
+        # Added TFT_eSPI dependency for hardware display
+        tft_espi
+
+    EMBED_FILES
+        "gw03.rom"
 )
 
 # ESP-IDF compiling requires C++17 for our emulator

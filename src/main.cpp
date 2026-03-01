@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "platform/desktop/Audio.h"
 #include "spectrum/Processor.h"
 #include "spectrum/TapeLoader.h"
 #include "spectrum/video/Screen.h"
@@ -97,8 +98,11 @@ int main(int argc, char *argv[]) {
     Logger::write("Starting ZX Spectrum Emulator v0.4.1");
     Logger::write(("Loading ROM from: " + romFileLocation).c_str());
 
-    // Create a processor and load the basic ROM
+    // Create a processor, audio device, and load the basic ROM
     Processor processor;
+    Audio audio;
+    processor.setAudioDevice(&audio);
+
     processor.init(romFileLocation.c_str());
     // processor.setFastLoad(fastLoad); // Will add this method
 
