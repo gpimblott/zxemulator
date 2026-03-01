@@ -33,16 +33,16 @@ public:
 #endif
 
 ESP32Screen::ESP32Screen()
-    : tft(nullptr), scanlineBuffer(nullptr), flashCounter(0) {
-  // 256 pixels wide, each pixel is a 16-bit RGB565 color (2 bytes)
-  scanlineBuffer = new uint16_t[SPECTRUM_SCREEN_WIDTH];
+    : tft(nullptr), frameBuffer(nullptr), flashCounter(0) {
+  // 256x192 pixels, each pixel is a 16-bit RGB565 color (2 bytes)
+  frameBuffer = new uint16_t[SPECTRUM_SCREEN_WIDTH * SPECTRUM_SCREEN_HEIGHT];
 }
 
 ESP32Screen::~ESP32Screen() {
   if (tft)
     delete tft;
-  if (scanlineBuffer)
-    delete[] scanlineBuffer;
+  if (frameBuffer)
+    delete[] frameBuffer;
 }
 
 void ESP32Screen::initPalette() {
@@ -156,21 +156,20 @@ void ESP32Screen::update() {
   int xOffset = 32;
   int yOffset = 24;
 
-  // Update the screen line by line.
-  // For ultimate performance on ESP32, TFT_eSPI DMA mode should be used here.
-  // However, pushColors handles the windowing efficiently.
+  // Update the screen line by line into the framebuffer
+  // For ultimate performance on ESP32, TFT_eSPI DMA mode could be used,
+  // but a single large pushImage is vastly faster than line-by-line.
   for (int y = 0; y < SPECTRUM_SCREEN_HEIGHT; ++y) {
+    uint16_t *scanlineDest = &frameBuffer[y * SPECTRUM_SCREEN_WIDTH];
     // Process each of the 32 character blocks per line
     for (int x = 0; x < VIDEO_WIDTH_CHARS; ++x) {
-      renderCharacterBlock(x, y, scanlineBuffer, flashInvert);
+      renderCharacterBlock(x, y, scanlineDest, flashInvert);
     }
-
-    // Define hardware window for this single scanline and push it using
-    // pushImage pushImage is safer than setAddrWindow + pushColors because it
-    // manages the SPI Chip Select (CS)
-    tft->pushImage(xOffset, yOffset + y, SPECTRUM_SCREEN_WIDTH, 1,
-                   scanlineBuffer);
   }
+
+  // Push the entire framebuffer to the display Hardware in one transaction
+  tft->pushImage(xOffset, yOffset, SPECTRUM_SCREEN_WIDTH,
+                 SPECTRUM_SCREEN_HEIGHT, frameBuffer);
 
   // We would also update the border colors in the xOffset/yOffset regions here
   // based on videoBuffer->getBorderColorAtLine(y).
