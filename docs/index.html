@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZX Emulator - The 80s Reborn</title>
     <meta name="description"
-        content="A modern, high-performance ZX Spectrum emulator for macOS, Linux, and Windows. Experience classic 8-bit gaming with modern features.">
+        content="A modern, high-performance ZX Spectrum emulator for macOS, Linux, Windows — and now ESP32 hardware. Experience classic 8-bit gaming rebuilt from silicon.">
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/png" href="assets/icon.png">
     <!-- Google Fonts -->
@@ -30,6 +30,7 @@
                 <ul>
                     <li><a href="#features">Features</a></li>
                     <li><a href="#compatibility">Compatibility</a></li>
+                    <li><a href="#esp32">ESP32</a></li>
                     <li><a href="https://github.com/gpimblott/zxemulator">GitHub</a></li>
                 </ul>
             </nav>
@@ -40,8 +41,8 @@
         <section class="hero">
             <div class="container">
                 <h1>The 80s <span class="text-gradient">Reborn</span></h1>
-                <p class="lead">A modern, high-performance ZX Spectrum emulator built with C++ and SFML. accurate
-                    timing, authentic sound, and modern conveniences.</p>
+                <p class="lead">A modern, high-performance ZX Spectrum emulator built with C++ and SFML. Accurate
+                    timing, authentic sound — and now running on real hardware with the ESP32.</p>
                 <div class="buttons">
                     <a href="https://github.com/gpimblott/zxemulator/releases" class="btn btn-primary"><i
                             class="fas fa-download"></i> Download Now</a>
@@ -149,6 +150,90 @@
                 <div style="text-align: center; margin-top: 2rem;">
                     <a href="https://github.com/gpimblott/zxemulator#compatibility"
                         style="font-size: 0.9rem; text-decoration: underline;">View Full Compatibility List</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="esp32" class="esp32">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Now Running on <span class="text-gradient">Real Hardware</span> <span class="wip-badge"><i
+                                class="fas fa-hard-hat"></i> Work in Progress</span></h2>
+                    <p>The emulator has been ported to the ESP32 microcontroller, putting a ZX Spectrum in your pocket
+                        for under &pound;20.<br>The core Z80 CPU and display are working &mdash; keyboard input and
+                        filesystem support are still in development.</p>
+                </div>
+
+                <div class="wip-callout">
+                    <h4><i class="fas fa-clock"></i> Roadmap &mdash; what&rsquo;s still needed</h4>
+                    <ul>
+                        <li><i class="fas fa-keyboard"></i> <strong>Keyboard integration</strong> &mdash; hardware
+                            keyboard or GPIO button matrix so you can actually type BASIC commands</li>
+                        <li><i class="fas fa-sd-card"></i> <strong>Filesystem / SD card</strong> &mdash; ability to load
+                            .tap and .z80 snapshot files from an SD card rather than only the embedded ROM</li>
+                    </ul>
+                </div>
+
+                <div class="esp32-layout">
+                    <div class="esp32-specs">
+                        <div class="spec-block">
+                            <div class="spec-icon"><i class="fas fa-microchip"></i></div>
+                            <div>
+                                <h4>ESP32 @ 240MHz</h4>
+                                <p>Dual-core Xtensa LX6 running at full speed with performance compiler optimisations.
+                                    Enough grunt to emulate the Z80 at authentic 3.5MHz.</p>
+                            </div>
+                        </div>
+                        <div class="spec-block">
+                            <div class="spec-icon"><i class="fas fa-desktop"></i></div>
+                            <div>
+                                <h4>ILI9341 TFT Display</h4>
+                                <p>240&times;320 SPI TFT screen driven via the TFT_eSPI library at 40MHz. The
+                                    256&times;192 Spectrum framebuffer is rendered and blasted over SPI in a single
+                                    transaction per frame.</p>
+                            </div>
+                        </div>
+                        <div class="spec-block">
+                            <div class="spec-icon"><i class="fas fa-bolt"></i></div>
+                            <div>
+                                <h4>ROM Embedded in Flash</h4>
+                                <p>The 48K BASIC ROM is compiled directly into the firmware binary using ESP-IDF's
+                                    binary embedding, so there's no SD card or filesystem needed.</p>
+                            </div>
+                        </div>
+                        <div class="spec-block">
+                            <div class="spec-icon"><i class="fas fa-code-branch"></i></div>
+                            <div>
+                                <h4>Shared Codebase</h4>
+                                <p>The Z80 core, memory model, and tape loader are 100% shared between the desktop
+                                    (SFML) and hardware (ESP32) builds — a single repo, two targets.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="esp32-build">
+                        <h3><i class="fas fa-hammer"></i> Build your own</h3>
+                        <p>All you need is an ESP32 dev board and a cheap SPI TFT display. Clone the repo and flash with
+                            a single script.</p>
+                        <div class="code-block">
+                            <pre><code>git clone https://github.com/gpimblott/zxemulator
+cd zxemulator/esp32
+./deploy_esp32.sh</code></pre>
+                        </div>
+                        <div class="esp32-bom">
+                            <h4>Parts List</h4>
+                            <ul>
+                                <li><i class="fas fa-check-circle"></i> ESP32 Dev Board (e.g. DOIT ESP32 DevKitC)</li>
+                                <li><i class="fas fa-check-circle"></i> ILI9341 2.8&quot; SPI TFT (240&times;320)</li>
+                                <li><i class="fas fa-check-circle"></i> USB cable &amp; breadboard jumpers</li>
+                                <li><i class="fas fa-check-circle"></i> <a
+                                        href="https://docs.espressif.com/projects/esp-idf/en/stable/esp32/get-started/">ESP-IDF
+                                        v5.5+</a> installed</li>
+                            </ul>
+                        </div>
+                        <a href="https://github.com/gpimblott/zxemulator/tree/main/esp32" class="btn btn-outline"
+                            style="margin-top:1.5rem"><i class="fab fa-github"></i> View ESP32 Source</a>
+                    </div>
                 </div>
             </div>
         </section>
