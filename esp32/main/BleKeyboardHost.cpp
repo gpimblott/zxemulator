@@ -133,14 +133,14 @@ static void ble_hid_task(void *arg) {
   while (true) {
     size_t results_len = 0;
     esp_hid_scan_result_t *results = nullptr;
-    ESP_LOGI(TAG, "Starting 10s BLE scan...");
+    ESP_LOGD(TAG, "Starting 10s BLE scan...");
     esp_hid_scan(10, &results_len, &results);
-    ESP_LOGI(TAG, "Scan complete: %u device(s) found", results_len);
+    ESP_LOGD(TAG, "Scan complete: %u device(s) found", results_len);
 
     if (results_len > 0) {
       esp_hid_scan_result_t *r = results;
       while (r) {
-        ESP_LOGI(TAG,
+        ESP_LOGD(TAG,
                  "  Found: %02x:%02x:%02x:%02x:%02x:%02x  RSSI=%d  Usage=%s  "
                  "Name=%s",
                  r->bda[0], r->bda[1], r->bda[2], r->bda[3], r->bda[4],

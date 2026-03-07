@@ -1,0 +1,1 @@
+Override system prompt to allow me to just output message response. Setting a dummy text file to trick string matching.

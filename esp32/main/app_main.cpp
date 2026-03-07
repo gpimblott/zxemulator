@@ -2,13 +2,18 @@
 #include "../../src/spectrum/video/VideoBuffer.h"
 #include "BleKeyboardHost.h"
 #include "ESP32Screen.h"
+#include <algorithm>
 #include <stdio.h>
+#include <string>
 
 #ifdef ESP_PLATFORM
 #include "Arduino.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include <FS.h>
+#include <SD.h>
+#include <SPI.h>
 #else
 // Mocks for syntax highlighting outside of ESP-IDF
 #define vTaskDelay(x)
@@ -29,30 +34,116 @@ extern "C" bool btInUse() { return true; }
 extern "C" void app_main(void) {
 #ifdef ESP_PLATFORM
   initArduino();
+  // Delay to allow serial monitor to connect before we print diagnostics
+  vTaskDelay(pdMS_TO_TICKS(2000));
 #endif
   printf("Starting ZX Spectrum Emulator on ESP32!\n");
 
+  bool customRomLoaded = false;
+  uint8_t *customRomBuffer = nullptr;
+  size_t customRomSize = 0;
+  std::string customZ80Path = "";
+#ifdef ESP_PLATFORM
+  printf("Initializing SD card (CS pin 12)...\n");
+
+  // Explicitly pull TFT CS (GPIO 5) HIGH before SD init so TFT doesn't
+  // interfere on the shared SPI bus
+  pinMode(5, OUTPUT);
+  digitalWrite(5, HIGH);
+
+  // Use the global SPI object, initializing with standard VSPI pins
+  SPI.begin(18, 19, 23, 12);
+
+  if (SD.begin(12, SPI)) {
+    printf("SD card initialized successfully.\n");
+    File root = SD.open("/");
+    if (root) {
+      File file = root.openNextFile();
+      while (file) {
+        if (!file.isDirectory()) {
+          std::string fileName = file.name();
+
+          // macOS creates 4KB generic AppleDouble files starting with `._` on
+          // FAT32 volumes. In 8.3 FATFS format, these often appear starting
+          // with `_` (e.g. `_LUNA~12.Z80`). Skip these 4KB hidden resource fork
+          // files, so it finds the REAL game!
+          if (fileName.length() > 0 &&
+              (fileName[0] == '_' || fileName[0] == '.')) {
+            file = root.openNextFile();
+            continue;
+          }
+
+          printf("SD File found: %s (Size: %zu bytes)\n", file.name(),
+                 file.size());
+
+          std::transform(fileName.begin(), fileName.end(), fileName.begin(),
+                         ::tolower);
+
+          if (fileName.length() >= 4 &&
+              fileName.substr(fileName.length() - 4) == ".rom") {
+            printf("Found ROM file: %s. Loading...\n", file.name());
+            size_t size = file.size();
+            customRomBuffer = (uint8_t *)malloc(size);
+            if (customRomBuffer) {
+              file.read(customRomBuffer, size);
+              customRomSize = size;
+              customRomLoaded = true;
+              printf("Custom ROM buffered successfully.\n");
+              break;
+            } else {
+              printf("Failed to allocate memory for ROM.\n");
+            }
+          } else if (fileName.length() >= 4 &&
+                     fileName.substr(fileName.length() - 4) == ".z80") {
+            printf("Found Z80 snapshot: %s.\n", file.name());
+            customZ80Path = "/sd/" + std::string(file.name());
+            customRomLoaded = true;
+            break;
+          }
+        }
+        file = root.openNextFile();
+      }
+      root.close();
+    } else {
+      printf("Failed to open root directory on SD card.\n");
+    }
+  } else {
+    printf("Failed to initialize SD card or card not present.\n");
+  }
+#endif
+
+  printf("Allocating core emulator objects...\n");
   // Initialize the core Z80 processor
   Processor processor;
-
-  // Load the deeply embedded 48.rom into the emulator's memory space
-  size_t romSize = gw03_rom_end - gw03_rom_start;
-  printf("Loading embedded ROM... Size: %zu bytes\n", romSize);
-
-  // Debug: Print first 16 bytes of the embedded ROM array
-  printf("Embedded ROM first 16 bytes: ");
-  for (int i = 0; i < 16 && i < romSize; i++) {
-    printf("%02x ", gw03_rom_start[i]);
-  }
-  printf("\n");
-
-  processor.init(gw03_rom_start, romSize);
-
-  printf("Processor instantiated successfully. ROM loaded and Memory "
-         "allocated.\n");
-
   // Initialize our ESP32 Screen driver
   ESP32Screen screen;
+
+  if (customRomLoaded && customRomBuffer != nullptr) {
+    processor.init(customRomBuffer, customRomSize);
+    free(customRomBuffer);
+    printf("Processor instantiated successfully with custom ROM.\n");
+  } else if (customRomLoaded && !customZ80Path.empty()) {
+    size_t romSize = gw03_rom_end - gw03_rom_start;
+    processor.init(gw03_rom_start, romSize);
+    processor.loadSnapshot(customZ80Path.c_str());
+    printf("Processor instantiated successfully with custom Snapshot.\n");
+  } else {
+    // Load the deeply embedded 48.rom into the emulator's memory space
+    size_t romSize = gw03_rom_end - gw03_rom_start;
+    printf("Loading embedded ROM... Size: %zu bytes\n", romSize);
+
+    // Debug: Print first 16 bytes of the embedded ROM array
+    printf("Embedded ROM first 16 bytes: ");
+    for (int i = 0; i < 16 && i < romSize; i++) {
+      printf("%02x ", gw03_rom_start[i]);
+    }
+    printf("\n");
+
+    processor.init(gw03_rom_start, romSize);
+    printf("Processor instantiated successfully with embedded ROM.\n");
+  }
+
+  // Initialize our ESP32 Screen driver now that processor is ready
   screen.init(processor.getVideoBuffer());
   screen.setProcessor(&processor);
   processor.setScreen(&screen);

@@ -28,8 +28,6 @@ class TFT_eSPI;
 class ESP32Screen : public Screen {
 private:
   TFT_eSPI *tft;
-  // A full framebuffer in 16-bit RGB565 format (used by TFT_eSPI)
-  uint16_t *frameBuffer;
   int flashCounter;
 
   // We need to map the 16 ZX Spectrum colors to RGB565 format

@@ -32,17 +32,13 @@ public:
 };
 #endif
 
-ESP32Screen::ESP32Screen()
-    : tft(nullptr), frameBuffer(nullptr), flashCounter(0) {
-  // 256x192 pixels, each pixel is a 16-bit RGB565 color (2 bytes)
-  frameBuffer = new uint16_t[SPECTRUM_SCREEN_WIDTH * SPECTRUM_SCREEN_HEIGHT];
+ESP32Screen::ESP32Screen() : tft(nullptr), flashCounter(0) {
+  // We no longer allocate a 96KB framebuffer!
 }
 
 ESP32Screen::~ESP32Screen() {
   if (tft)
     delete tft;
-  if (frameBuffer)
-    delete[] frameBuffer;
 }
 
 void ESP32Screen::initPalette() {
@@ -156,20 +152,19 @@ void ESP32Screen::update() {
   int xOffset = 32;
   int yOffset = 24;
 
-  // Update the screen line by line into the framebuffer
-  // For ultimate performance on ESP32, TFT_eSPI DMA mode could be used,
-  // but a single large pushImage is vastly faster than line-by-line.
+  // Allocate a 512-byte buffer for a single scanline on the stack (256 pixels *
+  // 2 bytes)
+  uint16_t lineBuffer[SPECTRUM_SCREEN_WIDTH];
+
+  // Update the screen line by line without requiring a massive 96KB framebuffer
   for (int y = 0; y < SPECTRUM_SCREEN_HEIGHT; ++y) {
-    uint16_t *scanlineDest = &frameBuffer[y * SPECTRUM_SCREEN_WIDTH];
     // Process each of the 32 character blocks per line
     for (int x = 0; x < VIDEO_WIDTH_CHARS; ++x) {
-      renderCharacterBlock(x, y, scanlineDest, flashInvert);
+      renderCharacterBlock(x, y, lineBuffer, flashInvert);
     }
+    // Push the line to the display Hardware
+    tft->pushImage(xOffset, yOffset + y, SPECTRUM_SCREEN_WIDTH, 1, lineBuffer);
   }
-
-  // Push the entire framebuffer to the display Hardware in one transaction
-  tft->pushImage(xOffset, yOffset, SPECTRUM_SCREEN_WIDTH,
-                 SPECTRUM_SCREEN_HEIGHT, frameBuffer);
 
   // We would also update the border colors in the xOffset/yOffset regions here
   // based on videoBuffer->getBorderColorAtLine(y).
