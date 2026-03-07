@@ -114,6 +114,7 @@ public:
   // Search helpers moved to instructions/ControlInstructions.h
 
   VideoBuffer *getVideoBuffer();
+  Keyboard *getKeyboard() { return &state.keyboard; }
   ProcessorState &getState() { return state; } // Expose for debugger
   bool isRunning() const { return running; }
   const std::string &getLastError() const { return lastError; }

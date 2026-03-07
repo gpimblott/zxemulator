@@ -21,6 +21,8 @@ idf_component_register(
         "../../src/spectrum/Keyboard.cpp"
         "../../src/spectrum/SnapshotLoader.cpp"
         "../../src/spectrum/TapeLoader.cpp"
+        "BleKeyboardHost.cpp"
+        "esp_hid_gap.c"
 
     INCLUDE_DIRS
         "."
@@ -29,6 +31,10 @@ idf_component_register(
     REQUIRES 
         # Added TFT_eSPI dependency for hardware display
         tft_espi
+        esp_hid
+        bt
+        nvs_flash
+        driver
 
     EMBED_FILES
         "gw03.rom"
